@@ -118,6 +118,18 @@ def dedupe(offers):
     return sorted(best.values(), key=lambda o: (o["price_eur"], o["cl"]))
 
 
+def migrate(entry):
+    """Anciennes lignes d'historique : CL32 et CL36 étaient regroupés dans cl32_36."""
+    if "cl32" not in entry or "cl36" not in entry:
+        merged = entry.get("cl32_36")
+        entry = {
+            **entry,
+            "cl32": merged if merged and merged["cl"] == 32 else None,
+            "cl36": merged if merged and merged["cl"] == 36 else None,
+        }
+    return entry
+
+
 def summary(offer):
     if offer is None:
         return None
@@ -153,20 +165,28 @@ def main(argv):
     # Meilleur prix « listé » : tout sauf les ruptures confirmées.
     listed = [o for o in offers if o["stock"] != "out_of_stock"]
     best_cl30 = next((o for o in listed if o["cl"] == 30), None)
+    best_cl32 = next((o for o in listed if o["cl"] == 32), None)
+    best_cl36 = next((o for o in listed if o["cl"] == 36), None)
     best_cl32_36 = next((o for o in listed if o["cl"] in (32, 36)), None)
+    best = {
+        "cl30": summary(best_cl30),
+        "cl32": summary(best_cl32),
+        "cl36": summary(best_cl36),
+        "cl32_36": summary(best_cl32_36),
+    }
     deals = [o for o in offers if o["deal"]]
 
     history = json.loads(HISTORY.read_text(encoding="utf-8")) if HISTORY.exists() else []
-    history = [h for h in history if h["checked_at"] != checked_at]
+    history = [migrate(h) for h in history if h["checked_at"] != checked_at]
     previous = history[-1] if history else None
 
-    def change(key, offer):
-        before = (previous or {}).get(key)
-        if offer is None or before is None:
+    def change(key):
+        now, before = best[key], (previous or {}).get(key)
+        if now is None or before is None:
             return None
-        return round(offer["price_eur"] - before["price_eur"], 2)
+        return round(now["price_eur"] - before["price_eur"], 2)
 
-    changes = {"cl30": change("cl30", best_cl30), "cl32_36": change("cl32_36", best_cl32_36)}
+    changes = {key: change(key) for key in best}
 
     if deals:
         top = deals[0]
@@ -192,7 +212,7 @@ def main(argv):
         "thresholds_eur": thresholds,
         "deal": bool(deals),
         "headline": headline,
-        "best": {"cl30": summary(best_cl30), "cl32_36": summary(best_cl32_36)},
+        "best": best,
         "change_since_previous_eur": changes,
         "offers": offers,
         "trend": run.get("trend", "").strip(),
@@ -201,8 +221,7 @@ def main(argv):
     history.append(
         {
             "checked_at": checked_at,
-            "cl30": summary(best_cl30),
-            "cl32_36": summary(best_cl32_36),
+            **best,
             "deal": bool(deals),
             "offers_count": len(offers),
         }
@@ -218,7 +237,7 @@ def main(argv):
     lines = [headline]
     moves = [
         f"{label} {'+' if d > 0 else '−'}{eur(abs(d))} €"
-        for label, d in (("CL30", changes["cl30"]), ("CL32/36", changes["cl32_36"]))
+        for label, d in (("CL30", changes["cl30"]), ("CL32", changes["cl32"]), ("CL36", changes["cl36"]))
         if d
     ]
     if moves:

@@ -4,9 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Veille RAM</title>
-  <meta name="description" content="Suivi du prix des kits DDR5 2x16 Go 6000 MHz CL30-36, mis à jour deux fois par jour.">
-  <meta name="theme-color" content="#f9f9f7" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)">
+  <meta name="description" content="Suivi du prix des kits DDR5 2x16 Go 6000 MHz CL30, CL32 et CL36, mis à jour deux fois par jour.">
+  <meta name="theme-color" content="#f4f4f1">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Veille RAM">
@@ -15,76 +14,226 @@
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="stylesheet" href="style.css">
+  <script>
+    // Thème choisi dans les réglages, appliqué avant le premier rendu.
+    try {
+      const t = JSON.parse(localStorage.getItem("veille-ram:prefs") || "{}").theme;
+      if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+    } catch (e) {}
+  </script>
 </head>
 <body>
-  <main class="app">
-    <header class="top">
-      <div>
-        <h1>Veille RAM</h1>
-        <p class="sub" id="product">DDR5 · 2×16 Go · 6000 MHz</p>
+  <div class="shell">
+    <header class="appbar">
+      <div class="appbar-text">
+        <p class="eyebrow" id="product">DDR5 · 2×16 Go · 6000 MHz</p>
+        <h1 id="page-title">Marché</h1>
       </div>
-      <button class="icon-btn" id="refresh" type="button" aria-label="Actualiser">
-        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <button class="icon-btn" id="refresh" type="button" aria-label="Actualiser les données">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5"/></svg>
       </button>
     </header>
 
-    <p class="banner" id="banner" hidden></p>
+    <p class="banner" id="banner" role="status" hidden></p>
 
-    <section class="card hero" id="hero" aria-live="polite">
-      <p class="status" id="status"></p>
-      <p class="label" id="hero-label">Meilleur prix CL30</p>
-      <p class="hero-value" id="hero-value">—</p>
-      <p class="hero-meta" id="hero-meta"></p>
-      <p class="hero-gap" id="hero-gap"></p>
-      <a class="btn" id="hero-link" hidden target="_blank" rel="noopener noreferrer">Voir l'offre</a>
-    </section>
+    <div class="segmented cl-switch" id="cl-switch" role="radiogroup" aria-label="Latence">
+      <button type="button" role="radio" data-cl="all">Toutes</button>
+      <button type="button" role="radio" data-cl="30"><span class="swatch s-cl30"></span>CL30</button>
+      <button type="button" role="radio" data-cl="32"><span class="swatch s-cl32"></span>CL32</button>
+      <button type="button" role="radio" data-cl="36"><span class="swatch s-cl36"></span>CL36</button>
+    </div>
 
-    <section class="tiles">
-      <div class="card tile">
-        <p class="label">Meilleur CL32 / CL36</p>
-        <p class="tile-value" id="alt-value">—</p>
-        <p class="tile-meta" id="alt-meta"></p>
-      </div>
-      <div class="card tile">
-        <p class="label">Dernière analyse</p>
-        <p class="tile-value" id="when-value">—</p>
-        <p class="tile-meta" id="when-meta"></p>
-      </div>
-    </section>
+    <main>
+      <!-- MARCHÉ -->
+      <section class="view" id="view-marche" data-title="Marché">
+        <div class="pills">
+          <span class="pill" id="status-pill"></span>
+          <span class="pill pill-quiet" id="updated-pill"></span>
+        </div>
 
-    <section class="card">
-      <div class="card-head">
-        <h2>Évolution du meilleur prix</h2>
-        <ul class="legend" aria-label="Légende">
-          <li><span class="key key-cl30"></span>CL30</li>
-          <li><span class="key key-alt"></span>CL32/36</li>
-        </ul>
-      </div>
-      <div class="chart" id="chart">
-        <div class="tooltip" id="tooltip" hidden></div>
-      </div>
-      <p class="hint" id="chart-hint"></p>
-      <details class="data-table">
-        <summary>Voir les données</summary>
-        <table>
-          <thead><tr><th scope="col">Date</th><th scope="col">CL30</th><th scope="col">CL32/36</th></tr></thead>
-          <tbody id="history-rows"></tbody>
-        </table>
-      </details>
-    </section>
+        <article class="card hero" id="hero">
+          <p class="caption" id="hero-label">Meilleur prix</p>
+          <p class="hero-price" id="hero-price">—</p>
+          <p class="hero-name" id="hero-name"></p>
+          <div class="hero-facts" id="hero-facts"></div>
+          <div class="hero-actions">
+            <a class="btn btn-primary" id="hero-link" target="_blank" rel="noopener noreferrer" hidden>Voir l'offre</a>
+            <a class="btn btn-ghost" href="#offres">Toutes les offres</a>
+          </div>
+        </article>
 
-    <section>
-      <h2 class="section-title">Offres relevées</h2>
-      <ol class="offers" id="offers"></ol>
-    </section>
+        <h2 class="section-title">Par latence</h2>
+        <div class="card list" id="by-cl"></div>
 
-    <section class="card notes" id="notes"></section>
+        <h2 class="section-title">Le marché</h2>
+        <div class="card text-card" id="trend"></div>
 
-    <footer class="foot">
-      <p id="schedule">Analyses à 11h58 et 19h58 (heure de Paris).</p>
-      <p><a href="https://github.com/Tom9603/veille-ram" target="_blank" rel="noopener noreferrer">Projet sur GitHub</a> · seuils dans <code>config.json</code></p>
-    </footer>
-  </main>
+        <div class="card next-run">
+          <span class="next-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+          </span>
+          <div>
+            <p class="caption">Prochaine analyse</p>
+            <p class="next-time" id="next-run">—</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- OFFRES -->
+      <section class="view" id="view-offres" data-title="Offres" hidden>
+        <div class="toolbar">
+          <label class="select-pill">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16M7 20l-3-3M7 20l3-3M17 20V4M17 4l-3 3M17 4l3 3"/></svg>
+            <span class="sr-only">Trier par</span>
+            <select id="sort">
+              <option value="price-asc">Prix croissant</option>
+              <option value="price-desc">Prix décroissant</option>
+              <option value="cl">Latence (CL)</option>
+              <option value="shop">Boutique (A → Z)</option>
+            </select>
+          </label>
+          <button type="button" class="chip-toggle" id="f-stock" aria-pressed="false">Disponibles</button>
+          <button type="button" class="chip-toggle" id="f-verified" aria-pressed="false">Prix vérifiés</button>
+          <button type="button" class="chip-toggle" id="f-details" aria-pressed="false">Détails</button>
+        </div>
+        <p class="result-count" id="result-count"></p>
+        <ol class="offers" id="offers"></ol>
+      </section>
+
+      <!-- HISTORIQUE -->
+      <section class="view" id="view-historique" data-title="Historique" hidden>
+        <div class="segmented period" id="period" role="radiogroup" aria-label="Période">
+          <button type="button" role="radio" data-period="7">7 jours</button>
+          <button type="button" role="radio" data-period="30">30 jours</button>
+          <button type="button" role="radio" data-period="all">Tout</button>
+        </div>
+
+        <article class="card chart-card">
+          <div class="card-head">
+            <h2 id="chart-title">Meilleur prix</h2>
+            <ul class="legend" id="legend"></ul>
+          </div>
+          <div class="chart" id="chart"><div class="tooltip" id="tooltip" hidden></div></div>
+          <p class="hint" id="chart-hint"></p>
+        </article>
+
+        <h2 class="section-title">Sur la période</h2>
+        <div class="card">
+          <table class="stats">
+            <thead><tr><th scope="col">Latence</th><th scope="col">Actuel</th><th scope="col">Plus bas</th><th scope="col">Plus haut</th></tr></thead>
+            <tbody id="stats-rows"></tbody>
+          </table>
+        </div>
+
+        <details class="card disclosure">
+          <summary>Tous les relevés</summary>
+          <table class="stats">
+            <thead><tr><th scope="col">Date</th><th scope="col">CL30</th><th scope="col">CL32</th><th scope="col">CL36</th></tr></thead>
+            <tbody id="history-rows"></tbody>
+          </table>
+        </details>
+      </section>
+
+      <!-- RÉGLAGES -->
+      <section class="view" id="view-reglages" data-title="Réglages" hidden>
+        <h2 class="section-title">Général</h2>
+        <div class="card list settings">
+          <label class="row">
+            <span>Latence suivie</span>
+            <select id="set-cl">
+              <option value="all">Toutes</option>
+              <option value="30">CL30</option>
+              <option value="32">CL32</option>
+              <option value="36">CL36</option>
+            </select>
+          </label>
+          <div class="row">
+            <span>Thème</span>
+            <div class="segmented mini" id="set-theme" role="radiogroup" aria-label="Thème">
+              <button type="button" role="radio" data-theme-value="auto">Auto</button>
+              <button type="button" role="radio" data-theme-value="light">Clair</button>
+              <button type="button" role="radio" data-theme-value="dark">Sombre</button>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="section-title">Liste des offres</h2>
+        <div class="card list settings">
+          <label class="row">
+            <span>Tri</span>
+            <select id="set-sort">
+              <option value="price-asc">Prix croissant</option>
+              <option value="price-desc">Prix décroissant</option>
+              <option value="cl">Latence (CL)</option>
+              <option value="shop">Boutique (A → Z)</option>
+            </select>
+          </label>
+          <label class="row">
+            <span>Fiches détaillées</span>
+            <input type="checkbox" class="switch" id="set-details">
+          </label>
+          <label class="row">
+            <span>Disponibles uniquement</span>
+            <input type="checkbox" class="switch" id="set-stock">
+          </label>
+          <label class="row">
+            <span>Prix vérifiés uniquement</span>
+            <input type="checkbox" class="switch" id="set-verified">
+          </label>
+        </div>
+
+        <h2 class="section-title">Alertes</h2>
+        <div class="card list settings">
+          <div class="row"><span>Seuil CL30</span><span class="value" id="th-cl30">—</span></div>
+          <div class="row"><span>Seuil CL32 / CL36</span><span class="value" id="th-cl32-36">—</span></div>
+          <a class="row link" href="https://github.com/Tom9603/veille-ram/edit/gh-pages/config.json" target="_blank" rel="noopener noreferrer">
+            <span>Modifier les seuils sur GitHub</span><span class="chev" aria-hidden="true">↗</span>
+          </a>
+        </div>
+        <p class="footnote">Une bonne affaire est une offre en stock ou sur commande, au prix vérifié chez la boutique, sous le seuil.</p>
+
+        <h2 class="section-title">Analyses</h2>
+        <div class="card list settings">
+          <div class="row"><span>Horaires</span><span class="value" id="set-schedule">—</span></div>
+          <div class="row"><span>Dernière analyse</span><span class="value" id="set-last">—</span></div>
+          <div class="row"><span>Sources inaccessibles</span><span class="value" id="set-blocked">—</span></div>
+          <button type="button" class="row link" id="set-refresh"><span>Actualiser maintenant</span><span class="chev" aria-hidden="true">↻</span></button>
+        </div>
+
+        <h2 class="section-title">Installer l'appli</h2>
+        <div class="card text-card">
+          <p><strong>iPhone :</strong> dans Safari, bouton Partager puis « Sur l'écran d'accueil ».</p>
+          <p><strong>Android :</strong> dans Chrome, menu ⋮ puis « Installer l'application ».</p>
+        </div>
+
+        <h2 class="section-title">À propos</h2>
+        <div class="card list settings">
+          <a class="row link" href="https://github.com/Tom9603/veille-ram" target="_blank" rel="noopener noreferrer"><span>Projet sur GitHub</span><span class="chev" aria-hidden="true">↗</span></a>
+          <div class="row"><span>Version</span><span class="value">2.0</span></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <nav class="tabbar" aria-label="Menu">
+    <a href="#marche" data-tab="marche">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>
+      <span>Marché</span>
+    </a>
+    <a href="#offres" data-tab="offres">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="8" cy="8" r="1.5"/></svg>
+      <span>Offres</span>
+    </a>
+    <a href="#historique" data-tab="historique">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg>
+      <span>Historique</span>
+    </a>
+    <a href="#reglages" data-tab="reglages">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h3M11 17h9"/><circle cx="16" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>
+      <span>Réglages</span>
+    </a>
+  </nav>
+
   <script src="app.js"></script>
 </body>
 </html>

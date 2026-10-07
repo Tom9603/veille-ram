@@ -10,6 +10,16 @@
    "stock": "unknown",
    "url": "https://ledenicheur.fr/s/ddr5-32-go-6000-cl30/"
   },
+  "cl32": null,
+  "cl36": {
+   "name": "Corsair Vengeance RGB",
+   "ref": "CMH32GX5M2E6000C36",
+   "cl": 36,
+   "price_eur": 499.99,
+   "shop": "Ledenicheur (meilleur prix)",
+   "stock": "unknown",
+   "url": "https://ledenicheur.fr/s/ddr5-32-go-6000-cl30/"
+  },
   "cl32_36": {
    "name": "Corsair Vengeance RGB",
    "ref": "CMH32GX5M2E6000C36",

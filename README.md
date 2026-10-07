@@ -23,6 +23,19 @@ Routine Claude (11h58 et 19h58, heure de Paris)
 - `index.html`, `app.js`, `style.css`, `sw.js`, `manifest.webmanifest` :
   l'appli (PWA installable, fonctionne hors ligne avec les dernières données).
 
+L'appli a quatre onglets :
+
+- **Marché** : bonne affaire ou non, meilleur prix, écart au seuil, résumé par
+  latence (CL30, CL32, CL36) et prochaine analyse.
+- **Offres** : toutes les offres relevées, filtrables par latence, triables
+  (prix croissant ou décroissant, latence, boutique), avec filtres
+  « disponibles » et « prix vérifiés » et des fiches détaillées (référence,
+  prix au Go, écart au seuil, vendeur).
+- **Historique** : courbe du meilleur prix par latence sur 7 jours, 30 jours ou
+  tout, avec plus bas, plus haut et tous les relevés.
+- **Réglages** : latence suivie, tri, thème clair/sombre, seuils, horaires.
+  Ces préférences sont mémorisées sur le téléphone.
+
 Une **bonne affaire** est une offre en stock (ou sur commande), dont le prix a
 été vérifié sur la page de la boutique, et sous le seuil :
 CL30 ≤ 400 €, CL32/CL36 ≤ 360 € (modifiable dans `config.json`).
