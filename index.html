@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Veille RAM</title>
+  <meta name="description" content="Suivi du prix des kits DDR5 2x16 Go 6000 MHz CL30-36, mis à jour deux fois par jour.">
+  <meta name="theme-color" content="#f9f9f7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Veille RAM">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <header class="top">
+      <div>
+        <h1>Veille RAM</h1>
+        <p class="sub" id="product">DDR5 · 2×16 Go · 6000 MHz</p>
+      </div>
+      <button class="icon-btn" id="refresh" type="button" aria-label="Actualiser">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </header>
+
+    <p class="banner" id="banner" hidden></p>
+
+    <section class="card hero" id="hero" aria-live="polite">
+      <p class="status" id="status"></p>
+      <p class="label" id="hero-label">Meilleur prix CL30</p>
+      <p class="hero-value" id="hero-value">—</p>
+      <p class="hero-meta" id="hero-meta"></p>
+      <p class="hero-gap" id="hero-gap"></p>
+      <a class="btn" id="hero-link" hidden target="_blank" rel="noopener noreferrer">Voir l'offre</a>
+    </section>
+
+    <section class="tiles">
+      <div class="card tile">
+        <p class="label">Meilleur CL32 / CL36</p>
+        <p class="tile-value" id="alt-value">—</p>
+        <p class="tile-meta" id="alt-meta"></p>
+      </div>
+      <div class="card tile">
+        <p class="label">Dernière analyse</p>
+        <p class="tile-value" id="when-value">—</p>
+        <p class="tile-meta" id="when-meta"></p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Évolution du meilleur prix</h2>
+        <ul class="legend" aria-label="Légende">
+          <li><span class="key key-cl30"></span>CL30</li>
+          <li><span class="key key-alt"></span>CL32/36</li>
+        </ul>
+      </div>
+      <div class="chart" id="chart">
+        <div class="tooltip" id="tooltip" hidden></div>
+      </div>
+      <p class="hint" id="chart-hint"></p>
+      <details class="data-table">
+        <summary>Voir les données</summary>
+        <table>
+          <thead><tr><th scope="col">Date</th><th scope="col">CL30</th><th scope="col">CL32/36</th></tr></thead>
+          <tbody id="history-rows"></tbody>
+        </table>
+      </details>
+    </section>
+
+    <section>
+      <h2 class="section-title">Offres relevées</h2>
+      <ol class="offers" id="offers"></ol>
+    </section>
+
+    <section class="card notes" id="notes"></section>
+
+    <footer class="foot">
+      <p id="schedule">Analyses à 11h58 et 19h58 (heure de Paris).</p>
+      <p><a href="https://github.com/Tom9603/veille-ram" target="_blank" rel="noopener noreferrer">Projet sur GitHub</a> · seuils dans <code>config.json</code></p>
+    </footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

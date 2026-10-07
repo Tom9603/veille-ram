@@ -1,0 +1,122 @@
+{
+  "checked_at": "2026-10-07T18:10+02:00",
+  "product": {
+    "label": "DDR5 · 2×16 Go · 6000 MHz",
+    "kit": "2x16 Go (32 Go)",
+    "speed_mts": 6000,
+    "preferred_cl": 30,
+    "fallback_cl": [
+      32,
+      36
+    ]
+  },
+  "thresholds_eur": {
+    "cl30": 400,
+    "cl32_36": 360
+  },
+  "deal": false,
+  "headline": "RAM DDR5 32 Go 6000 : pas d'affaire. Meilleur CL30 593,99 € (Ledenicheur (meilleur prix)), meilleur CL32/36 499,99 € (Ledenicheur (meilleur prix))",
+  "best": {
+    "cl30": {
+      "name": "Corsair Vengeance",
+      "ref": "CMK32GX5M2B6000C30",
+      "cl": 30,
+      "price_eur": 593.99,
+      "shop": "Ledenicheur (meilleur prix)",
+      "stock": "unknown",
+      "url": "https://ledenicheur.fr/s/ddr5-32-go-6000-cl30/"
+    },
+    "cl32_36": {
+      "name": "Corsair Vengeance RGB",
+      "ref": "CMH32GX5M2E6000C36",
+      "cl": 36,
+      "price_eur": 499.99,
+      "shop": "Ledenicheur (meilleur prix)",
+      "stock": "unknown",
+      "url": "https://ledenicheur.fr/s/ddr5-32-go-6000-cl30/"
+    }
+  },
+  "change_since_previous_eur": {
+    "cl30": null,
+    "cl32_36": null
+  },
+  "offers": [
+    {
+      "name": "Corsair Vengeance RGB",
+      "ref": "CMH32GX5M2E6000C36",
+      "cl": 36,
+      "price_eur": 499.99,
+      "shop": "Ledenicheur (meilleur prix)",
+      "stock": "unknown",
+      "marketplace": false,
+      "verified": false,
+      "url": "https://ledenicheur.fr/s/ddr5-32-go-6000-cl30/",
+      "deal": false
+    },
+    {
+      "name": "Crucial Pro Overclocking",
+      "ref": "CP2K16G60C36U5B",
+      "cl": 36,
+      "price_eur": 499.99,
+      "shop": "Ledenicheur (meilleur prix)",
+      "stock": "unknown",
+      "marketplace": false,
+      "verified": false,
+      "url": "https://ledenicheur.fr/s/ddr5-32-go-6000-cl30/",
+      "deal": false
+    },
+    {
+      "name": "Kingston Fury Beast",
+      "ref": "KF560C30BBEK2-32",
+      "cl": 30,
+      "price_eur": 529.99,
+      "shop": "Grosbill",
+      "stock": "out_of_stock",
+      "marketplace": false,
+      "verified": true,
+      "url": "https://www.grosbill.com/memoire-pc-2/32go-ddr5",
+      "deal": false
+    },
+    {
+      "name": "Corsair Vengeance",
+      "ref": "CMK32GX5M2B6000C30",
+      "cl": 30,
+      "price_eur": 593.99,
+      "shop": "Ledenicheur (meilleur prix)",
+      "stock": "unknown",
+      "marketplace": false,
+      "verified": false,
+      "url": "https://ledenicheur.fr/s/ddr5-32-go-6000-cl30/",
+      "deal": false
+    },
+    {
+      "name": "Kingston Fury Beast",
+      "ref": "KF560C30BBEK2-32",
+      "cl": 30,
+      "price_eur": 599.0,
+      "shop": "Ledenicheur (meilleur prix)",
+      "stock": "unknown",
+      "marketplace": false,
+      "verified": false,
+      "url": "https://ledenicheur.fr/s/ddr5-32-go-6000-cl30/",
+      "deal": false
+    },
+    {
+      "name": "G.Skill Trident Z5 Neo RGB",
+      "ref": "",
+      "cl": 30,
+      "price_eur": 714.69,
+      "shop": "Ledenicheur (meilleur prix)",
+      "stock": "unknown",
+      "marketplace": false,
+      "verified": false,
+      "url": "https://ledenicheur.fr/s/ddr5-32-go-6000-cl30/",
+      "deal": false
+    }
+  ],
+  "trend": "Marché très haut (pénurie de DRAM) : CL30 entre ~530 et 600 €, CL36 autour de 500 €.",
+  "blocked_sources": [
+    "idealo.fr",
+    "amazon.fr"
+  ]
+}
