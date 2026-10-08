@@ -264,5 +264,60 @@
   },
   "deal": false,
   "offers_count": 80
+ },
+ {
+  "checked_at": "2026-10-09T00:24+02:00",
+  "cl30": {
+   "name": "Patriot Viper Venom",
+   "ref": "PVV532G600C30K",
+   "speed": 6000,
+   "cl": 30,
+   "price_eur": 499.99,
+   "shop": "Amazon.fr Marketplace",
+   "stock": "in_stock",
+   "url": "https://ledenicheur.fr/go-to-shop/26551/offer/B0D4NLSP87?client_id=1551"
+  },
+  "cl32": {
+   "name": "Lexar Ares OC",
+   "ref": "LD5U16G60C320A",
+   "speed": 6000,
+   "cl": 32,
+   "price_eur": 541.99,
+   "shop": "Cdiscount",
+   "stock": "in_stock",
+   "url": "https://ledenicheur.fr/go-to-shop/24166/offer/LEX1759298414731?client_id=1551"
+  },
+  "cl36": {
+   "name": "Patriot Viper Venom",
+   "ref": "PVV532G600C36K",
+   "speed": 6000,
+   "cl": 36,
+   "price_eur": 474.99,
+   "shop": "Amazon.fr Marketplace",
+   "stock": "in_stock",
+   "url": "https://ledenicheur.fr/go-to-shop/26551/offer/B09XY6KX8P?client_id=1551"
+  },
+  "cl32_36": {
+   "name": "Patriot Viper Venom",
+   "ref": "PVV532G600C36K",
+   "speed": 6000,
+   "cl": 36,
+   "price_eur": 474.99,
+   "shop": "Amazon.fr Marketplace",
+   "stock": "in_stock",
+   "url": "https://ledenicheur.fr/go-to-shop/26551/offer/B09XY6KX8P?client_id=1551"
+  },
+  "mhz5600": {
+   "name": "Patriot Viper RGB LED",
+   "ref": "PVVR532G560C36K",
+   "speed": 5600,
+   "cl": 36,
+   "price_eur": 459.99,
+   "shop": "Amazon.fr Marketplace",
+   "stock": "in_stock",
+   "url": "https://ledenicheur.fr/go-to-shop/26551/offer/B09XY7JBR7?client_id=1551"
+  },
+  "deal": false,
+  "offers_count": 72
  }
 ]
