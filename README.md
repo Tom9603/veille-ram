@@ -8,20 +8,18 @@ CL32/CL36 en plan B), avec une appli mobile pour consulter l'état du marché.
 ## Comment ça marche
 
 ```
+GitHub Actions « Actualiser les prix » (11h40, 19h40, et à chaque ↻ dans l'appli)
+  │  scripts/collect.py : Ledenicheur, Materiel.net, Alternate
+  │  scripts/record.py  → data/latest.json + data/history.json
+  └──────────────► GitHub Pages republie l'appli (moins d'une minute)
+
 Routine Claude (11h58 et 19h58, heure de Paris)
-  │  cherche les prix (Ledenicheur, LDLC, Materiel.net, Grosbill, Amazon, Dealabs…)
-  │  python3 scripts/record.py  → data/latest.json + data/history.json
-  │  git push sur gh-pages (la branche publiée par GitHub Pages)
-  ├──────────────► GitHub Pages republie l'appli (1 à 2 min)
+  │  lit le dernier relevé + cherche les bons plans récents sur Dealabs
   └──────────────► notification push dans l'appli Claude (résumé + lien)
 ```
 
-Il y a aussi un **relevé automatique sans IA** (`scripts/collect.py`, lancé par
-GitHub Actions via `.github/workflows/actualiser.yml`) : il lit Ledenicheur,
-Materiel.net et Alternate en une minute. Il tourne à 11h40 et 19h40, et à la
-demande quand tu touches ↻ (ou tires l'écran vers le bas) dans l'appli.
-
-- `AGENT.md` : les consignes que l'agent suit à chaque passage.
+- `AGENT.md` : consignes pour une recherche complète par un agent IA (utilisables
+  si une routine Claude a un accès en écriture au dépôt).
 - `config.json` : le produit, les **seuils d'alerte** et l'horaire affiché.
 - `scripts/record.py` : valide le relevé de l'agent, calcule les meilleurs
   prix et les « bonnes affaires », met à jour les données.

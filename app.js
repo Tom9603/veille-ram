@@ -762,7 +762,7 @@
     status.textContent = on ? "Activée" : "Non configurée";
     status.classList.toggle("is-on", on);
     $("token-remove").hidden = !on;
-    $("token-input").placeholder = on ? "Clé enregistrée (colle une nouvelle clé pour la remplacer)" : "Colle ta clé GitHub (github_pat_…)";
+    $("token-input").placeholder = on ? "Remplacer la clé…" : "Colle ta clé GitHub (github_pat_…)";
   }
 
   async function saveToken(e) {
