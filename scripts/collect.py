@@ -41,20 +41,31 @@ MATERIEL_PAGE = "https://www.materiel.net/recherche/ddr5%206000%202x16/"
 ALTERNATE_PAGE = "https://www.alternate.fr/listing.xhtml?q=ddr5+6000+2x16"
 GROSBILL_PAGE = "https://www.grosbill.com/memoire-pc-2/32go-ddr5"
 
-# Boutiques lues en direct : leurs offres vues via Ledenicheur sont ignorées.
-DIRECT_SHOPS = {"ldlc", "materiel.net", "alternate", "grosbill"}
+# Boutiques lues en direct : si leur lecture a réussi, leurs offres vues via
+# Ledenicheur sont ignorées (doublons) ; sinon Ledenicheur prend le relais.
+DIRECT_SHOPS = {"ldlc.com": "ldlc", "materiel.net": "materiel.net", "alternate.fr": "alternate", "grosbill.com": "grosbill"}
 
 
 # ---------- Outils ----------
 
-def fetch(url):
+def fetch(url, attempts=2):
+    for attempt in range(attempts):
+        try:
+            return fetch_once(url)
+        except Exception:
+            if attempt == attempts - 1:
+                raise
+            time.sleep(3)
+
+
+def fetch_once(url):
     req = urllib.request.Request(url, headers={
         "User-Agent": UA,
         "Accept": "text/html,application/xhtml+xml",
         "Accept-Language": "fr-FR,fr;q=0.9",
         "Accept-Encoding": "gzip",
     })
-    with urllib.request.urlopen(req, timeout=30) as res:
+    with urllib.request.urlopen(req, timeout=20) as res:
         body = res.read()
         if res.headers.get("Content-Encoding") == "gzip":
             body = gzip.decompress(body)
@@ -153,7 +164,7 @@ def ledenicheur_list(pages):
     return list(products.values())
 
 
-def ledenicheur_shops(product, page):
+def ledenicheur_shops(product, page, skip_shops=frozenset()):
     """Fiche produit : une offre par boutique (prix livraison incluse, stock, lien)."""
     offers = []
     for block in page.split('data-test="OfferListItem"')[1:]:
@@ -170,7 +181,7 @@ def ledenicheur_shops(product, page):
         if (other_cl and other_cl != product["cl"]) or re.search(r"so-?dimm", title, re.I):
             continue  # Ledenicheur rattache parfois un autre kit à la fiche
         shop_name = html.unescape(shop.group(1)).strip()
-        if shop_name.lower().replace(" marketplace", "") in DIRECT_SHOPS:
+        if shop_name.lower().replace(" marketplace", "") in skip_shops:
             continue
         p = price(cost.group(1))
         if p is None:
@@ -320,13 +331,17 @@ def collect():
             blocked.append(label)
             return []
 
+    read_directly = set()
     for label, run in (
-        ("ldlc.com", lambda: ldlc([fetch(u) for u in LDLC_PAGES])),
+        ("ldlc.com", lambda: ldlc([fetch(LDLC_PAGES[0])] + [fetch(u, attempts=1) for u in LDLC_PAGES[1:]])),
         ("materiel.net", lambda: materiel(fetch(MATERIEL_PAGE))),
         ("alternate.fr", lambda: alternate(fetch(ALTERNATE_PAGE))),
         ("grosbill.com", lambda: grosbill(fetch(GROSBILL_PAGE))),
     ):
-        offers += source(label, run)
+        found = source(label, run)
+        if found:
+            read_directly.add(DIRECT_SHOPS[label])
+        offers += found
 
     listed = source("ledenicheur.fr", lambda: ledenicheur_list([fetch(u) for u in LEDENICHEUR_PAGES]))
     for cl in sorted(TARGET_CLS):
@@ -336,7 +351,7 @@ def collect():
             if i < PRODUCT_PAGES_PER_CL:
                 try:
                     time.sleep(0.4)
-                    shops = ledenicheur_shops(product, fetch(product["url"]))
+                    shops = ledenicheur_shops(product, fetch(product["url"]), frozenset(read_directly))
                 except Exception as err:
                     print(f"Fiche Ledenicheur {product['url']} : {err}", file=sys.stderr)
             offers += shops or [product]
