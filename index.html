@@ -102,7 +102,7 @@
             </select>
           </label>
           <button type="button" class="chip-toggle" id="f-stock" aria-pressed="false">Disponibles</button>
-          <button type="button" class="chip-toggle" id="f-verified" aria-pressed="false">Prix vérifiés</button>
+          <button type="button" class="chip-toggle" id="f-verified" aria-pressed="false">Prix confirmés</button>
           <button type="button" class="chip-toggle" id="f-details" aria-pressed="false">Détails</button>
         </div>
         <p class="result-count" id="result-count"></p>
@@ -186,7 +186,7 @@
             <input type="checkbox" class="switch" id="set-stock">
           </label>
           <label class="row">
-            <span>Prix vérifiés uniquement</span>
+            <span>Prix confirmés uniquement</span>
             <input type="checkbox" class="switch" id="set-verified">
           </label>
         </div>
@@ -208,7 +208,7 @@
           </a>
           <button type="button" class="row link danger" id="token-remove" hidden><span>Supprimer la clé de ce téléphone</span></button>
         </div>
-        <p class="footnote">Le bouton ↻ (ou tirer l'écran vers le bas) lance une vraie recherche de prix sur Ledenicheur, Materiel.net et Alternate, en 1 à 2 minutes. Il faut pour cela une clé GitHub : nom « Veille RAM », Repository access « Only select repositories » → veille-ram, Permissions → Actions : « Read and write ». La clé reste uniquement sur ce téléphone.</p>
+        <p class="footnote">Le bouton ↻ (ou tirer l'écran vers le bas) lance une vraie recherche de prix (LDLC, Materiel.net, Alternate, Grosbill, et Amazon, Cdiscount, Fnac… via Ledenicheur), en 1 à 2 minutes. Il faut pour cela une clé GitHub : nom « Veille RAM », Repository access « Only select repositories » → veille-ram, Permissions → Actions : « Read and write ». La clé reste uniquement sur ce téléphone.</p>
 
         <h2 class="section-title">Alertes</h2>
         <div class="card list settings">
@@ -218,7 +218,7 @@
             <span>Modifier les seuils sur GitHub</span><span class="chev" aria-hidden="true">↗</span>
           </a>
         </div>
-        <p class="footnote">Une bonne affaire est une offre en stock ou sur commande, au prix vérifié chez la boutique, sous le seuil.</p>
+        <p class="footnote">Une bonne affaire est une offre en stock ou sur commande, sous le seuil, dont le prix est confirmé : vu chez la boutique, ou relevé pour elle par Ledenicheur (livraison incluse).</p>
 
         <h2 class="section-title">Analyses</h2>
         <div class="card list settings">

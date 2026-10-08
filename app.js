@@ -445,7 +445,7 @@
     return state.latest.offers
       .filter((o) => cls.includes(o.cl))
       .filter((o) => !prefs.available || o.stock === "in_stock" || o.stock === "on_order")
-      .filter((o) => !prefs.verifiedOnly || o.verified)
+      .filter((o) => !prefs.verifiedOnly || o.verified || o.via)
       .sort(sorters[prefs.sort] || sorters["price-asc"]);
   }
 
@@ -486,7 +486,7 @@
       el("dl", { class: "facts" },
         fact("Référence", o.ref || "non précisée", true),
         fact("Écart au seuil", gap > 0 ? `+${eurRound(gap)} (seuil ${eur(limitFor(o.cl))})` : `${eurRound(-gap)} sous le seuil`),
-        fact("Prix", o.verified ? "Vérifié chez la boutique" : "Non vérifié (comparateur)"),
+        fact("Prix", o.verified ? "Vérifié chez la boutique" : o.via ? `Relevé via ${o.via}, livraison incluse` : "Non vérifié (comparateur)"),
         fact("Vendeur", o.marketplace ? "Marketplace (vendeur tiers)" : "Boutique"),
         fact("Stock", stock.label),
         fact("Prix au Go", perGo(o.price_eur))),

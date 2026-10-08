@@ -9,7 +9,8 @@ CL32/CL36 en plan B), avec une appli mobile pour consulter l'état du marché.
 
 ```
 GitHub Actions « Actualiser les prix » (11h40, 19h40, et à chaque ↻ dans l'appli)
-  │  scripts/collect.py : Ledenicheur, Materiel.net, Alternate
+  │  scripts/collect.py : LDLC, Materiel.net, Alternate, Grosbill en direct,
+  │                       Amazon, Cdiscount, Fnac… via les fiches Ledenicheur
   │  scripts/record.py  → data/latest.json + data/history.json
   └──────────────► GitHub Pages republie l'appli (moins d'une minute)
 

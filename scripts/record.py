@@ -17,6 +17,7 @@ Entrée (run.json, écrit par l'agent HORS du dépôt) :
       "stock": "in_stock",                      # in_stock | on_order | out_of_stock | unknown
       "marketplace": false,                     # vendeur tiers ?
       "verified": true,                         # prix vu sur la page produit ?
+      "via": "Ledenicheur",                     # optionnel : prix d'une boutique précise relevé par un comparateur
       "url": "https://..."
     }
   ],
@@ -91,6 +92,8 @@ def validate(run):
         for key in ("marketplace", "verified"):
             if not isinstance(o.get(key), bool):
                 errors.append(f"{where}.{key} doit être true ou false")
+        if not isinstance(o.get("via", ""), str):
+            errors.append(f"{where}.via doit être un texte")
         if isinstance(o.get("url"), str) and not o["url"].startswith("https://"):
             errors.append(f"{where}.url doit commencer par https://")
     if not isinstance(run.get("trend", ""), str):
@@ -156,9 +159,11 @@ def main(argv):
     for o in dedupe(run["offers"]):
         o = {**o, "ref": o.get("ref", "").strip(), "price_eur": round(float(o["price_eur"]), 2)}
         limit = thresholds["cl30"] if o["cl"] == 30 else thresholds["cl32_36"]
+        # Bonne affaire : disponible, sous le seuil, et prix d'une boutique identifiée
+        # (vu chez elle, ou relevé pour elle par un comparateur).
         o["deal"] = (
             o["stock"] in ("in_stock", "on_order")
-            and o["verified"]
+            and (o["verified"] or bool(o.get("via")))
             and o["price_eur"] <= limit
         )
         offers.append(o)
@@ -240,7 +245,8 @@ def main(argv):
         lines.append("Depuis le dernier passage : " + ", ".join(moves))
     lines += ["", "| Kit | CL | Prix | Boutique | Stock | Lien |", "|---|---|---|---|---|---|"]
     for o in offers[:5]:
-        flags = (" (marketplace)" if o["marketplace"] else "") + ("" if o["verified"] else " (non vérifié)")
+        flags = (" (marketplace)" if o["marketplace"] else "") + (
+            "" if o["verified"] else f" (via {o['via']})" if o.get("via") else " (non vérifié)")
         lines.append(
             f"| {o['name']} | {o['cl']} | {eur(o['price_eur'])} €{flags} | {o['shop']} "
             f"| {STOCK_LABELS[o['stock']]} | {o['url']} |"

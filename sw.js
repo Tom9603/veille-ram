@@ -1,6 +1,6 @@
 // Coquille de l'appli en cache (mise à jour en arrière-plan),
 // données toujours demandées au réseau d'abord, avec repli sur le cache hors ligne.
-const VERSION = "veille-ram-v3";
+const VERSION = "veille-ram-v4";
 const SHELL = [
   "./",
   "index.html",
