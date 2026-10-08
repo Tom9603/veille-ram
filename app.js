@@ -18,7 +18,7 @@
 
   // ---------- Préférences (mémorisées sur l'appareil) ----------
 
-  const DEFAULT_PREFS = { cl: "all", sort: "price-asc", available: false, verifiedOnly: false, details: false, theme: "auto", period: "all" };
+  const DEFAULT_PREFS = { cl: "all", sort: "price-asc", available: false, verifiedOnly: false, details: false, theme: "auto", period: "all", autoRefresh: true };
   let prefs = { ...DEFAULT_PREFS };
   try { prefs = { ...DEFAULT_PREFS, ...JSON.parse(localStorage.getItem(PREFS_KEY) || "{}") }; } catch (e) { /* stockage indisponible */ }
 
@@ -109,7 +109,48 @@
   let state = { latest: null, history: [], config: null, loadedAt: 0, fromCache: false };
   const openOffers = new Set();
 
+  // ---------- GitHub (actualisation à la demande) ----------
+  // La clé ne quitte jamais ce téléphone : elle n'est envoyée qu'à api.github.com.
+
+  const REPO = "Tom9603/veille-ram";
+  const BRANCH = "gh-pages";
+  const WORKFLOW = "actualiser.yml";
+  const TOKEN_KEY = "veille-ram:gh-token";
+  const AUTO_REFRESH_MINUTES = 15;
+
+  function getToken() {
+    try { return localStorage.getItem(TOKEN_KEY) || ""; } catch (e) { return ""; }
+  }
+  function setToken(token) {
+    try {
+      if (token) localStorage.setItem(TOKEN_KEY, token); else localStorage.removeItem(TOKEN_KEY);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function github(path, options = {}) {
+    return fetch(`https://api.github.com/repos/${REPO}${path}`, {
+      ...options,
+      cache: "no-store",
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${getToken()}`,
+        "X-GitHub-Api-Version": "2022-11-28",
+        ...(options.headers || {}),
+      },
+    });
+  }
+
   async function getJSON(path) {
+    // Avec la clé, on lit le dépôt directement : données à jour sans attendre la republication du site.
+    if (getToken() && path.startsWith("data/")) {
+      try {
+        const res = await github(`/contents/${path}?ref=${BRANCH}`, { headers: { Accept: "application/vnd.github.raw+json" } });
+        if (res.ok) return { data: await res.json(), cached: false };
+      } catch (e) { /* repli sur le site ci-dessous */ }
+    }
     const res = await fetch(`${path}?t=${Date.now()}`, { cache: "no-store" });
     if (!res.ok) throw new Error(`${path} : HTTP ${res.status}`);
     return { data: await res.json(), cached: res.headers.get("x-veille-cache") === "1" };
@@ -132,9 +173,120 @@
         ? "Impossible d'actualiser : affichage des dernières données connues."
         : "Impossible de charger les données. Vérifie ta connexion puis touche ↻.");
     } finally {
-      $("refresh").classList.remove("spinning");
+      if (!refreshing) $("refresh").classList.remove("spinning");
       document.body.classList.remove("loading");
     }
+  }
+
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  let refreshing = false;
+  let syncTimer;
+
+  function showSync(message, kind) {
+    clearTimeout(syncTimer);
+    const box = $("sync");
+    box.className = `sync${kind ? ` is-${kind}` : ""}`;
+    $("sync-text").textContent = message;
+    box.hidden = false;
+    if (kind === "done") syncTimer = setTimeout(() => { box.hidden = true; }, 4000);
+  }
+
+  async function latestRunId() {
+    const res = await github(`/actions/workflows/${WORKFLOW}/runs?per_page=1`);
+    if (res.status === 401 || res.status === 403 || res.status === 404) throw new Error("auth");
+    const data = await res.json();
+    return data.workflow_runs && data.workflow_runs[0] ? data.workflow_runs[0].id : 0;
+  }
+
+  // Lance une vraie recherche de prix (GitHub Actions), attend la fin, puis recharge les données.
+  async function refreshPrices() {
+    if (refreshing) return;
+    if (!getToken()) {
+      await load();
+      showSync("Données rechargées. Pour lancer une nouvelle recherche de prix, ajoute ta clé GitHub dans Réglages.", "error");
+      return;
+    }
+    refreshing = true;
+    $("refresh").classList.add("spinning");
+    const started = Date.now();
+    const tick = () => showSync(`Recherche des prix en cours… ${Math.round((Date.now() - started) / 1000)} s`);
+    tick();
+    try {
+      const before = await latestRunId();
+      const res = await github(`/actions/workflows/${WORKFLOW}/dispatches`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ref: BRANCH }),
+      });
+      if (res.status === 401 || res.status === 403 || res.status === 404) throw new Error("auth");
+      if (!res.ok) throw new Error(`GitHub a répondu ${res.status}`);
+
+      let run = null;
+      while (Date.now() - started < 5 * 60 * 1000) {
+        await sleep(4000);
+        tick();
+        const list = await github(`/actions/workflows/${WORKFLOW}/runs?per_page=5`);
+        if (!list.ok) continue;
+        const runs = (await list.json()).workflow_runs || [];
+        run = runs.filter((r) => r.id > before).sort((a, b) => a.id - b.id)[0] || null;
+        if (run && run.status === "completed") break;
+      }
+      if (!run || run.status !== "completed") throw new Error("la recherche prend plus de temps que prévu, les prix arriveront dans quelques minutes");
+      if (run.conclusion !== "success") throw new Error("la recherche a échoué côté GitHub, réessaie plus tard");
+      await load();
+      showSync(`Prix actualisés à l'instant (${state.latest.offers.length} offres).`, "done");
+    } catch (err) {
+      console.error(err);
+      showSync(err.message === "auth"
+        ? "Clé GitHub refusée : vérifie-la dans Réglages (droit Actions en lecture et écriture sur veille-ram)."
+        : `Actualisation impossible : ${err.message}.`, "error");
+    } finally {
+      refreshing = false;
+      $("refresh").classList.remove("spinning");
+    }
+  }
+
+  function maybeAutoRefresh() {
+    if (!getToken() || !prefs.autoRefresh || !state.latest || refreshing) return;
+    const ageMinutes = (Date.now() - new Date(state.latest.checked_at)) / 60000;
+    if (ageMinutes > AUTO_REFRESH_MINUTES) refreshPrices();
+  }
+
+  // Tirer l'écran vers le bas depuis le haut de la page pour actualiser.
+  function setupPullToRefresh() {
+    const ptr = $("ptr");
+    const THRESHOLD = 80;
+    let startY = null;
+    let pull = 0;
+    const reset = () => {
+      startY = null;
+      pull = 0;
+      ptr.style.transition = "transform 0.2s, opacity 0.2s";
+      ptr.style.transform = "translateY(-60px)";
+      ptr.style.opacity = "0";
+      ptr.classList.remove("is-ready");
+    };
+    window.addEventListener("touchstart", (e) => {
+      if (window.scrollY > 0 || refreshing || e.touches.length !== 1) return;
+      startY = e.touches[0].clientY;
+      ptr.style.transition = "none";
+    }, { passive: true });
+    window.addEventListener("touchmove", (e) => {
+      if (startY === null) return;
+      pull = Math.max(0, e.touches[0].clientY - startY);
+      if (pull === 0) return;
+      const dist = Math.min(pull * 0.5, 70);
+      ptr.style.transform = `translateY(${dist - 60}px) rotate(${pull * 2}deg)`;
+      ptr.style.opacity = String(Math.min(1, pull / THRESHOLD));
+      ptr.classList.toggle("is-ready", pull >= THRESHOLD);
+    }, { passive: true });
+    window.addEventListener("touchend", () => {
+      if (startY === null) return;
+      const go = pull >= THRESHOLD;
+      reset();
+      if (go) refreshPrices();
+    });
+    window.addEventListener("touchcancel", reset);
   }
 
   const thresholds = () => state.latest.thresholds_eur;
@@ -600,6 +752,39 @@
     $("set-stock").checked = prefs.available;
     $("set-verified").checked = prefs.verifiedOnly;
     $("set-details").checked = prefs.details;
+    $("set-auto").checked = prefs.autoRefresh;
+    renderTokenStatus();
+  }
+
+  function renderTokenStatus() {
+    const on = !!getToken();
+    const status = $("token-status");
+    status.textContent = on ? "Activée" : "Non configurée";
+    status.classList.toggle("is-on", on);
+    $("token-remove").hidden = !on;
+    $("token-input").placeholder = on ? "Clé enregistrée (colle une nouvelle clé pour la remplacer)" : "Colle ta clé GitHub (github_pat_…)";
+  }
+
+  async function saveToken(e) {
+    e.preventDefault();
+    const input = $("token-input");
+    const token = input.value.trim();
+    if (!token) return;
+    const previous = getToken();
+    if (!setToken(token)) {
+      showSync("Impossible d'enregistrer la clé sur ce navigateur (stockage bloqué).", "error");
+      return;
+    }
+    try {
+      await latestRunId();
+      input.value = "";
+      renderTokenStatus();
+      showSync("Clé enregistrée : le bouton ↻ lance maintenant une vraie recherche de prix.", "done");
+    } catch (err) {
+      setToken(previous);
+      renderTokenStatus();
+      showSync("Cette clé ne fonctionne pas : il faut le droit Actions en lecture et écriture sur le dépôt veille-ram.", "error");
+    }
   }
 
   // ---------- Événements ----------
@@ -616,11 +801,20 @@
   $("set-stock").addEventListener("change", (e) => setPref("available", e.target.checked));
   $("set-verified").addEventListener("change", (e) => setPref("verifiedOnly", e.target.checked));
   $("set-details").addEventListener("change", (e) => setPref("details", e.target.checked));
-  $("refresh").addEventListener("click", load);
-  $("set-refresh").addEventListener("click", load);
+  $("set-auto").addEventListener("change", (e) => setPref("autoRefresh", e.target.checked));
+  $("token-form").addEventListener("submit", saveToken);
+  $("token-remove").addEventListener("click", () => {
+    setToken("");
+    renderTokenStatus();
+    showSync("Clé supprimée de ce téléphone.", "done");
+  });
+  $("refresh").addEventListener("click", refreshPrices);
+  $("set-refresh").addEventListener("click", refreshPrices);
   window.addEventListener("hashchange", () => showView(true));
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible" && Date.now() - state.loadedAt > 60000) load();
+  document.addEventListener("visibilitychange", async () => {
+    if (document.visibilityState !== "visible" || refreshing) return;
+    if (Date.now() - state.loadedAt > 60000) await load();
+    maybeAutoRefresh();
   });
   document.addEventListener("pointerdown", (e) => { if (!$("chart").contains(e.target)) hideChartTip(); });
   let resizeTimer;
@@ -639,5 +833,6 @@
   applyTheme();
   syncControls();
   showView(false);
-  load();
+  setupPullToRefresh();
+  load().then(maybeAutoRefresh);
 })();

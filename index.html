@@ -34,7 +34,16 @@
       </button>
     </header>
 
+    <div class="ptr" id="ptr" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5"/></svg>
+    </div>
+
     <p class="banner" id="banner" role="status" hidden></p>
+
+    <div class="sync" id="sync" role="status" hidden>
+      <span class="sync-spinner" aria-hidden="true"></span>
+      <span id="sync-text">Recherche des prix en cours…</span>
+    </div>
 
     <div class="segmented cl-switch" id="cl-switch" role="radiogroup" aria-label="Latence">
       <button type="button" role="radio" data-cl="all">Toutes</button>
@@ -181,6 +190,25 @@
             <input type="checkbox" class="switch" id="set-verified">
           </label>
         </div>
+
+        <h2 class="section-title">Actualisation des prix</h2>
+        <div class="card list settings">
+          <div class="row"><span>Recherche à la demande</span><span class="value" id="token-status">Non configurée</span></div>
+          <label class="row">
+            <span>Nouvelle recherche à l'ouverture</span>
+            <input type="checkbox" class="switch" id="set-auto">
+          </label>
+          <form class="row token-form" id="token-form" autocomplete="off">
+            <label class="sr-only" for="token-input">Clé GitHub</label>
+            <input type="password" id="token-input" placeholder="Colle ta clé GitHub (github_pat_…)" spellcheck="false" autocapitalize="off">
+            <button type="submit" class="btn btn-primary btn-small">Enregistrer</button>
+          </form>
+          <a class="row link" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer">
+            <span>Créer la clé sur GitHub</span><span class="chev" aria-hidden="true">↗</span>
+          </a>
+          <button type="button" class="row link danger" id="token-remove" hidden><span>Supprimer la clé de ce téléphone</span></button>
+        </div>
+        <p class="footnote">Le bouton ↻ (ou tirer l'écran vers le bas) lance une vraie recherche de prix sur Ledenicheur, Materiel.net et Alternate, en 1 à 2 minutes. Il faut pour cela une clé GitHub : nom « Veille RAM », Repository access « Only select repositories » → veille-ram, Permissions → Actions : « Read and write ». La clé reste uniquement sur ce téléphone.</p>
 
         <h2 class="section-title">Alertes</h2>
         <div class="card list settings">

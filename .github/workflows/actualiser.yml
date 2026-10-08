@@ -1,0 +1,41 @@
+name: Actualiser les prix
+
+# Lancé par le bouton ↻ de l'appli (workflow_dispatch) et deux fois par jour,
+# juste avant le passage de l'agent Claude (11h58 et 19h58 à Paris).
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "40 9,17 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: actualiser-les-prix
+  cancel-in-progress: false
+
+jobs:
+  releve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Relever les prix
+        run: python3 scripts/collect.py "$RUNNER_TEMP/run.json"
+
+      - name: Mettre à jour les données
+        run: python3 scripts/record.py "$RUNNER_TEMP/run.json"
+
+      - name: Publier
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/latest.json data/history.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Relevé automatique du $(TZ=Europe/Paris date '+%d/%m à %Hh%M')"
+          for attempt in 1 2 3; do
+            git pull --rebase origin gh-pages && git push origin HEAD:gh-pages && exit 0
+            sleep $((attempt * 5))
+          done
+          exit 1

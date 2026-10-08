@@ -25,7 +25,8 @@ Entrée (run.json, écrit par l'agent HORS du dépôt) :
 }
 
 Sorties : data/latest.json (état courant) et data/history.json (une ligne par
-passage). Le texte de la notification est affiché sur la sortie standard.
+passage). Le texte de la notification est affiché sur la sortie standard et
+enregistré dans data/latest.json (champ « notification »).
 """
 
 import json
@@ -228,11 +229,6 @@ def main(argv):
     )
     history.sort(key=lambda h: datetime.fromisoformat(h["checked_at"]))
 
-    if not dry_run:
-        LATEST.parent.mkdir(parents=True, exist_ok=True)
-        LATEST.write_text(json.dumps(latest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        HISTORY.write_text(json.dumps(history, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-
     # Texte de la notification, prêt à recopier tel quel.
     lines = [headline]
     moves = [
@@ -257,7 +253,13 @@ def main(argv):
     if latest["blocked_sources"]:
         lines.append("Sources bloquées : " + ", ".join(latest["blocked_sources"]))
     lines.append(f"Appli : {config['app_url']}")
-    print("\n".join(lines))
+    latest["notification"] = "\n".join(lines)
+
+    if not dry_run:
+        LATEST.parent.mkdir(parents=True, exist_ok=True)
+        LATEST.write_text(json.dumps(latest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        HISTORY.write_text(json.dumps(history, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    print(latest["notification"])
     if dry_run:
         print("\n(--dry-run : rien n'a été écrit)", file=sys.stderr)
 

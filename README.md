@@ -16,6 +16,11 @@ Routine Claude (11h58 et 19h58, heure de Paris)
   └──────────────► notification push dans l'appli Claude (résumé + lien)
 ```
 
+Il y a aussi un **relevé automatique sans IA** (`scripts/collect.py`, lancé par
+GitHub Actions via `.github/workflows/actualiser.yml`) : il lit Ledenicheur,
+Materiel.net et Alternate en une minute. Il tourne à 11h40 et 19h40, et à la
+demande quand tu touches ↻ (ou tires l'écran vers le bas) dans l'appli.
+
 - `AGENT.md` : les consignes que l'agent suit à chaque passage.
 - `config.json` : le produit, les **seuils d'alerte** et l'horaire affiché.
 - `scripts/record.py` : valide le relevé de l'agent, calcule les meilleurs
@@ -49,6 +54,20 @@ CL30 ≤ 400 €, CL32/CL36 ≤ 360 € (modifiable dans `config.json`).
 
 L'appli s'ouvre alors en plein écran comme une appli normale et se met à jour
 à chaque ouverture.
+
+## Activer l'actualisation à la demande
+
+Le bouton ↻ de l'appli lance une vraie recherche de prix. Il lui faut une clé
+GitHub, à créer une seule fois :
+
+1. Sur https://github.com/settings/personal-access-tokens/new : nom
+   « Veille RAM », expiration au choix (1 an par exemple).
+2. **Repository access** : « Only select repositories » → `veille-ram`.
+3. **Permissions** → **Actions** : « Read and write ».
+4. Génère la clé, copie-la (`github_pat_…`) et colle-la dans l'appli :
+   Réglages → Actualisation des prix → Enregistrer.
+
+La clé reste sur ton téléphone et n'est envoyée qu'à api.github.com.
 
 ## Modifier les réglages
 
