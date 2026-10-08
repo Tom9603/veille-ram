@@ -1,7 +1,8 @@
 # Veille RAM
 
-Suivi automatique du prix d'un kit **DDR5 2×16 Go 6000 MHz** (CL30 en priorité,
-CL32/CL36 en plan B), avec une appli mobile pour consulter l'état du marché.
+Suivi automatique du prix d'un kit **DDR5 2×16 Go** : **6000 MHz** (CL30 en priorité,
+CL32/CL36 en plan B) et **5600 MHz** (CL28 à CL36), avec une appli mobile pour
+consulter l'état du marché.
 
 **Appli :** https://tom9603.github.io/veille-ram/
 
@@ -42,7 +43,8 @@ L'appli a quatre onglets :
 
 Une **bonne affaire** est une offre en stock (ou sur commande), dont le prix a
 été vérifié sur la page de la boutique, et sous le seuil :
-CL30 ≤ 400 €, CL32/CL36 ≤ 360 € (modifiable dans `config.json`).
+6000 CL30 ≤ 400 €, 6000 CL32/CL36 ≤ 360 €, 5600 ≤ 340 € (modifiable dans
+`config.json`, clé `mhz5600` pour le 5600).
 
 ## Installer l'appli sur le téléphone
 

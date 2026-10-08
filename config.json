@@ -1,18 +1,35 @@
 {
   "product": {
-    "label": "DDR5 · 2×16 Go · 6000 MHz",
+    "label": "DDR5 · 2×16 Go · 6000 / 5600 MHz",
     "kit": "2x16 Go (32 Go)",
     "speed_mts": 6000,
     "preferred_cl": 30,
-    "fallback_cl": [32, 36]
+    "fallback_cl": [
+      32,
+      36
+    ],
+    "alt_speed": {
+      "speed_mts": 5600,
+      "cl": [
+        28,
+        30,
+        32,
+        34,
+        36
+      ]
+    }
   },
   "thresholds_eur": {
     "cl30": 400,
-    "cl32_36": 360
+    "cl32_36": 360,
+    "mhz5600": 340
   },
   "schedule": {
     "timezone": "Europe/Paris",
-    "times": ["11:58", "19:58"]
+    "times": [
+      "11:58",
+      "19:58"
+    ]
   },
   "app_url": "https://tom9603.github.io/veille-ram/"
 }

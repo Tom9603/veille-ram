@@ -26,7 +26,7 @@
   <div class="shell">
     <header class="appbar">
       <div class="appbar-text">
-        <p class="eyebrow" id="product">DDR5 · 2×16 Go · 6000 MHz</p>
+        <p class="eyebrow" id="product">DDR5 · 2×16 Go · 6000 / 5600 MHz</p>
         <h1 id="page-title">Marché</h1>
       </div>
       <button class="icon-btn" id="refresh" type="button" aria-label="Actualiser les données">
@@ -46,10 +46,11 @@
     </div>
 
     <div class="segmented cl-switch" id="cl-switch" role="radiogroup" aria-label="Latence">
-      <button type="button" role="radio" data-cl="all">Toutes</button>
-      <button type="button" role="radio" data-cl="30"><span class="swatch s-cl30"></span>CL30</button>
-      <button type="button" role="radio" data-cl="32"><span class="swatch s-cl32"></span>CL32</button>
-      <button type="button" role="radio" data-cl="36"><span class="swatch s-cl36"></span>CL36</button>
+      <button type="button" role="radio" data-cl="all" aria-label="Toutes les catégories">Tout</button>
+      <button type="button" role="radio" data-cl="30" aria-label="6000 MHz CL30"><span class="swatch s-cl30"></span>CL30</button>
+      <button type="button" role="radio" data-cl="32" aria-label="6000 MHz CL32"><span class="swatch s-cl32"></span>CL32</button>
+      <button type="button" role="radio" data-cl="36" aria-label="6000 MHz CL36"><span class="swatch s-cl36"></span>CL36</button>
+      <button type="button" role="radio" data-cl="5600" aria-label="5600 MHz, CL28 à CL36"><span class="swatch s-mhz5600"></span>5600</button>
     </div>
 
     <main>
@@ -71,7 +72,7 @@
           </div>
         </article>
 
-        <h2 class="section-title">Par latence</h2>
+        <h2 class="section-title">Par catégorie</h2>
         <div class="card list" id="by-cl"></div>
 
         <h2 class="section-title">Le marché</h2>
@@ -129,7 +130,7 @@
         <h2 class="section-title">Sur la période</h2>
         <div class="card">
           <table class="stats">
-            <thead><tr><th scope="col">Latence</th><th scope="col">Actuel</th><th scope="col">Plus bas</th><th scope="col">Plus haut</th></tr></thead>
+            <thead><tr><th scope="col">Catégorie</th><th scope="col">Actuel</th><th scope="col">Plus bas</th><th scope="col">Plus haut</th></tr></thead>
             <tbody id="stats-rows"></tbody>
           </table>
         </div>
@@ -137,7 +138,7 @@
         <details class="card disclosure">
           <summary>Tous les relevés</summary>
           <table class="stats">
-            <thead><tr><th scope="col">Date</th><th scope="col">CL30</th><th scope="col">CL32</th><th scope="col">CL36</th></tr></thead>
+            <thead><tr><th scope="col">Date</th><th scope="col">CL30</th><th scope="col">CL32</th><th scope="col">CL36</th><th scope="col">5600</th></tr></thead>
             <tbody id="history-rows"></tbody>
           </table>
         </details>
@@ -148,12 +149,13 @@
         <h2 class="section-title">Général</h2>
         <div class="card list settings">
           <label class="row">
-            <span>Latence suivie</span>
+            <span>Catégorie suivie</span>
             <select id="set-cl">
               <option value="all">Toutes</option>
-              <option value="30">CL30</option>
-              <option value="32">CL32</option>
-              <option value="36">CL36</option>
+              <option value="30">6000 MHz CL30</option>
+              <option value="32">6000 MHz CL32</option>
+              <option value="36">6000 MHz CL36</option>
+              <option value="5600">5600 MHz (CL28 à 36)</option>
             </select>
           </label>
           <div class="row">
@@ -212,8 +214,9 @@
 
         <h2 class="section-title">Alertes</h2>
         <div class="card list settings">
-          <div class="row"><span>Seuil CL30</span><span class="value" id="th-cl30">—</span></div>
-          <div class="row"><span>Seuil CL32 / CL36</span><span class="value" id="th-cl32-36">—</span></div>
+          <div class="row"><span>Seuil 6000 MHz CL30</span><span class="value" id="th-cl30">—</span></div>
+          <div class="row"><span>Seuil 6000 MHz CL32 / CL36</span><span class="value" id="th-cl32-36">—</span></div>
+          <div class="row"><span>Seuil 5600 MHz</span><span class="value" id="th-5600">—</span></div>
           <a class="row link" href="https://github.com/Tom9603/veille-ram/edit/gh-pages/config.json" target="_blank" rel="noopener noreferrer">
             <span>Modifier les seuils sur GitHub</span><span class="chev" aria-hidden="true">↗</span>
           </a>

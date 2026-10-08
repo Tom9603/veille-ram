@@ -10,9 +10,11 @@ Trouver le meilleur prix actuel **en France** pour le kit décrit dans
 `config.json` (`product`), enregistrer le relevé dans ce dépôt pour que l'appli
 se mette à jour, puis rendre un résumé court en français.
 
-- RAM DDR5 desktop (DIMM), kit **2 x 16 Go** (32 Go), **6000 MHz** (6000 MT/s).
-- Latence : **CL30** en priorité. Plan B : **CL32** ou **CL36**. Ignore CL38 et
-  plus, les kits 1x32 et 2x32, et les autres fréquences.
+- RAM DDR5 desktop (DIMM), kit **2 x 16 Go** (32 Go).
+- **6000 MHz** : CL30 en priorité, plan B CL32 ou CL36.
+- **5600 MHz** : CL28 à CL36 (champ `"speed": 5600` dans le relevé).
+- Ignore CL38 et plus, les kits 1x32 et 2x32, les SO-DIMM et les autres
+  fréquences.
 - Neuf uniquement (pas d'occasion ni de reconditionné), livré en France.
 
 Les seuils d'alerte sont dans `config.json` (`thresholds_eur`) : relis-les à

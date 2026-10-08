@@ -11,7 +11,8 @@ Entrée (run.json, écrit par l'agent HORS du dépôt) :
     {
       "name": "Kingston Fury Beast",           # nom commercial du kit
       "ref": "KF560C30BBEK2-32",               # référence fabricant ("" si inconnue)
-      "cl": 30,                                 # 30, 32 ou 36
+      "speed": 6000,                            # 6000 (par défaut) ou 5600 MHz
+      "cl": 30,                                 # 30, 32 ou 36 en 6000 ; 28 à 36 en 5600
       "price_eur": 529.99,                      # TTC, livraison incluse si affichée
       "shop": "Grosbill",
       "stock": "in_stock",                      # in_stock | on_order | out_of_stock | unknown
@@ -48,7 +49,8 @@ STOCK_LABELS = {
     "out_of_stock": "rupture",
     "unknown": "stock ?",
 }
-CLS = {30, 32, 36}
+CLS = {28, 30, 32, 34, 36}
+SPEEDS = {5600, 6000}
 
 
 def fail(errors):
@@ -83,7 +85,9 @@ def validate(run):
         if not isinstance(o.get("ref", ""), str):
             errors.append(f"{where}.ref doit être un texte")
         if o.get("cl") not in CLS:
-            errors.append(f"{where}.cl doit valoir 30, 32 ou 36 (reçu {o.get('cl')!r})")
+            errors.append(f"{where}.cl doit valoir 28, 30, 32, 34 ou 36 (reçu {o.get('cl')!r})")
+        if o.get("speed", 6000) not in SPEEDS:
+            errors.append(f"{where}.speed doit valoir 5600 ou 6000 (reçu {o.get('speed')!r})")
         price = o.get("price_eur")
         if isinstance(price, bool) or not isinstance(price, (int, float)) or not 50 <= price <= 2000:
             errors.append(f"{where}.price_eur doit être un nombre entre 50 et 2000 (reçu {price!r})")
@@ -113,10 +117,10 @@ def validate(run):
 
 
 def dedupe(offers):
-    """Garde l'offre la moins chère par (boutique, kit, CL)."""
+    """Garde l'offre la moins chère par (boutique, kit, fréquence, CL)."""
     best = {}
     for o in offers:
-        key = (o["shop"].strip().lower(), (o.get("ref") or o["name"]).strip().lower(), o["cl"])
+        key = (o["shop"].strip().lower(), (o.get("ref") or o["name"]).strip().lower(), o.get("speed", 6000), o["cl"])
         if key not in best or o["price_eur"] < best[key]["price_eur"]:
             best[key] = o
     return sorted(best.values(), key=lambda o: (o["price_eur"], o["cl"]))
@@ -137,7 +141,14 @@ def migrate(entry):
 def summary(offer):
     if offer is None:
         return None
-    return {k: offer[k] for k in ("name", "ref", "cl", "price_eur", "shop", "stock", "url")}
+    return {k: offer[k] for k in ("name", "ref", "speed", "cl", "price_eur", "shop", "stock", "url")}
+
+
+def limit_for(offer, thresholds):
+    """Seuil d'alerte : 5600 MHz, sinon 6000 MHz CL30, sinon 6000 MHz CL32/CL36."""
+    if offer["speed"] == 5600:
+        return thresholds["mhz5600"]
+    return thresholds["cl30"] if offer["cl"] <= 30 else thresholds["cl32_36"]
 
 
 def main(argv):
@@ -157,8 +168,8 @@ def main(argv):
 
     offers = []
     for o in dedupe(run["offers"]):
-        o = {**o, "ref": o.get("ref", "").strip(), "price_eur": round(float(o["price_eur"]), 2)}
-        limit = thresholds["cl30"] if o["cl"] == 30 else thresholds["cl32_36"]
+        o = {**o, "ref": o.get("ref", "").strip(), "speed": o.get("speed", 6000), "price_eur": round(float(o["price_eur"]), 2)}
+        limit = limit_for(o, thresholds)
         # Bonne affaire : disponible, sous le seuil, et prix d'une boutique identifiée
         # (vu chez elle, ou relevé pour elle par un comparateur).
         o["deal"] = (
@@ -170,15 +181,18 @@ def main(argv):
 
     # Meilleur prix « listé » : tout sauf les ruptures confirmées.
     listed = [o for o in offers if o["stock"] != "out_of_stock"]
-    best_cl30 = next((o for o in listed if o["cl"] == 30), None)
-    best_cl32 = next((o for o in listed if o["cl"] == 32), None)
-    best_cl36 = next((o for o in listed if o["cl"] == 36), None)
-    best_cl32_36 = next((o for o in listed if o["cl"] in (32, 36)), None)
+    listed_6000 = [o for o in listed if o["speed"] == 6000]
+    best_cl30 = next((o for o in listed_6000 if o["cl"] == 30), None)
+    best_cl32 = next((o for o in listed_6000 if o["cl"] == 32), None)
+    best_cl36 = next((o for o in listed_6000 if o["cl"] == 36), None)
+    best_cl32_36 = next((o for o in listed_6000 if o["cl"] in (32, 36)), None)
+    best_5600 = next((o for o in listed if o["speed"] == 5600), None)
     best = {
         "cl30": summary(best_cl30),
         "cl32": summary(best_cl32),
         "cl36": summary(best_cl36),
         "cl32_36": summary(best_cl32_36),
+        "mhz5600": summary(best_5600),
     }
     deals = [o for o in offers if o["deal"]]
 
@@ -197,7 +211,7 @@ def main(argv):
     if deals:
         top = deals[0]
         headline = (
-            f"🚨 BONNE AFFAIRE RAM : {top['name']} CL{top['cl']} à {eur(top['price_eur'])} € "
+            f"🚨 BONNE AFFAIRE RAM : {top['name']} {top['speed']} MHz CL{top['cl']} à {eur(top['price_eur'])} € "
             f"chez {top['shop']}"
         )
     else:
@@ -206,10 +220,12 @@ def main(argv):
 
         first = part("CL30", best_cl30)
         headline = (
-            "RAM DDR5 32 Go 6000 : pas d'affaire. "
+            "RAM DDR5 32 Go : pas d'affaire. "
             + first[0].upper() + first[1:]
             + ", "
             + part("CL32/36", best_cl32_36)
+            + ", "
+            + part("5600", best_5600)
         )
 
     latest = {
@@ -238,21 +254,22 @@ def main(argv):
     lines = [headline]
     moves = [
         f"{label} {'+' if d > 0 else '−'}{eur(abs(d))} €"
-        for label, d in (("CL30", changes["cl30"]), ("CL32", changes["cl32"]), ("CL36", changes["cl36"]))
+        for label, d in (("CL30", changes["cl30"]), ("CL32", changes["cl32"]), ("CL36", changes["cl36"]),
+                         ("5600", changes["mhz5600"]))
         if d
     ]
     if moves:
         lines.append("Depuis le dernier passage : " + ", ".join(moves))
-    lines += ["", "| Kit | CL | Prix | Boutique | Stock | Lien |", "|---|---|---|---|---|---|"]
+    lines += ["", "| Kit | MHz | CL | Prix | Boutique | Stock | Lien |", "|---|---|---|---|---|---|---|"]
     for o in offers[:5]:
         flags = (" (marketplace)" if o["marketplace"] else "") + (
             "" if o["verified"] else f" (via {o['via']})" if o.get("via") else " (non vérifié)")
         lines.append(
-            f"| {o['name']} | {o['cl']} | {eur(o['price_eur'])} €{flags} | {o['shop']} "
+            f"| {o['name']} | {o['speed']} | {o['cl']} | {eur(o['price_eur'])} €{flags} | {o['shop']} "
             f"| {STOCK_LABELS[o['stock']]} | {o['url']} |"
         )
     if not offers:
-        lines.append("| aucune offre trouvée | | | | | |")
+        lines.append("| aucune offre trouvée | | | | | | |")
     lines.append("")
     if latest["trend"]:
         lines.append(f"Tendance : {latest['trend']}")

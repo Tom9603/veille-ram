@@ -7,8 +7,8 @@ Lancé par GitHub Actions (bouton ↻ de l'appli et deux fois par jour). Sources
 - Ledenicheur : liste des kits, puis fiche des moins chers pour avoir le prix de
   chaque boutique (Amazon, Cdiscount, Fnac, TopAchat…), livraison incluse.
 
-Garde les kits DDR5 2x16 Go 6000 MHz en CL30, CL32 ou CL36 et écrit un relevé au
-format attendu par scripts/record.py.
+Garde les kits DDR5 2x16 Go en 6000 MHz (CL30, CL32, CL36) et en 5600 MHz
+(CL28 à CL36), et écrit un relevé au format attendu par scripts/record.py.
 
 Usage :
     python3 scripts/collect.py /chemin/vers/run.json
@@ -23,22 +23,32 @@ import time
 import urllib.request
 
 UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"
-TARGET_CLS = {30, 32, 36}
-PRODUCT_PAGES_PER_CL = 6     # fiches Ledenicheur ouvertes par latence (les kits les moins chers)
-KEEP_PER_CL = 20             # offres gardées par latence dans le relevé
+TARGETS = {6000: {30, 32, 36}, 5600: {28, 30, 32, 34, 36}}   # latences suivies par fréquence
+PRODUCT_PAGES_PER_GROUP = 6   # fiches Ledenicheur ouvertes par catégorie (les kits les moins chers)
+KEEP_PER_GROUP = 20           # offres gardées par catégorie dans le relevé
 
-LEDENICHEUR_PAGES = [
+LEDENICHEUR_6000_PAGES = [
     "https://ledenicheur.fr/s/ddr5-32-go-6000-cl30/",
     "https://ledenicheur.fr/s/ddr5-32-go-6000/",
     "https://ledenicheur.fr/s/ddr5-6000-cl36/",
 ]
+# Catégorie filtrée : 5600 MHz (1170=39864), 32 Go, 2 barrettes, CL28 à CL36.
+LEDENICHEUR_5600_PAGE = "https://ledenicheur.fr/c/memoire-ram?1170=39864&r_95336=32-32&r_1181=2-2&r_1172=28-36"
 LDLC_PAGES = [
     "https://www.ldlc.com/recherche/ddr5%206000/",
     "https://www.ldlc.com/recherche/ddr5%206000/page2/",
     "https://www.ldlc.com/recherche/ddr5%206000/page3/",
+    "https://www.ldlc.com/recherche/ddr5%205600/",
+    "https://www.ldlc.com/recherche/ddr5%205600/page2/",
 ]
-MATERIEL_PAGE = "https://www.materiel.net/recherche/ddr5%206000%202x16/"
-ALTERNATE_PAGE = "https://www.alternate.fr/listing.xhtml?q=ddr5+6000+2x16"
+MATERIEL_PAGES = [
+    "https://www.materiel.net/recherche/ddr5%206000%202x16/",
+    "https://www.materiel.net/recherche/ddr5%205600%202x16/",
+]
+ALTERNATE_PAGES = [
+    "https://www.alternate.fr/listing.xhtml?q=ddr5+6000+2x16",
+    "https://www.alternate.fr/listing.xhtml?q=ddr5+5600+2x16",
+]
 GROSBILL_PAGE = "https://www.grosbill.com/memoire-pc-2/32go-ddr5"
 
 # Boutiques lues en direct : si leur lecture a réussi, leurs offres vues via
@@ -89,34 +99,55 @@ def price(raw):
     return value if 50 <= value <= 2000 else None
 
 
+def detect_speed(blob):
+    b = blob.replace(" ", " ")
+    if re.search(r"6000|PC5-48000|6\.000|6,000", b):
+        return 6000
+    if re.search(r"5600|PC5-44800|5\.600|5,600", b):
+        return 5600
+    return None
+
+
 def detect_cl(*parts):
     blob = " ".join(p for p in parts if p)
     m = re.search(r"\bCL\s?(\d{2})\b", blob, re.I)
-    if not m:  # références fabricant : 6000C30, 560C30, 60C36, 6000J3038, 6000HC30…
-        m = re.search(r"(?:6000|600|560|60)H?[CJ](\d{2})", blob)
+    if not m:  # références fabricant : 6000C30, 560C30, 5600J36, 556C36, 56C46, 6000HC30…
+        m = re.search(r"(?:6000|600|560|5600|556|60|56)H?[CJ](\d{2})", blob)
     return int(m.group(1)) if m else None
 
 
-def is_kit(blob):
+def kit_speed(blob):
+    """Fréquence du kit s'il s'agit bien d'un kit DDR5 2x16 Go de bureau suivi, sinon None."""
     b = blob.lower().replace(" ", " ")
     two_by_16 = re.search(r"2\s?x\s?16|16\s?go, 2 pce|32 go \(2x", b)
-    laptop = re.search(r"so-?dimm|so-dim", b)
-    return "ddr5" in b and "6000" in b and bool(two_by_16) and not laptop
+    laptop = re.search(r"so-?dimm|so-dim|sodimm", b)
+    if "ddr5" not in b or not two_by_16 or laptop or used(b):
+        return None
+    return detect_speed(blob)
+
+
+def used(blob):
+    """Occasion et reconditionné exclus : la veille ne suit que du neuf."""
+    return bool(re.search(r"occasion|reconditionn|seconde main|refurb", blob, re.I))
+
+
+def tracked(speed, cl):
+    return speed in TARGETS and cl in TARGETS[speed]
 
 
 def tidy(name):
     """Retire du nom affiché le bruit technique répété partout (DDR5, 6000 MHz, 2x16 Go…)."""
-    name = re.sub(r"\([^)]*\)", " ", name)
-    name = re.sub(r"\b(DDR5|DIMM|PC5-48000|PC48000|\d{4}\s?MHz|2\s?x\s?16\s?G[oB]?|32\s?G[oB]|CL\s?\d{2}|AMD Expo|Memory)\b",
+    name = re.sub(r"\([^)]*\)?", " ", name)
+    name = re.sub(r"\b(DDR5|DIMM|288-pin|RAM|PC5-48000|PC5-44800|PC48000|PC44800|\d{4}\s?MHz|\d,\d{3}\s?MHz|2\s?x\s?16\s?G[oB]?|32\s?G[oB]|CL\s?\d{2}|AMD Expo|Memory)\b",
                   " ", name, flags=re.I)
     return re.sub(r"\s+", " ", name).strip(" -,")
 
 
 def reference(*parts):
     blob = " ".join(p for p in parts if p)
-    for pattern in (r"\b(F5-6000[A-Z0-9-]+)", r"\b(KF560[A-Z0-9-]+)", r"\b(CM[A-Z0-9]*6000C\d{2}[A-Z0-9]*)",
-                    r"\b(CP2K16G60C\d{2}[A-Z0-9]*)", r"\b(PV[A-Z0-9]*600C\d{2}K)", r"\b([A-Z0-9]{2,}6000H?C\d{2}[A-Z0-9-]*)",
-                    r"\b([A-Z0-9]{3,}60C\d{2}[A-Z0-9]*)"):
+    for pattern in (r"\b(F5-(?:6000|5600)[A-Z0-9-]+)", r"\b(KF5(?:60|56)[A-Z0-9-]+)", r"\b(CM[A-Z0-9]*(?:6000|5600)[CZ]\d{2}[A-Z0-9]*)",
+                    r"\b(CP2K16G(?:60|56)C\d{2}[A-Z0-9]*)", r"\b(PV[A-Z0-9]*(?:600|560)C\d{2}K)",
+                    r"\b([A-Z0-9]{2,}(?:6000|5600)H?C\d{2}[A-Z0-9-]*)", r"\b([A-Z0-9]{3,}(?:60|56)C\d{2}[A-Z0-9]*)"):
         m = re.search(pattern, blob)
         if m:
             return m.group(1)
@@ -125,27 +156,31 @@ def reference(*parts):
 
 def stock_from(label):
     s = label.lower()
-    if "pas en stock" in s or "rupture" in s or "épuisé" in s or "indisponible" in s:
+    if "pas en stock" in s or "rupture" in s or "épuisé" in s or "indisponible" in s or "out_of_stock" in s:
         return "out_of_stock"
-    if "en stock" in s or "dernière" in s or "dernières" in s:
+    if "en stock" in s or "dernière" in s or "in_stock" in s:
         return "in_stock"
     if s.strip():
         return "on_order"
     return "unknown"
 
 
-def offer(name, ref, cl, p, shop, stock, url, verified, marketplace=False, via=None):
-    o = {"name": name, "ref": ref, "cl": cl, "price_eur": p, "shop": shop, "stock": stock,
+def offer(name, ref, speed, cl, p, shop, stock, url, verified, marketplace=False, via=None):
+    o = {"name": name, "ref": ref, "speed": speed, "cl": cl, "price_eur": p, "shop": shop, "stock": stock,
          "marketplace": marketplace, "verified": verified, "url": url}
     if via:
         o["via"] = via
     return o
 
 
+def group(o):
+    return (o["speed"], o["cl"] if o["speed"] == 6000 else "all")
+
+
 # ---------- Ledenicheur ----------
 
 def ledenicheur_list(pages):
-    """Liste des kits avec leur prix « dès » (boutique non précisée)."""
+    """Pages de recherche 6000 MHz : liste des kits avec leur prix « dès » (boutique non précisée)."""
     products = {}
     for page in pages:
         for card in page.split('data-test="ProductCardProductName"')[1:]:
@@ -153,14 +188,37 @@ def ledenicheur_list(pages):
             if not m:
                 continue
             url, name, spec = "https://ledenicheur.fr" + m.group(1), text(m.group(2)), text(m.group(3))
-            if not is_kit(f"{name} {spec}"):
-                continue
+            speed = kit_speed(f"{name} {spec}")
             cl = detect_cl(name)
             dès = re.search(r"Dès\s*</p>.*?>([^<]*\d[^<]*€)", card[:8000], re.S) or re.search(r">([\d\s ,]+)\s*€<", card[:8000])
             p = price(text(dès.group(1))) if dès else None
-            if cl not in TARGET_CLS or p is None:
+            if not tracked(speed, cl) or p is None:
                 continue
-            products[url] = offer(tidy(name), reference(name), cl, p, "Ledenicheur (meilleur prix)", "unknown", url, False)
+            products[url] = offer(tidy(name), reference(name), speed, cl, p, "Ledenicheur (meilleur prix)", "unknown", url, False)
+    return list(products.values())
+
+
+def ledenicheur_category(page):
+    """Page catégorie filtrée : les données de chaque kit sont dans le JSON de la page."""
+    products = {}
+    for m in re.finditer(r'"pathName":"(/product\.php\?p=\d+)","name":"((?:[^"\\]|\\.)*)","stockStatus":"([^"]*)"', page):
+        window = page[m.end():m.end() + 6000]
+        nxt = window.find('"pathName":"/product.php')
+        window = window if nxt < 0 else window[:nxt]
+        name = json.loads(f'"{m.group(2)}"') if "\\x" not in m.group(2) else m.group(2).encode().decode("unicode_escape")
+        cost = re.search(r'"priceSummary":\{"regular":([\d.]+|null),"includeShipping":([\d.]+|null)', window)
+        cas = re.search(r'"Latence CAS \(CL\)"[^}]*?"number":(\d+|null)', window)
+        mods = re.search(r'"Nombre de modules"[^}]*?"number":(\d+|null)', window)
+        if not cost or (mods and mods.group(1) not in ("2", "null")):
+            continue
+        p = price(cost.group(2) if cost.group(2) != "null" else cost.group(1))
+        cl = detect_cl(name) or (int(cas.group(1)) if cas and cas.group(1) != "null" else None)
+        speed = detect_speed(name) or 5600
+        if re.search(r"so-?dimm|sodimm|ecc", name, re.I) or not tracked(speed, cl) or p is None:
+            continue
+        url = "https://ledenicheur.fr" + m.group(1)
+        products[url] = offer(tidy(name), reference(name), speed, cl, p, "Ledenicheur (meilleur prix)",
+                              stock_from(m.group(3)) if m.group(3) == "out_of_stock" else "unknown", url, False)
     return list(products.values())
 
 
@@ -173,12 +231,15 @@ def ledenicheur_shops(product, page, skip_shops=frozenset()):
         link = re.search(r'href="((?:https://ledenicheur\.fr)?/go-to-shop/[^"]+)"', block)
         # Balises remplacées par « | » pour ne pas coller « CL36 » au prix « 469,99 € ».
         body = re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " | ", re.sub(r"<(svg|style|script)[^>]*>.*?</\1>", " ", block, flags=re.S))))
-        cost = re.search(r"\|\s*(\d{1,3}(?:[\s\u00a0\u202f]\d{3})*,\d{2})\s*€(?!\s*/)", body)
+        cost = re.search(r"\|\s*(\d{1,3}(?:[\s  ]\d{3})*,\d{2})\s*€(?!\s*/)", body)
         if not (shop and link and cost):
             continue
         title = re.sub(r"[|\s]+", " ", body[:cost.start()])
-        other_cl = detect_cl(title)
-        if (other_cl and other_cl != product["cl"]) or re.search(r"so-?dimm", title, re.I):
+        if 'data-test="UsedBadge"' in block or used(title):
+            continue
+        other_cl, other_speed = detect_cl(title), detect_speed(title)
+        if ((other_cl and other_cl != product["cl"]) or (other_speed and other_speed != product["speed"])
+                or re.search(r"so-?dimm", title, re.I)):
             continue  # Ledenicheur rattache parfois un autre kit à la fiche
         shop_name = html.unescape(shop.group(1)).strip()
         if shop_name.lower().replace(" marketplace", "") in skip_shops:
@@ -187,7 +248,7 @@ def ledenicheur_shops(product, page, skip_shops=frozenset()):
         if p is None:
             continue
         stock = re.search(r"(En stock|Pas en stock|Stock inconnu|Rupture[^|]*|Expédié[^|]{0,40}|Sous \d+[^|]{0,30}|Sur commande)", body, re.I)
-        offers.append(offer(product["name"], product["ref"], product["cl"], p, shop_name,
+        offers.append(offer(product["name"], product["ref"], product["speed"], product["cl"], p, shop_name,
                             stock_from(stock.group(1)) if stock else "unknown",
                             html.unescape(link.group(1)) if link.group(1).startswith("http")
                             else "https://ledenicheur.fr" + html.unescape(link.group(1)), False,
@@ -208,14 +269,13 @@ def ldlc_like(page, shop, base, item_split, title_re, desc_re, price_re, stock_r
             continue
         url, name = title.group(1), text(title.group(2))
         details = text(desc.group(1)) if desc else ""
-        if not is_kit(f"{name} {details}"):
-            continue
+        speed = kit_speed(f"{name} {details}")
         cl = detect_cl(name, details)
         p = price(text(cost.group(1)))
-        if cl not in TARGET_CLS or p is None:
+        if not tracked(speed, cl) or p is None:
             continue
         avail = re.search(stock_re, block, re.S)
-        offers.append(offer(tidy(re.sub(r"\s+-\s+2 x 16 Go.*$", "", name)), reference(details, name), cl, p, shop,
+        offers.append(offer(tidy(re.sub(r"\s+-\s+2 x 16 Go.*$", "", name)), reference(details, name), speed, cl, p, shop,
                             stock_from(text(avail.group(1))) if avail else "unknown",
                             url if url.startswith("http") else base + url, True,
                             marketplace='data-is-marketplace="1"' in block))
@@ -231,35 +291,38 @@ def ldlc(pages):
     return offers
 
 
-def materiel(page):
-    return ldlc_like(page, "Materiel.net", "https://www.materiel.net", r'<li class="c-products-list__item"',
-                     r'<a href="(https://www\.materiel\.net/produit/[^"]+)"[^>]*>\s*<h2 class="c-product__title">(.*?)</h2>',
-                     r'<p class="c-product__description">(.*?)</p>', r'<span class="o-product__price">(.*?)</span>',
-                     r'o-availability__value[^"]*">(.*?)</span>')
-
-
-def alternate(page):
+def materiel(pages):
     offers = []
-    for block in re.split(r'<a href="(?=https://www\.alternate\.fr/[^"]+/html/product/)', page)[1:]:
-        url = block.split('"', 1)[0]
-        name = re.search(r'<div class="product-name[^"]*">(.*?)</div>', block, re.S)
-        sub = re.search(r'<span class="product-name-sub">(.*?)</span>', block, re.S)
-        bullets = " ".join(text(b) for b in re.findall(r"<li>(.*?)</li>", block, re.S))
-        cost = re.search(r'<span class="price[^"]*">(.*?)</span>', block, re.S)
-        if not (name and cost):
-            continue
-        name, sub = text(name.group(1)), text(sub.group(1)) if sub else ""
-        if not is_kit(f"{name} {sub} {bullets}"):
-            continue
-        cl = detect_cl(bullets, sub, name)
-        p = price(text(cost.group(1)))
-        if cl not in TARGET_CLS or p is None:
-            continue
-        avail = re.search(r'delivery-info[^>]*>\s*<span[^>]*>(.*?)</span>', block, re.S)
-        colour = sub.split(",")[0].strip() if sub else ""
-        brand = re.sub(r" 32 Go DDR5-6000.*$", "", name)
-        offers.append(offer(f"{brand}{' ' + colour if colour and len(colour) < 15 else ''}", reference(sub, name), cl, p,
-                            "Alternate", stock_from(text(avail.group(1))) if avail else "unknown", url, True))
+    for page in pages:
+        offers += ldlc_like(page, "Materiel.net", "https://www.materiel.net", r'<li class="c-products-list__item"',
+                            r'<a href="(https://www\.materiel\.net/produit/[^"]+)"[^>]*>\s*<h2 class="c-product__title">(.*?)</h2>',
+                            r'<p class="c-product__description">(.*?)</p>', r'<span class="o-product__price">(.*?)</span>',
+                            r'o-availability__value[^"]*">(.*?)</span>')
+    return offers
+
+
+def alternate(pages):
+    offers = []
+    for page in pages:
+        for block in re.split(r'<a href="(?=https://www\.alternate\.fr/[^"]+/html/product/)', page)[1:]:
+            url = block.split('"', 1)[0]
+            name = re.search(r'<div class="product-name[^"]*">(.*?)</div>', block, re.S)
+            sub = re.search(r'<span class="product-name-sub">(.*?)</span>', block, re.S)
+            bullets = " ".join(text(b) for b in re.findall(r"<li>(.*?)</li>", block, re.S))
+            cost = re.search(r'<span class="price[^"]*">(.*?)</span>', block, re.S)
+            if not (name and cost):
+                continue
+            name, sub = text(name.group(1)), text(sub.group(1)) if sub else ""
+            speed = kit_speed(f"{name} {sub} {bullets}")
+            cl = detect_cl(bullets, sub, name)
+            p = price(text(cost.group(1)))
+            if not tracked(speed, cl) or p is None:
+                continue
+            avail = re.search(r'delivery-info[^>]*>\s*<span[^>]*>(.*?)</span>', block, re.S)
+            colour = sub.split(",")[0].strip() if sub else ""
+            brand = re.sub(r" 32 Go DDR5-\d{4}.*$", "", name)
+            offers.append(offer(f"{brand}{' ' + colour if colour and len(colour) < 15 else ''}", reference(sub, name), speed, cl, p,
+                                "Alternate", stock_from(text(avail.group(1))) if avail else "unknown", url, True))
     return offers
 
 
@@ -272,7 +335,8 @@ def grosbill(page, get=fetch):
         if not (name and cost):
             continue
         url, title = "https://www.grosbill.com" + name.group(1), text(name.group(2))
-        if not is_kit(title):
+        speed = kit_speed(f"{title} {text(row[:4000])}")
+        if speed not in TARGETS:
             continue
         cl = detect_cl(title)
         if cl is None:  # le nom ne donne pas toujours la latence : on la lit sur la fiche
@@ -282,9 +346,9 @@ def grosbill(page, get=fetch):
             except Exception:
                 cl = None
         p = price(cost.group(1))
-        if cl not in TARGET_CLS or p is None:
+        if not tracked(speed, cl) or p is None:
             continue
-        offers.append(offer(tidy(title), reference(title), cl, p, "Grosbill",
+        offers.append(offer(tidy(title), reference(title), speed, cl, p, "Grosbill",
                             stock_from(text(avail.group(1))) if avail else "unknown", url, True))
     return offers
 
@@ -292,10 +356,10 @@ def grosbill(page, get=fetch):
 # ---------- Assemblage ----------
 
 def dedupe(offers):
-    """Une seule offre par (boutique, kit, CL) : la moins chère."""
+    """Une seule offre par (boutique, kit, fréquence, CL) : la moins chère."""
     best = {}
     for o in offers:
-        key = (o["shop"].lower(), (o["ref"] or o["name"]).lower(), o["cl"])
+        key = (o["shop"].lower(), (o["ref"] or o["name"]).lower(), o["speed"], o["cl"])
         if key not in best or o["price_eur"] < best[key]["price_eur"]:
             best[key] = o
     return list(best.values())
@@ -310,10 +374,11 @@ def better_names(offers):
     return offers
 
 
-def keep_cheapest(offers, per_cl=KEEP_PER_CL):
-    kept = []
-    for cl in sorted(TARGET_CLS):
-        kept += sorted((o for o in offers if o["cl"] == cl), key=lambda o: o["price_eur"])[:per_cl]
+def keep_cheapest(offers, per_group=KEEP_PER_GROUP):
+    groups = {}
+    for o in sorted(offers, key=lambda o: o["price_eur"]):
+        groups.setdefault(group(o), []).append(o)
+    kept = [o for items in groups.values() for o in items[:per_group]]
     return sorted(kept, key=lambda o: o["price_eur"])
 
 
@@ -331,11 +396,22 @@ def collect():
             blocked.append(label)
             return []
 
+    def pages(urls):
+        """Première page obligatoire ; les suivantes sont facultatives (une seule tentative)."""
+        got = []
+        for i, url in enumerate(urls):
+            try:
+                got.append(fetch(url, attempts=2 if i == 0 else 1))
+            except Exception:
+                if i == 0:
+                    raise
+        return got
+
     read_directly = set()
     for label, run in (
-        ("ldlc.com", lambda: ldlc([fetch(LDLC_PAGES[0])] + [fetch(u, attempts=1) for u in LDLC_PAGES[1:]])),
-        ("materiel.net", lambda: materiel(fetch(MATERIEL_PAGE))),
-        ("alternate.fr", lambda: alternate(fetch(ALTERNATE_PAGE))),
+        ("ldlc.com", lambda: ldlc(pages(LDLC_PAGES))),
+        ("materiel.net", lambda: materiel(pages(MATERIEL_PAGES))),
+        ("alternate.fr", lambda: alternate(pages(ALTERNATE_PAGES))),
         ("grosbill.com", lambda: grosbill(fetch(GROSBILL_PAGE))),
     ):
         found = source(label, run)
@@ -343,12 +419,15 @@ def collect():
             read_directly.add(DIRECT_SHOPS[label])
         offers += found
 
-    listed = source("ledenicheur.fr", lambda: ledenicheur_list([fetch(u) for u in LEDENICHEUR_PAGES]))
-    for cl in sorted(TARGET_CLS):
-        cheapest = sorted((p for p in listed if p["cl"] == cl), key=lambda p: p["price_eur"])
-        for i, product in enumerate(cheapest):
+    listed = source("ledenicheur.fr", lambda: ledenicheur_list(pages(LEDENICHEUR_6000_PAGES))
+                    + ledenicheur_category(fetch(LEDENICHEUR_5600_PAGE)))
+    groups = {}
+    for product in sorted(listed, key=lambda p: p["price_eur"]):
+        groups.setdefault(group(product), []).append(product)
+    for products in groups.values():
+        for i, product in enumerate(products):
             shops = []
-            if i < PRODUCT_PAGES_PER_CL:
+            if i < PRODUCT_PAGES_PER_GROUP:
                 try:
                     time.sleep(0.4)
                     shops = ledenicheur_shops(product, fetch(product["url"]), frozenset(read_directly))
@@ -371,9 +450,10 @@ def main(argv):
         shop = o["shop"] if o.get("via") is None else "autres boutiques via Ledenicheur"
         shop = "Ledenicheur" if shop.startswith("Ledenicheur") else shop
         counts[shop] = counts.get(shop, 0) + 1
+    n5600 = sum(1 for o in offers if o["speed"] == 5600)
     run = {
         "offers": keep_cheapest(offers),
-        "trend": f"Relevé automatique de {len(offers)} offres ("
+        "trend": f"Relevé automatique de {len(offers)} offres, dont {n5600} en 5600 MHz ("
                  + ", ".join(f"{shop} {n}" for shop, n in sorted(counts.items())) + ").",
         "blocked_sources": blocked,
     }

@@ -5,8 +5,17 @@
   const SVG_NS = "http://www.w3.org/2000/svg";
   const PREFS_KEY = "veille-ram:prefs";
   const STALE_HOURS = 14;
-  const CLS = [30, 32, 36];
-  const CL_COLOR = { 30: "var(--cl30)", 32: "var(--cl32)", 36: "var(--cl36)" };
+  // Catégories suivies : DDR5 6000 MHz en CL30, CL32, CL36, et DDR5 5600 MHz (CL28 à CL36).
+  const GROUPS = ["30", "32", "36", "5600"];
+  const GROUP = {
+    30: { label: "CL30", long: "6000 MHz CL30", sub: "6000 MHz", color: "var(--cl30)" },
+    32: { label: "CL32", long: "6000 MHz CL32", sub: "6000 MHz", color: "var(--cl32)" },
+    36: { label: "CL36", long: "6000 MHz CL36", sub: "6000 MHz", color: "var(--cl36)" },
+    5600: { label: "5600", long: "5600 MHz", sub: "CL28 à CL36", color: "var(--mhz5600)" },
+  };
+  const speedOf = (o) => o.speed || 6000;
+  const groupOf = (o) => (speedOf(o) === 5600 ? "5600" : String(o.cl));
+  const kitLabel = (o) => `${speedOf(o)} CL${o.cl}`;
   const VIEWS = { marche: "Marché", offres: "Offres", historique: "Historique", reglages: "Réglages" };
   const STOCK = {
     in_stock: { label: "En stock", color: "var(--good)" },
@@ -290,13 +299,14 @@
   }
 
   const thresholds = () => state.latest.thresholds_eur;
-  const limitFor = (cl) => (cl === 30 ? thresholds().cl30 : thresholds().cl32_36);
-  const selectedCls = () => (prefs.cl === "all" ? CLS : [Number(prefs.cl)]);
-  const offerKey = (o) => `${o.shop}|${o.ref || o.name}|${o.cl}`;
+  const groupLimit = (g) => (g === "5600" ? (thresholds().mhz5600 ?? 340) : g === "30" ? thresholds().cl30 : thresholds().cl32_36);
+  const limitFor = (o) => groupLimit(groupOf(o));
+  const selectedGroups = () => (GROUP[prefs.cl] ? [prefs.cl] : GROUPS);
+  const offerKey = (o) => `${o.shop}|${o.ref || o.name}|${speedOf(o)}|${o.cl}`;
 
-  function bestListed(cl) {
+  function bestListed(g) {
     return state.latest.offers
-      .filter((o) => o.stock !== "out_of_stock" && (cl == null || o.cl === cl))
+      .filter((o) => o.stock !== "out_of_stock" && (g == null || groupOf(o) === g))
       .reduce((best, o) => (!best || o.price_eur < best.price_eur ? o : best), null);
   }
 
@@ -310,16 +320,17 @@
         return merged && merged.cl === cl ? merged : null;
       };
       const p = { t: new Date(h.checked_at) };
-      for (const cl of CLS) p[cl] = pick(cl) ? pick(cl).price_eur : null;
+      for (const cl of [30, 32, 36]) p[cl] = pick(cl) ? pick(cl).price_eur : null;
+      p["5600"] = h.mhz5600 ? h.mhz5600.price_eur : null;
       return p;
     }).sort((a, b) => a.t - b.t);
   }
 
-  function changeSincePrevious(cl) {
+  function changeSincePrevious(g) {
     const pts = historyPoints();
     if (pts.length < 2) return null;
     const [a, b] = pts.slice(-2);
-    return a[cl] != null && b[cl] != null ? Math.round((b[cl] - a[cl]) * 100) / 100 : null;
+    return a[g] != null && b[g] != null ? Math.round((b[g] - a[g]) * 100) / 100 : null;
   }
 
   // ---------- Navigation ----------
@@ -364,10 +375,10 @@
 
   function renderMarche() {
     const latest = state.latest;
-    const cls = selectedCls();
-    const deals = latest.offers.filter((o) => o.deal && cls.includes(o.cl)).sort((a, b) => a.price_eur - b.price_eur);
+    const groups = selectedGroups();
+    const deals = latest.offers.filter((o) => o.deal && groups.includes(groupOf(o))).sort((a, b) => a.price_eur - b.price_eur);
     const deal = deals[0] || null;
-    const offer = deal || bestListed(prefs.cl === "all" ? null : Number(prefs.cl));
+    const offer = deal || bestListed(groups.length === 1 ? groups[0] : null);
 
     const pill = $("status-pill");
     pill.classList.toggle("is-deal", !!deal);
@@ -375,22 +386,22 @@
     $("updated-pill").textContent = `Mis à jour ${relative(new Date(latest.checked_at))}`;
 
     $("hero").classList.toggle("is-deal", !!deal);
-    const scope = prefs.cl === "all" ? "toutes latences" : `CL${prefs.cl}`;
-    $("hero-label").textContent = deal ? `Bonne affaire · CL${deal.cl}` : `Meilleur prix · ${scope}`;
+    const scope = groups.length === 1 ? GROUP[groups[0]].long : "toutes catégories";
+    $("hero-label").textContent = deal ? `Bonne affaire · ${kitLabel(deal)}` : `Meilleur prix · ${scope}`;
     $("hero-price").textContent = offer ? eur(offer.price_eur) : "—";
-    $("hero-name").textContent = offer ? `${offer.name}${prefs.cl === "all" ? ` · CL${offer.cl}` : ""}` : "Aucune offre disponible à ce passage";
+    $("hero-name").textContent = offer ? `${offer.name} · ${kitLabel(offer)}` : "Aucune offre disponible à ce passage";
 
     const facts = $("hero-facts");
     facts.replaceChildren();
     if (offer) {
       const stock = STOCK[offer.stock] || STOCK.unknown;
-      const gap = offer.price_eur - limitFor(offer.cl);
+      const gap = offer.price_eur - limitFor(offer);
       facts.append(
         el("span", null, offer.shop),
         el("span", null, dot(stock.color), stock.label),
-        el("span", null, gap > 0 ? `${eurRound(gap)} au-dessus du seuil (${eur(limitFor(offer.cl))})` : `${eurRound(-gap)} sous le seuil`),
+        el("span", null, gap > 0 ? `${eurRound(gap)} au-dessus du seuil (${eur(limitFor(offer))})` : `${eurRound(-gap)} sous le seuil`),
       );
-      const d = changeSincePrevious(offer.cl);
+      const d = changeSincePrevious(groupOf(offer));
       if (d) facts.append(el("span", null, deltaChip(d), "depuis le passage précédent"));
     }
     const url = offer && safeUrl(offer.url);
@@ -398,17 +409,17 @@
     if (url) $("hero-link").href = url;
 
     const list = $("by-cl");
-    list.replaceChildren(...CLS.map((cl) => {
-      const best = bestListed(cl);
+    list.replaceChildren(...GROUPS.map((g) => {
+      const best = bestListed(g);
       return el("button", {
         type: "button",
-        class: `row-cl${prefs.cl === String(cl) ? " is-selected" : ""}`,
-        onclick: () => { setPref("cl", String(cl)); location.hash = "#offres"; },
+        class: `row-cl${prefs.cl === g ? " is-selected" : ""}`,
+        onclick: () => { setPref("cl", g); location.hash = "#offres"; },
       },
-      el("span", { class: "cl-name" }, dot(CL_COLOR[cl]), el("span", null, `CL${cl}`, el("span", { class: "cl-sub" }, `seuil ${eur(limitFor(cl))}`))),
+      el("span", { class: "cl-name" }, dot(GROUP[g].color), el("span", null, GROUP[g].label, el("span", { class: "cl-sub" }, `${GROUP[g].sub} · seuil ${eur(groupLimit(g))}`))),
       el("span", { class: "cl-right" },
         el("span", { class: "cl-price" }, best ? eur(best.price_eur) : "—",
-          el("small", null, best ? deltaChip(changeSincePrevious(cl)) || el("span", { class: "cl-sub" }, best.shop) : el("span", { class: "cl-sub" }, "aucune offre"))),
+          el("small", null, best ? deltaChip(changeSincePrevious(g)) || el("span", { class: "cl-sub" }, best.shop) : el("span", { class: "cl-sub" }, "aucune offre"))),
         el("span", { class: "chev", "aria-hidden": "true" }, "›")));
     }));
 
@@ -435,15 +446,15 @@
   }
 
   function filteredOffers() {
-    const cls = selectedCls();
+    const groups = selectedGroups();
     const sorters = {
       "price-asc": (a, b) => a.price_eur - b.price_eur,
       "price-desc": (a, b) => b.price_eur - a.price_eur,
-      cl: (a, b) => a.cl - b.cl || a.price_eur - b.price_eur,
+      cl: (a, b) => speedOf(b) - speedOf(a) || a.cl - b.cl || a.price_eur - b.price_eur,
       shop: (a, b) => a.shop.localeCompare(b.shop, "fr") || a.price_eur - b.price_eur,
     };
     return state.latest.offers
-      .filter((o) => cls.includes(o.cl))
+      .filter((o) => groups.includes(groupOf(o)))
       .filter((o) => !prefs.available || o.stock === "in_stock" || o.stock === "on_order")
       .filter((o) => !prefs.verifiedOnly || o.verified || o.via)
       .sort(sorters[prefs.sort] || sorters["price-asc"]);
@@ -451,14 +462,14 @@
 
   function renderOffres() {
     const offers = filteredOffers();
-    const total = state.latest.offers.filter((o) => selectedCls().includes(o.cl)).length;
+    const total = state.latest.offers.filter((o) => selectedGroups().includes(groupOf(o))).length;
     $("result-count").textContent = offers.length
       ? `${offers.length} offre${offers.length > 1 ? "s" : ""}${offers.length < total ? ` sur ${total}` : ""} · ${SORT_LABELS[prefs.sort] || ""}`
       : "";
     const list = $("offers");
     if (!offers.length) {
       list.replaceChildren(el("li", { class: "empty" },
-        el("p", null, total ? "Aucune offre ne correspond à tes filtres." : "Aucune offre relevée pour cette latence à ce passage."),
+        el("p", null, total ? "Aucune offre ne correspond à tes filtres." : "Aucune offre relevée pour cette catégorie à ce passage."),
         total ? el("button", { type: "button", class: "btn btn-ghost", onclick: () => { prefs.available = false; setPref("verifiedOnly", false); } }, "Retirer les filtres") : null));
       return;
     }
@@ -469,12 +480,12 @@
     const stock = STOCK[o.stock] || STOCK.unknown;
     const key = offerKey(o);
     const open = prefs.details || openOffers.has(key);
-    const gap = o.price_eur - limitFor(o.cl);
+    const gap = o.price_eur - limitFor(o);
     const url = safeUrl(o.url);
     const li = el("li", { class: ["offer", o.deal && "is-deal", o.stock === "out_of_stock" && "is-out", open && "is-open"].filter(Boolean).join(" ") });
     const head = el("button", { type: "button", class: "offer-head", "aria-expanded": String(open) },
       el("span", { class: "offer-top" },
-        el("span", { class: "badge" }, dot(CL_COLOR[o.cl]), `CL${o.cl}`),
+        el("span", { class: "badge" }, dot(GROUP[groupOf(o)].color), kitLabel(o)),
         o.deal && el("span", { class: "badge deal" }, "Bonne affaire")),
       el("span", { class: "offer-price" }, eur(o.price_eur)),
       el("span", { class: "offer-name" }, o.name),
@@ -485,7 +496,7 @@
     const more = el("div", { class: "offer-more" }, el("div", null,
       el("dl", { class: "facts" },
         fact("Référence", o.ref || "non précisée", true),
-        fact("Écart au seuil", gap > 0 ? `+${eurRound(gap)} (seuil ${eur(limitFor(o.cl))})` : `${eurRound(-gap)} sous le seuil`),
+        fact("Écart au seuil", gap > 0 ? `+${eurRound(gap)} (seuil ${eur(limitFor(o))})` : `${eurRound(-gap)} sous le seuil`),
         fact("Prix", o.verified ? "Vérifié chez la boutique" : o.via ? `Relevé via ${o.via}, livraison incluse` : "Non vérifié (comparateur)"),
         fact("Vendeur", o.marketplace ? "Marketplace (vendeur tiers)" : "Boutique"),
         fact("Stock", stock.label),
@@ -515,26 +526,26 @@
   }
 
   function renderHistorique() {
-    const cls = selectedCls();
-    $("chart-title").textContent = prefs.cl === "all" ? "Meilleur prix par latence" : `Meilleur prix · CL${prefs.cl}`;
-    $("legend").replaceChildren(...(cls.length > 1 ? cls.map((cl) => {
+    const groups = selectedGroups();
+    $("chart-title").textContent = groups.length > 1 ? "Meilleur prix par catégorie" : `Meilleur prix · ${GROUP[groups[0]].long}`;
+    $("legend").replaceChildren(...(groups.length > 1 ? groups.map((g) => {
       const key = el("span", { class: "key" });
-      key.style.background = CL_COLOR[cl];
-      return el("li", null, key, `CL${cl}`);
+      key.style.background = GROUP[g].color;
+      return el("li", null, key, GROUP[g].label);
     }) : []));
 
     const pts = periodPoints();
-    $("stats-rows").replaceChildren(...cls.map((cl) => {
-      const values = pts.map((p) => p[cl]).filter((v) => v != null);
-      const last = [...pts].reverse().find((p) => p[cl] != null);
+    $("stats-rows").replaceChildren(...groups.map((g) => {
+      const values = pts.map((p) => p[g]).filter((v) => v != null);
+      const last = [...pts].reverse().find((p) => p[g] != null);
       return el("tr", null,
-        el("td", null, el("span", { class: "cl-cell" }, dot(CL_COLOR[cl]), `CL${cl}`)),
-        el("td", null, last ? eur(last[cl]) : "—"),
+        el("td", null, el("span", { class: "cl-cell" }, dot(GROUP[g].color), GROUP[g].label)),
+        el("td", null, last ? eur(last[g]) : "—"),
         el("td", null, values.length ? eur(Math.min(...values)) : "—"),
         el("td", null, values.length ? eur(Math.max(...values)) : "—"));
     }));
     $("history-rows").replaceChildren(...[...pts].reverse().map((p) =>
-      el("tr", null, el("td", null, shortFmt.format(p.t)), ...CLS.map((cl) => el("td", null, eur(p[cl]))))));
+      el("tr", null, el("td", null, shortFmt.format(p.t)), ...GROUPS.map((g) => el("td", null, eur(p[g]))))));
 
     if (currentView() === "historique") renderChart();
   }
@@ -552,10 +563,10 @@
     box.querySelectorAll("svg").forEach((n) => n.remove());
     tooltip.hidden = true;
 
-    const series = selectedCls().map((cl) => ({ key: cl, name: `CL${cl}`, color: CL_COLOR[cl] }));
+    const series = selectedGroups().map((g) => ({ key: g, name: GROUP[g].label, color: GROUP[g].color }));
     const points = periodPoints().filter((p) => series.some((s) => p[s.key] != null));
     $("chart-hint").textContent = !points.length
-      ? "Aucun relevé sur cette période pour cette latence."
+      ? "Aucun relevé sur cette période pour cette catégorie."
       : points.length < 2
         ? "L'historique se remplit à chaque passage (2 par jour)."
         : "Touche ou glisse sur le graphique pour lire les prix d'une date.";
@@ -567,9 +578,14 @@
     const iw = W - m.left - m.right;
     const ih = H - m.top - m.bottom;
 
+    const keys = series.map((s) => s.key);
+    const single = series.length === 1 ? series[0] : null;
     const refs = [];
-    if (series.some((s) => s.key === 30)) refs.push({ v: thresholds().cl30, label: "seuil CL30", color: "var(--cl30)" });
-    if (series.some((s) => s.key !== 30)) refs.push({ v: thresholds().cl32_36, label: series.length === 1 ? `seuil ${series[0].name}` : "seuil CL32/36", color: series.length === 1 ? series[0].color : "var(--muted)" });
+    if (keys.includes("30")) refs.push({ v: groupLimit("30"), label: "seuil CL30", color: "var(--cl30)" });
+    if (keys.includes("32") || keys.includes("36")) {
+      refs.push({ v: groupLimit("36"), label: single ? `seuil ${single.name}` : "seuil CL32/36", color: single ? single.color : "var(--muted)" });
+    }
+    if (keys.includes("5600")) refs.push({ v: groupLimit("5600"), label: "seuil 5600", color: "var(--mhz5600)" });
 
     const values = points.flatMap((p) => series.map((s) => p[s.key])).filter((v) => v != null).concat(refs.map((r) => r.v));
     let lo = Math.min(...values);
@@ -615,13 +631,20 @@
       root.append(label);
     }
 
-    refs.sort((a, b) => b.v - a.v).forEach((r, i) => {
+    // Seuils trop proches les uns des autres : lignes seules, valeurs reportées sous le graphique.
+    const sortedRefs = refs.sort((a, b) => b.v - a.v);
+    const crowded = sortedRefs.some((r, i) => i > 0 && Math.abs(y(r.v) - y(sortedRefs[i - 1].v)) < 18);
+    sortedRefs.forEach((r, i) => {
       const yy = y(r.v);
       root.append(svg("line", { x1: m.left, x2: m.left + iw, y1: yy, y2: yy, stroke: r.color, "stroke-width": 1, opacity: 0.55 }));
+      if (crowded) return;
       const label = svg("text", { x: m.left + 4, y: i === 0 ? yy - 5 : yy + 13 });
       label.textContent = `${r.label} · ${r.v} €`;
       root.append(label);
     });
+    if (crowded) {
+      $("chart-hint").textContent += ` Seuils : ${sortedRefs.map((r) => `${r.label.replace("seuil ", "")} ${r.v} €`).join(" · ")}.`;
+    }
 
     const ends = [];
     for (const s of series) {
@@ -721,6 +744,7 @@
     const t = thresholds();
     $("th-cl30").textContent = eur(t.cl30);
     $("th-cl32-36").textContent = eur(t.cl32_36);
+    $("th-5600").textContent = eur(groupLimit("5600"));
     $("set-schedule").textContent = scheduleTimes().map((s) => s.replace(":", "h")).join(" · ");
     $("set-last").textContent = shortFmt.format(new Date(state.latest.checked_at));
     const blocked = state.latest.blocked_sources || [];

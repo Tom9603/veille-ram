@@ -16,6 +16,7 @@
   --cl30: #2a78d6;
   --cl32: #eb6834;
   --cl36: #1baf7a;
+  --mhz5600: #eda100;
   --good: #0ca30c;
   --good-ink: #006300;
   --good-soft: rgba(12, 163, 12, 0.10);
@@ -44,6 +45,7 @@
     --cl30: #3987e5;
     --cl32: #d95926;
     --cl36: #199e70;
+    --mhz5600: #c98500;
     --good-ink: #0ca30c;
     --good-soft: rgba(12, 163, 12, 0.16);
     --bad-ink: #e66767;
@@ -67,6 +69,7 @@
   --cl30: #3987e5;
   --cl32: #d95926;
   --cl36: #199e70;
+  --mhz5600: #c98500;
   --good-ink: #0ca30c;
   --good-soft: rgba(12, 163, 12, 0.16);
   --bad-ink: #e66767;
@@ -137,6 +140,8 @@ h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.025em; line-height: 1
 .s-cl30 { background: var(--cl30); }
 .s-cl32 { background: var(--cl32); }
 .s-cl36 { background: var(--cl36); }
+.s-mhz5600 { background: var(--mhz5600); }
+.cl-switch button { padding: 7px 2px; font-size: 0.8125rem; gap: 5px; }
 
 /* ---------- Vues ---------- */
 .view { animation: enter 0.22s ease-out; }
