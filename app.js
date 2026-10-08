@@ -197,7 +197,7 @@
     box.className = `sync${kind ? ` is-${kind}` : ""}`;
     $("sync-text").textContent = message;
     box.hidden = false;
-    if (kind === "done") syncTimer = setTimeout(() => { box.hidden = true; }, 4000);
+    if (kind === "done" || kind === "info") syncTimer = setTimeout(() => { box.hidden = true; }, kind === "info" ? 8000 : 4000);
   }
 
   async function latestRunId() {
@@ -212,7 +212,7 @@
     if (refreshing) return;
     if (!getToken()) {
       await load();
-      showSync("Données rechargées. Pour lancer une nouvelle recherche de prix, ajoute ta clé GitHub dans Réglages.", "error");
+      showSync("Prix rechargés. Pour lancer une vraie recherche à chaque ↻, ajoute ta clé GitHub dans Réglages.", "info");
       return;
     }
     refreshing = true;
@@ -851,7 +851,15 @@
   }
 
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js").catch((err) => console.warn("Service worker :", err));
+    // Quand une nouvelle version de l'appli prend la main, on recharge une fois pour l'afficher.
+    const hadController = !!navigator.serviceWorker.controller;
+    let reloaded = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (hadController && !reloaded) { reloaded = true; location.reload(); }
+    });
+    navigator.serviceWorker.register("sw.js", { updateViaCache: "none" })
+      .then((reg) => reg.update())
+      .catch((err) => console.warn("Service worker :", err));
   }
 
   applyTheme();

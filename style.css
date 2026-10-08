@@ -352,7 +352,8 @@ body.loading .hero-price, body.loading .offers, body.loading .chart { opacity: 0
   width: 16px; height: 16px; border-radius: 50%; flex: none;
   border: 2px solid currentColor; border-right-color: transparent; animation: spin 0.8s linear infinite;
 }
-.sync.is-done .sync-spinner, .sync.is-error .sync-spinner { display: none; }
+.sync.is-info { color: var(--ink-2); background: var(--surface); box-shadow: var(--shadow); }
+.sync.is-done .sync-spinner, .sync.is-error .sync-spinner, .sync.is-info .sync-spinner { display: none; }
 
 .ptr {
   position: fixed; top: calc(env(safe-area-inset-top) + 8px); left: 50%; z-index: 20;
