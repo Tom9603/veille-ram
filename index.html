@@ -83,7 +83,7 @@
             <svg viewBox="0 0 24 24"><path d="M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
           </span>
           <div>
-            <p class="caption">Prochaine analyse</p>
+            <p class="caption">Prochaine notification</p>
             <p class="next-time" id="next-run">—</p>
           </div>
         </div>
@@ -195,7 +195,7 @@
 
         <h2 class="section-title">Actualisation des prix</h2>
         <div class="card list settings">
-          <div class="row"><span>Recherche à la demande</span><span class="value" id="token-status">Non configurée</span></div>
+          <div class="row"><span>Recherche immédiate (facultatif)</span><span class="value" id="token-status">Non configurée</span></div>
           <label class="row">
             <span>Nouvelle recherche à l'ouverture</span>
             <input type="checkbox" class="switch" id="set-auto">
@@ -210,7 +210,7 @@
           </a>
           <button type="button" class="row link danger" id="token-remove" hidden><span>Supprimer la clé de ce téléphone</span></button>
         </div>
-        <p class="footnote">Le bouton ↻ (ou tirer l'écran vers le bas) lance une vraie recherche de prix (LDLC, Materiel.net, Alternate, Grosbill, et Amazon, Cdiscount, Fnac… via Ledenicheur), en 1 à 2 minutes. Il faut pour cela une clé GitHub : nom « Veille RAM », Repository access « Only select repositories » → veille-ram, Permissions → Actions : « Read and write ». La clé reste uniquement sur ce téléphone.</p>
+        <p class="footnote">Les prix sont relevés automatiquement toutes les heures de 6h à 23h (LDLC, Materiel.net, Alternate, Grosbill, et Amazon, Cdiscount, Fnac… via Ledenicheur) : ↻ affiche le dernier relevé. Facultatif : avec une clé GitHub, ↻ lance en plus une recherche immédiate (1 à 2 minutes). Nom « Veille RAM », Repository access « Only select repositories » → veille-ram, Permissions → Actions : « Read and write ». La clé reste uniquement sur ce téléphone.</p>
 
         <h2 class="section-title">Alertes</h2>
         <div class="card list settings">
@@ -225,7 +225,8 @@
 
         <h2 class="section-title">Analyses</h2>
         <div class="card list settings">
-          <div class="row"><span>Horaires</span><span class="value" id="set-schedule">—</span></div>
+          <div class="row"><span>Relevé des prix</span><span class="value">toutes les heures, 6h–23h</span></div>
+          <div class="row"><span>Notifications</span><span class="value" id="set-schedule">—</span></div>
           <div class="row"><span>Dernière analyse</span><span class="value" id="set-last">—</span></div>
           <div class="row"><span>Sources inaccessibles</span><span class="value" id="set-blocked">—</span></div>
           <button type="button" class="row link" id="set-refresh"><span>Actualiser maintenant</span><span class="chev" aria-hidden="true">↻</span></button>

@@ -52,6 +52,7 @@
   const shortFmt = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" });
   const dayFmt = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", timeZone: "Europe/Paris" });
   const rtf = new Intl.RelativeTimeFormat("fr", { numeric: "auto" });
+  const hourFmt = { format: (d) => new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" }).format(d).replace(":", "h") };
 
   function relative(date) {
     const minutes = Math.round((date - Date.now()) / 60000);
@@ -197,7 +198,7 @@
     box.className = `sync${kind ? ` is-${kind}` : ""}`;
     $("sync-text").textContent = message;
     box.hidden = false;
-    if (kind === "done" || kind === "info") syncTimer = setTimeout(() => { box.hidden = true; }, kind === "info" ? 8000 : 4000);
+    if (kind === "done" || kind === "info") syncTimer = setTimeout(() => { box.hidden = true; }, kind === "info" ? 5000 : 4000);
   }
 
   async function latestRunId() {
@@ -212,7 +213,8 @@
     if (refreshing) return;
     if (!getToken()) {
       await load();
-      showSync("Prix rechargés. Pour lancer une vraie recherche à chaque ↻, ajoute ta clé GitHub dans Réglages.", "info");
+      const at = state.latest ? hourFmt.format(new Date(state.latest.checked_at)) : "";
+      showSync(`Prix à jour : relevé de ${at}. Nouveau relevé automatique toutes les heures.`, "info");
       return;
     }
     refreshing = true;

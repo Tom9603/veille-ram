@@ -9,7 +9,7 @@ consulter l'état du marché.
 ## Comment ça marche
 
 ```
-GitHub Actions « Actualiser les prix » (11h40, 19h40, et à chaque ↻ dans l'appli)
+GitHub Actions « Actualiser les prix » (toutes les heures de 6h à 23h, et ↻ avec clé)
   │  scripts/collect.py : LDLC, Materiel.net, Alternate, Grosbill en direct,
   │                       Amazon, Cdiscount, Fnac… via les fiches Ledenicheur
   │  scripts/record.py  → data/latest.json + data/history.json

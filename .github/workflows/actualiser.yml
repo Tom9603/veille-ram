@@ -1,12 +1,12 @@
 name: Actualiser les prix
 
-# Lancé par le bouton ↻ de l'appli (workflow_dispatch), deux fois par jour juste
-# avant le passage de l'agent Claude (11h58 et 19h58 à Paris), et quand le
-# relevé lui-même est modifié.
+# Lancé toutes les heures en journée (GitHub décale parfois ces lancements),
+# par le bouton ↻ de l'appli quand une clé GitHub y est enregistrée
+# (workflow_dispatch), et quand le relevé lui-même est modifié.
 on:
   workflow_dispatch:
   schedule:
-    - cron: "40 9,17 * * *"
+    - cron: "13 4-21 * * *"   # toutes les heures, de 6h13 à 23h13 à Paris (heure d'été)
   push:
     branches: [gh-pages]
     paths:
