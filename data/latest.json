@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-11T18:38+02:00",
+  "checked_at": "2026-10-11T22:57+02:00",
   "product": {
     "label": "DDR5 · 2×16 Go · 6000 / 5600 MHz",
     "kit": "2x16 Go (32 Go)",
@@ -1006,30 +1006,30 @@
       "deal": false
     },
     {
-      "name": "Lexar Ares OC",
-      "ref": "LD5U16G60C320A",
-      "speed": 6000,
-      "cl": 32,
-      "price_eur": 752.78,
-      "shop": "Amazon.fr Marketplace",
-      "stock": "in_stock",
-      "marketplace": true,
-      "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/26551/offer/B0DWFRHV6H?client_id=1551",
-      "via": "Ledenicheur",
-      "deal": false
-    },
-    {
       "name": "G.Skill Trident Z5 Neo",
       "ref": "F5-6000J3238F16GX2-TZ5N",
       "speed": 6000,
       "cl": 32,
-      "price_eur": 760.8,
+      "price_eur": 760.21,
       "shop": "Fnac Marketplace",
       "stock": "in_stock",
       "marketplace": true,
       "verified": false,
       "url": "https://ledenicheur.fr/go-to-shop/28695/offer/3-51018439?client_id=1551",
+      "via": "Ledenicheur",
+      "deal": false
+    },
+    {
+      "name": "Lexar Ares OC",
+      "ref": "LD5U16G60C320A",
+      "speed": 6000,
+      "cl": 32,
+      "price_eur": 778.01,
+      "shop": "Amazon.fr Marketplace",
+      "stock": "in_stock",
+      "marketplace": true,
+      "verified": false,
+      "url": "https://ledenicheur.fr/go-to-shop/26551/offer/B0DWFRHV6H?client_id=1551",
       "via": "Ledenicheur",
       "deal": false
     },
