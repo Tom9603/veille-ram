@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-11T22:57+02:00",
+  "checked_at": "2026-10-12T02:30+02:00",
   "product": {
     "label": "DDR5 · 2×16 Go · 6000 / 5600 MHz",
     "kit": "2x16 Go (32 Go)",
@@ -179,20 +179,6 @@
       "marketplace": false,
       "verified": true,
       "url": "https://www.alternate.fr/Patriot/32-Go-DDR5-6000-2x-16-Go-mémoire-vive/html/product/1855427",
-      "deal": false
-    },
-    {
-      "name": "Crucial Pro Overclocking Edition",
-      "ref": "CP2K16G60C36U5B",
-      "speed": 6000,
-      "cl": 36,
-      "price_eur": 494.07,
-      "shop": "ManoMano",
-      "stock": "in_stock",
-      "marketplace": false,
-      "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/25574/offer/87344239?client_id=1551",
-      "via": "Ledenicheur",
       "deal": false
     },
     {
@@ -569,19 +555,6 @@
       "deal": false
     },
     {
-      "name": "Team Group Noir",
-      "ref": "FF3D532G6000HC30DC01",
-      "speed": 6000,
-      "cl": 30,
-      "price_eur": 544.0,
-      "shop": "Alternate",
-      "stock": "in_stock",
-      "marketplace": false,
-      "verified": true,
-      "url": "https://www.alternate.fr/Team-Group/32-Go-DDR5-6000-2x-16-Go-mémoire-vive/html/product/1853819",
-      "deal": false
-    },
-    {
       "name": "Team Group T-Force Delta White RGB",
       "ref": "FF4D532G6000HC30DC01",
       "speed": 6000,
@@ -592,6 +565,19 @@
       "marketplace": false,
       "verified": true,
       "url": "https://www.alternate.fr/Team-Group/32-Go-DDR5-6000-2x-16-Go-mémoire-vive/html/product/100122899",
+      "deal": false
+    },
+    {
+      "name": "Team Group Noir",
+      "ref": "FF3D532G6000HC30DC01",
+      "speed": 6000,
+      "cl": 30,
+      "price_eur": 544.0,
+      "shop": "Alternate",
+      "stock": "in_stock",
+      "marketplace": false,
+      "verified": true,
+      "url": "https://www.alternate.fr/Team-Group/32-Go-DDR5-6000-2x-16-Go-mémoire-vive/html/product/1853819",
       "deal": false
     },
     {
@@ -620,6 +606,19 @@
       "verified": false,
       "url": "https://ledenicheur.fr/go-to-shop/24166/offer/LEX0843367140985?client_id=1551",
       "via": "Ledenicheur",
+      "deal": false
+    },
+    {
+      "name": "Corsair Vengeance RGB Black",
+      "ref": "CMH32GX5M2E6000C36",
+      "speed": 6000,
+      "cl": 36,
+      "price_eur": 549.99,
+      "shop": "Ledenicheur (meilleur prix)",
+      "stock": "unknown",
+      "marketplace": false,
+      "verified": false,
+      "url": "https://ledenicheur.fr/product.php?p=11653766",
       "deal": false
     },
     {
@@ -1024,7 +1023,7 @@
       "ref": "LD5U16G60C320A",
       "speed": 6000,
       "cl": 32,
-      "price_eur": 778.01,
+      "price_eur": 777.61,
       "shop": "Amazon.fr Marketplace",
       "stock": "in_stock",
       "marketplace": true,
