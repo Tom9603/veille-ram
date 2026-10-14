@@ -368,13 +368,5 @@ body.loading .hero-price, body.loading .offers, body.loading .chart { opacity: 0
 .ptr svg { width: 20px; height: 20px; }
 .ptr.is-ready { color: var(--good-ink); }
 
-.token-form { gap: 8px; }
-.token-form input {
-  flex: 1; min-width: 0; border: 1px solid var(--hairline); border-radius: 10px; padding: 9px 12px;
-  background: var(--page); font-size: 0.875rem; outline: none;
-}
-.token-form input:focus { border-color: var(--accent); }
-.btn-small { padding: 9px 14px; font-size: 0.875rem; border-radius: 10px; }
-.settings .danger { color: var(--bad-ink); }
-.value.is-on { color: var(--good-ink); font-weight: 600; }
+.value.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.8125rem; user-select: all; -webkit-user-select: all; }
 @media (prefers-reduced-motion: reduce) { .sync-spinner { animation: none; } }

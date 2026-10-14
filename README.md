@@ -10,7 +10,7 @@ la latence réelle est au moins aussi bonne qu'en 5600 CL36 (6400 jusqu'à CL40,
 ## Comment ça marche
 
 ```
-GitHub Actions « Actualiser les prix » (un relevé par heure de 6h à 23h, et ↻ avec clé)
+GitHub Actions « Actualiser les prix » (un relevé par heure de 6h à 23h, et à la demande)
   │  GitHub lance les tâches programmées avec des heures de retard : le robot
   │  tourne donc en continu, fait lui-même un relevé à hh:13 (rien la nuit) et
   │  se passe le relais avant la limite de 6 h par job ; la programmation ne
@@ -18,11 +18,13 @@ GitHub Actions « Actualiser les prix » (un relevé par heure de 6h à 23h, et 
   │  scripts/collect.py : LDLC, Materiel.net, Alternate, Grosbill en direct,
   │                       Amazon, Cdiscount, Fnac… via les fiches Ledenicheur
   │  scripts/record.py  → data/latest.json + data/history.json
-  └──────────────► GitHub Pages republie l'appli (moins d'une minute)
+  │  scripts/notify.py  → notification ntfy (chaque heure ; sinon seulement si affaire)
+  ├──────────────► GitHub Pages republie l'appli (moins d'une minute)
+  └──────────────► notification sur le téléphone (appli ntfy, canal de config.json)
 
-Routine Claude (11h58 et 19h58, heure de Paris)
-  │  lit le dernier relevé + cherche les bons plans récents sur Dealabs
-  └──────────────► notification push dans l'appli Claude (résumé + lien)
+Bouton ↻ de l'appli
+  │  publie une demande sur le canal ntfy « …-releve » (sans clé)
+  └──────────────► le robot, qui surveille ce canal toutes les 15 s, fait un relevé
 ```
 
 - `AGENT.md` : consignes pour une recherche complète par un agent IA (utilisables
@@ -36,7 +38,7 @@ Routine Claude (11h58 et 19h58, heure de Paris)
 L'appli a quatre onglets :
 
 - **Marché** : bonne affaire ou non, meilleur prix, écart au seuil, résumé par
-  catégorie (6000 CL30, CL32, CL36, 5600, 6400+) et prochaine notification.
+  catégorie (6000 CL30, CL32, CL36, 5600, 6400+) et prochain relevé.
 - **Offres** : toutes les offres relevées, filtrables par latence, triables
   (prix croissant ou décroissant, latence, boutique), avec filtres
   « disponibles » et « prix vérifiés » et des fiches détaillées (référence,
@@ -61,26 +63,25 @@ Une **bonne affaire** est une offre en stock (ou sur commande), dont le prix a
 L'appli s'ouvre alors en plein écran comme une appli normale et se met à jour
 à chaque ouverture.
 
-## Activer l'actualisation à la demande
+## Recevoir les notifications
 
-Le bouton ↻ de l'appli lance une vraie recherche de prix. Il lui faut une clé
-GitHub, à créer une seule fois :
+1. Installe l'appli gratuite **ntfy** (App Store ou Play Store), sans compte.
+2. Touche **+**, entre le nom du canal (Réglages de l'appli Veille RAM, ou
+   `ntfy.topic` dans `config.json`), puis « S'abonner ».
 
-1. Sur https://github.com/settings/personal-access-tokens/new : nom
-   « Veille RAM », expiration au choix (1 an par exemple).
-2. **Repository access** : « Only select repositories » → `veille-ram`.
-3. **Permissions** → **Actions** : « Read and write ».
-4. Génère la clé, copie-la (`github_pat_…`) et colle-la dans l'appli :
-   Réglages → Actualisation des prix → Enregistrer.
+Une notification arrive à chaque relevé de l'heure (6h13 à 23h13) : discrète
+s'il n'y a pas d'affaire, prioritaire dès qu'un kit passe sous le seuil.
 
-La clé reste sur ton téléphone et n'est envoyée qu'à api.github.com.
+Le bouton ↻ de l'appli lance un vrai relevé (1 à 2 minutes), sans clé : il
+publie une demande sur le canal `ntfy.refresh_topic`, que le robot surveille.
 
 ## Modifier les réglages
 
 - **Seuils** : change `thresholds_eur` dans `config.json` (ex. depuis l'appli
   GitHub ou github.com). Pris en compte au passage suivant.
-- **Horaires** : se règlent dans la routine Claude (claude.ai → Routines), puis
-  mets à jour `schedule.times` dans `config.json` pour l'affichage.
+- **Horaires** : un relevé par heure à hh:13 de 6h à 23h, réglés dans
+  `.github/workflows/actualiser.yml` (et `schedule` dans `config.json` pour
+  l'affichage).
 - **Comportement de l'agent** : modifie `AGENT.md`.
 
 ## Tester en local

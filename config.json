@@ -32,10 +32,14 @@
   },
   "schedule": {
     "timezone": "Europe/Paris",
-    "times": [
-      "11:58",
-      "19:58"
-    ]
+    "minute": 13,
+    "from_hour": 6,
+    "to_hour": 23
   },
-  "app_url": "https://tom9603.github.io/veille-ram/"
+  "app_url": "https://tom9603.github.io/veille-ram/",
+  "ntfy": {
+    "server": "https://ntfy.sh",
+    "topic": "veille-ram-vxgh897lgs",
+    "refresh_topic": "veille-ram-vxgh897lgs-releve"
+  }
 }

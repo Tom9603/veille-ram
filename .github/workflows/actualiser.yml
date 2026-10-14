@@ -7,12 +7,15 @@ name: Actualiser les prix
 # la nuit). Un job GitHub dure 6 h au plus : avant cette limite, il en lance
 # un autre qui prend le relais.
 #
-# - « Relevé horaire » : la boucle, entretenue par les relais. Les lancements
-#   programmés ne servent que de secours : ils la redémarrent si elle s'est
-#   arrêtée, et s'arrêtent tout de suite si elle tourne. Une modification du
-#   relevé (push) fait un relevé immédiat, puis sert de secours de la même façon.
-# - « Relevé ponctuel » : un seul relevé, pour le bouton ↻ de l'appli (quand
-#   une clé GitHub y est enregistrée).
+# - « Relevé horaire » : la boucle, entretenue par les relais. Après chaque
+#   relevé de l'heure, elle envoie la notification au téléphone (ntfy). Entre
+#   deux relevés, elle surveille le canal ntfy des demandes de l'appli : le
+#   bouton ↻ y publie un message et un relevé est fait aussitôt. Les lancements
+#   programmés ne servent que de secours : ils redémarrent la boucle si elle
+#   s'est arrêtée, et s'arrêtent tout de suite si elle tourne. Une modification
+#   du relevé (push) fait un relevé immédiat, puis remplace la boucle en cours
+#   pour qu'elle tourne avec la nouvelle version.
+# - « Relevé ponctuel » : un seul relevé, lancé à la main depuis GitHub.
 run-name: ${{ (github.event_name == 'workflow_dispatch' && inputs.mode == 'ponctuel') && 'Relevé ponctuel' || 'Relevé horaire' }}
 
 on:
@@ -29,6 +32,8 @@ on:
     branches: [gh-pages]
     paths:
       - scripts/collect.py
+      - scripts/record.py
+      - scripts/notify.py
       - .github/workflows/actualiser.yml
 
 permissions:
@@ -68,20 +73,55 @@ jobs:
             echo "$next"
           }
 
-          # Relevé, puis publication sur gh-pages. En cas de conflit avec un autre
-          # relevé, on repart de la version en ligne et on y réapplique celui-ci.
+          # Relevé, publication sur gh-pages, puis notification : à chaque relevé de
+          # l'heure (« horaire »), seulement en cas d'affaire pour un relevé demandé
+          # depuis l'appli (« manuel »). En cas de conflit avec un autre relevé, on
+          # repart de la version en ligne et on y réapplique celui-ci.
           releve() {
+            local published=
             python3 scripts/collect.py "$run_json" || return 1
             for attempt in 1 2 3; do
               git fetch -q origin gh-pages && git reset -q --hard origin/gh-pages || { sleep 5; continue; }
               python3 scripts/record.py "$run_json" > /dev/null || return 1
               git add data/latest.json data/history.json
-              git diff --cached --quiet && return 0
+              git diff --cached --quiet && { published=1; break; }
               git commit -q -m "Relevé automatique du $(TZ=Europe/Paris date '+%d/%m à %Hh%M')"
-              git push -q origin HEAD:gh-pages && return 0
+              git push -q origin HEAD:gh-pages && { published=1; break; }
               sleep $((attempt * 5))
             done
-            return 1
+            [ -n "$published" ] || return 1
+            if [ "$1" = horaire ]; then
+              python3 scripts/notify.py || echo "::warning::Notification non envoyée."
+            else
+              python3 scripts/notify.py --deals-only || echo "::warning::Notification non envoyée."
+            fi
+          }
+
+          # Attend l'heure $1 (secondes depuis 1970) en relevant le canal ntfy des
+          # demandes de l'appli toutes les 15 s ; une demande déclenche un relevé.
+          # « since » : identifiant de la dernière demande traitée ; au départ, l'heure
+          # d'il y a 3 minutes, pour reprendre les demandes faites pendant un relais.
+          since=$(( $(date +%s) - 180 ))
+          last_request() {   # identifiant de la dernière demande après « since », vide s'il n'y en a pas
+            curl -sf --max-time 10 "$1/json?poll=1&since=$since" | grep -E '"event" *: *"message"' | tail -n 1 \
+              | grep -oE '"id" *: *"[^"]+"' | head -n 1 | sed -E 's/.*"([^"]+)"$/\1/'
+          }
+          wait_until() {
+            local until=$1 url left id
+            url=$(python3 -c 'import json; c = json.load(open("config.json")).get("ntfy") or {}; print(c["server"].rstrip("/") + "/" + c["refresh_topic"] if c.get("refresh_topic") else "")')
+            while left=$((until - $(date +%s))); [ "$left" -gt 0 ]; do
+              id=$([ -n "$url" ] && last_request "$url")
+              if [ -n "$id" ]; then
+                since=$id
+                echo "Relevé demandé depuis l'appli à $(TZ=Europe/Paris date +%Hh%M)."
+                releve manuel || echo "::warning::Relevé demandé en échec."
+                id=$(last_request "$url")   # demandes faites pendant ce relevé : déjà satisfaites
+                [ -n "$id" ] && since=$id
+                continue
+              fi
+              left=$((until - $(date +%s)))
+              [ "$left" -gt 0 ] && sleep $((left < 15 ? left : 15))
+            done
           }
 
           # Dernier relevé publié il y a moins de 40 minutes ?
@@ -95,19 +135,21 @@ jobs:
           }
 
           if [ "$MODE" = ponctuel ]; then
-            releve
+            releve manuel
             exit $?
           fi
 
           if [ "$MODE" = push ]; then
-            releve || echo "::warning::Relevé en échec."
+            releve manuel || echo "::warning::Relevé en échec."
           fi
 
           if [ "$MODE" != relais ]; then
-            # Une boucle plus ancienne tourne déjà (ou son relais attend) : rien à faire.
             older=$(gh run list --workflow actualiser.yml --limit 30 --json databaseId,displayTitle,status \
-              --jq "[.[] | select(.displayTitle == \"Relevé horaire\" and .status != \"completed\" and .databaseId < $GITHUB_RUN_ID)] | length")
-            if [ "${older:-0}" -gt 0 ]; then
+              --jq ".[] | select(.displayTitle == \"Relevé horaire\" and .status != \"completed\" and .databaseId < $GITHUB_RUN_ID) | .databaseId")
+            if [ -n "$older" ] && [ "$MODE" = push ]; then
+              # Nouvelle version du relevé : elle remplace la boucle en cours.
+              for id in $older; do gh run cancel "$id" || true; done
+            elif [ -n "$older" ]; then
               echo "La boucle horaire tourne déjà."
               exit 0
             fi
@@ -121,7 +163,7 @@ jobs:
               if [ "$first" = 1 ] && { [ $(( $(next_slot) - $(date +%s) )) -le 900 ] || recent; }; then
                 echo "Pas de relevé immédiat : le prochain est à $(TZ=Europe/Paris date -d "@$(next_slot)" +%Hh%M)."
               else
-                releve || echo "::warning::Relevé de $(TZ=Europe/Paris date +%Hh%M) en échec, nouvel essai à l'heure suivante."
+                releve horaire || echo "::warning::Relevé de $(TZ=Europe/Paris date +%Hh%M) en échec, nouvel essai à l'heure suivante."
               fi
             fi
             first=0
@@ -129,11 +171,10 @@ jobs:
             next=$(next_slot)
             if [ "$next" -gt $((started + 290 * 60)) ]; then
               # Bientôt la limite de 6 h : un nouveau job prendra le prochain relevé.
-              wait=$((next - 120 - $(date +%s)))
-              [ "$wait" -gt 0 ] && sleep "$wait"
+              wait_until $((next - 120))
               gh workflow run actualiser.yml --ref gh-pages -f mode=relais \
                 || echo "::warning::Relais impossible : la programmation redémarrera la boucle."
               exit 0
             fi
-            sleep $((next - $(date +%s)))
+            wait_until "$next"
           done

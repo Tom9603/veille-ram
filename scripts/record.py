@@ -29,7 +29,8 @@ Entrée (run.json, écrit par l'agent HORS du dépôt) :
 
 Sorties : data/latest.json (état courant) et data/history.json (une ligne par
 passage). Le texte de la notification est affiché sur la sortie standard et
-enregistré dans data/latest.json (champ « notification »).
+enregistré dans data/latest.json (champ « notification ») ; sa version courte
+pour le téléphone (ntfy) est dans le champ « push », envoyée par scripts/notify.py.
 """
 
 import json
@@ -154,6 +155,50 @@ def summary(offer):
     return {k: offer[k] for k in ("name", "ref", "speed", "cl", "price_eur", "shop", "stock", "url")}
 
 
+def offer_key(o):
+    return (o["shop"].strip().lower(), (o.get("ref") or o["name"]).strip().lower(), o.get("speed", 6000), o["cl"])
+
+
+def push_message(offers, deals, best, changes, thresholds, previous_latest, app_url):
+    """Notification courte pour le téléphone : titre, texte, priorité ntfy, lien."""
+    labels = (("mhz6400plus", "6400+"), ("mhz5600", "5600"), ("cl36", "CL36"), ("cl32", "CL32"), ("cl30", "CL30"))
+    ranked = sorted(((best[k]["price_eur"], label) for k, label in labels if best.get(k)))
+    summary_line = " · ".join(f"{label} {eur(p)} €" for p, label in ranked)
+    moves = [f"{label} {'+' if changes[k] > 0 else '−'}{eur(abs(changes[k]))} €" for k, label in labels if changes.get(k)]
+    if deals:
+        top = deals[0]
+        before = {offer_key(o) for o in (previous_latest or {}).get("offers", []) if o.get("deal")}
+        new = [o for o in deals if offer_key(o) not in before]
+        lines = [f"{top['name']} {top['speed']} MHz CL{top['cl']} chez {top['shop']} ({STOCK_LABELS[top['stock']]}), "
+                 f"seuil {eur(limit_for(top, thresholds))} €."]
+        if len(deals) > 1:
+            lines.append(f"{len(deals) - 1} autre{'s' if len(deals) > 2 else ''} offre{'s' if len(deals) > 2 else ''} sous le seuil.")
+        return {
+            "title": f"{'Bonne affaire' if new else 'Toujours en cours'} : {eur(top['price_eur'])} € pour 32 Go DDR5",
+            "message": "\n".join(lines),
+            "priority": 5 if new else 4,
+            "tags": ["rotating_light"] if new else ["moneybag"],
+            "click": top["url"],
+        }
+    listed = [o for o in offers if o["stock"] != "out_of_stock"]
+    top = listed[0] if listed else None
+    lines = []
+    if top:
+        lines.append(f"{top['name']} {top['speed']} MHz CL{top['cl']} chez {top['shop']}, "
+                     f"{eur(top['price_eur'] - limit_for(top, thresholds))} € au-dessus du seuil.")
+    if summary_line:
+        lines.append(summary_line)
+    if moves:
+        lines.append("Depuis le relevé précédent : " + ", ".join(moves))
+    return {
+        "title": f"Pas d'affaire : {eur(top['price_eur'])} € au mieux" if top else "Pas d'affaire : aucune offre disponible",
+        "message": "\n".join(lines) or "Aucune offre relevée.",
+        "priority": 2,
+        "tags": [],
+        "click": app_url,
+    }
+
+
 def limit_for(offer, thresholds):
     """Seuil d'alerte : 5600 MHz, 6400 MHz et plus, sinon 6000 MHz CL30, sinon 6000 MHz CL32/CL36."""
     if offer["speed"] == 5600:
@@ -210,6 +255,7 @@ def main(argv):
     }
     deals = [o for o in offers if o["deal"]]
 
+    previous_latest = json.loads(LATEST.read_text(encoding="utf-8")) if LATEST.exists() else None
     history = json.loads(HISTORY.read_text(encoding="utf-8")) if HISTORY.exists() else []
     history = [migrate(h) for h in history if h["checked_at"] != checked_at]
     previous = history[-1] if history else None
@@ -293,6 +339,7 @@ def main(argv):
         lines.append("Sources bloquées : " + ", ".join(latest["blocked_sources"]))
     lines.append(f"Appli : {config['app_url']}")
     latest["notification"] = "\n".join(lines)
+    latest["push"] = push_message(offers, deals, best, changes, thresholds, previous_latest, config["app_url"])
 
     if not dry_run:
         LATEST.parent.mkdir(parents=True, exist_ok=True)

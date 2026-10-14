@@ -1,8 +1,8 @@
 # Consignes de l'agent de veille
 
-Ce fichier est lu par l'agent IA à chaque passage (2 fois par jour). Pour changer
-son comportement, modifie ce fichier. Pour changer les seuils ou l'horaire
-affiché, modifie `config.json`.
+Consignes pour une recherche complète faite par un agent IA (les relevés de
+l'heure sont faits par `scripts/collect.py`, sans IA). Pour changer les seuils,
+modifie `config.json`.
 
 ## Mission
 

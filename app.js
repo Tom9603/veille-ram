@@ -4,7 +4,6 @@
   const $ = (id) => document.getElementById(id);
   const SVG_NS = "http://www.w3.org/2000/svg";
   const PREFS_KEY = "veille-ram:prefs";
-  const STALE_HOURS = 14;
   // Catégories suivies : DDR5 6000 MHz en CL30, CL32, CL36, DDR5 5600 MHz (CL28 à CL36),
   // et DDR5 6400 MHz et plus dont la latence réelle vaut au moins celle d'un 5600 CL36.
   const GROUPS = ["30", "32", "36", "5600", "6400"];
@@ -29,7 +28,7 @@
 
   // ---------- Préférences (mémorisées sur l'appareil) ----------
 
-  const DEFAULT_PREFS = { cl: "all", sort: "price-asc", available: false, verifiedOnly: false, details: false, theme: "auto", period: "all", autoRefresh: true };
+  const DEFAULT_PREFS = { cl: "all", sort: "price-asc", available: false, verifiedOnly: false, details: false, theme: "auto", period: "all" };
   let prefs = { ...DEFAULT_PREFS };
   try { prefs = { ...DEFAULT_PREFS, ...JSON.parse(localStorage.getItem(PREFS_KEY) || "{}") }; } catch (e) { /* stockage indisponible */ }
 
@@ -121,48 +120,15 @@
   let state = { latest: null, history: [], config: null, loadedAt: 0, fromCache: false };
   const openOffers = new Set();
 
-  // ---------- GitHub (actualisation à la demande) ----------
-  // La clé ne quitte jamais ce téléphone : elle n'est envoyée qu'à api.github.com.
+  // ---------- Relevé à la demande ----------
+  // ↻ publie une demande sur un canal ntfy que le robot de relevé (GitHub Actions)
+  // surveille en continu : il relève les prix (1 à 2 minutes) et les publie. Sans clé.
 
-  const REPO = "Tom9603/veille-ram";
-  const BRANCH = "gh-pages";
-  const WORKFLOW = "actualiser.yml";
-  const TOKEN_KEY = "veille-ram:gh-token";
-  const AUTO_REFRESH_MINUTES = 15;
-
-  function getToken() {
-    try { return localStorage.getItem(TOKEN_KEY) || ""; } catch (e) { return ""; }
-  }
-  function setToken(token) {
-    try {
-      if (token) localStorage.setItem(TOKEN_KEY, token); else localStorage.removeItem(TOKEN_KEY);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  function github(path, options = {}) {
-    return fetch(`https://api.github.com/repos/${REPO}${path}`, {
-      ...options,
-      cache: "no-store",
-      headers: {
-        Accept: "application/vnd.github+json",
-        Authorization: `Bearer ${getToken()}`,
-        "X-GitHub-Api-Version": "2022-11-28",
-        ...(options.headers || {}),
-      },
-    });
-  }
+  const NTFY_DEFAULT = { server: "https://ntfy.sh", topic: "veille-ram-vxgh897lgs", refresh_topic: "veille-ram-vxgh897lgs-releve" };
+  const ntfy = () => ({ ...NTFY_DEFAULT, ...((state.config && state.config.ntfy) || {}) });
+  const REFRESH_TIMEOUT_MS = 4 * 60 * 1000;
 
   async function getJSON(path) {
-    // Avec la clé, on lit le dépôt directement : données à jour sans attendre la republication du site.
-    if (getToken() && path.startsWith("data/")) {
-      try {
-        const res = await github(`/contents/${path}?ref=${BRANCH}`, { headers: { Accept: "application/vnd.github.raw+json" } });
-        if (res.ok) return { data: await res.json(), cached: false };
-      } catch (e) { /* repli sur le site ci-dessous */ }
-    }
     const res = await fetch(`${path}?t=${Date.now()}`, { cache: "no-store" });
     if (!res.ok) throw new Error(`${path} : HTTP ${res.status}`);
     return { data: await res.json(), cached: res.headers.get("x-veille-cache") === "1" };
@@ -203,68 +169,41 @@
     if (kind === "done" || kind === "info") syncTimer = setTimeout(() => { box.hidden = true; }, kind === "info" ? 5000 : 4000);
   }
 
-  async function latestRunId() {
-    const res = await github(`/actions/workflows/${WORKFLOW}/runs?per_page=1`);
-    if (res.status === 401 || res.status === 403 || res.status === 404) throw new Error("auth");
-    const data = await res.json();
-    return data.workflow_runs && data.workflow_runs[0] ? data.workflow_runs[0].id : 0;
-  }
-
-  // Lance une vraie recherche de prix (GitHub Actions), attend la fin, puis recharge les données.
+  // Demande un relevé au robot, attend qu'il soit publié, puis recharge les données.
   async function refreshPrices() {
     if (refreshing) return;
-    if (!getToken()) {
-      await load();
-      const at = state.latest ? hourFmt.format(new Date(state.latest.checked_at)) : "";
-      showSync(`Prix à jour : relevé de ${at}. Nouveau relevé automatique toutes les heures.`, "info");
-      return;
-    }
     refreshing = true;
     $("refresh").classList.add("spinning");
     const started = Date.now();
-    const tick = () => showSync(`Recherche des prix en cours… ${Math.round((Date.now() - started) / 1000)} s`);
+    const tick = () => showSync(`Relevé des prix en cours… ${Math.round((Date.now() - started) / 1000)} s`);
     tick();
+    const ticker = setInterval(tick, 1000);
     try {
-      const before = await latestRunId();
-      const res = await github(`/actions/workflows/${WORKFLOW}/dispatches`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ref: BRANCH }),
-      });
-      if (res.status === 401 || res.status === 403 || res.status === 404) throw new Error("auth");
-      if (!res.ok) throw new Error(`GitHub a répondu ${res.status}`);
-
-      let run = null;
-      while (Date.now() - started < 5 * 60 * 1000) {
-        await sleep(4000);
-        tick();
-        const list = await github(`/actions/workflows/${WORKFLOW}/runs?per_page=10`);
-        if (!list.ok) continue;
-        const runs = (await list.json()).workflow_runs || [];
-        // Seulement le relevé ponctuel demandé ici, pas la boucle horaire qui tourne en parallèle.
-        run = runs.filter((r) => r.id > before && r.event === "workflow_dispatch" && r.display_title !== "Relevé horaire")
-          .sort((a, b) => a.id - b.id)[0] || null;
-        if (run && run.status === "completed") break;
+      const before = state.latest ? state.latest.checked_at : "";
+      const { server, refresh_topic: topic } = ntfy();
+      const res = await fetch(`${server.replace(/\/$/, "")}/${topic}`, { method: "POST", body: "↻", cache: "no-store" });
+      if (res.status === 429) throw new Error("trop de demandes, réessaie dans quelques minutes");
+      if (!res.ok) throw new Error(`le service de demande a répondu ${res.status}`);
+      // Le relevé prend 1 à 2 minutes, puis le site se met à jour (moins d'une minute).
+      while (Date.now() - started < REFRESH_TIMEOUT_MS) {
+        await sleep(6000);
+        let fresh = null;
+        try { fresh = (await getJSON("data/latest.json")).data; } catch (e) { /* réseau : on réessaie */ }
+        if (fresh && fresh.checked_at !== before) {
+          await load();
+          showSync(`Prix relevés à l'instant (${state.latest.offers.length} offres).`, "done");
+          return;
+        }
       }
-      if (!run || run.status !== "completed") throw new Error("la recherche prend plus de temps que prévu, les prix arriveront dans quelques minutes");
-      if (run.conclusion !== "success") throw new Error("la recherche a échoué côté GitHub, réessaie plus tard");
-      await load();
-      showSync(`Prix actualisés à l'instant (${state.latest.offers.length} offres).`, "done");
+      throw new Error("le robot n'a pas répondu à temps, les prix arriveront au prochain relevé");
     } catch (err) {
       console.error(err);
-      showSync(err.message === "auth"
-        ? "Clé GitHub refusée : vérifie-la dans Réglages (droit Actions en lecture et écriture sur veille-ram)."
-        : `Actualisation impossible : ${err.message}.`, "error");
+      showSync(`Actualisation impossible : ${err.message}.`, "error");
     } finally {
+      clearInterval(ticker);
       refreshing = false;
       $("refresh").classList.remove("spinning");
     }
-  }
-
-  function maybeAutoRefresh() {
-    if (!getToken() || !prefs.autoRefresh || !state.latest || refreshing) return;
-    const ageMinutes = (Date.now() - new Date(state.latest.checked_at)) / 60000;
-    if (ageMinutes > AUTO_REFRESH_MINUTES) refreshPrices();
   }
 
   // Tirer l'écran vers le bas depuis le haut de la page pour actualiser.
@@ -375,8 +314,10 @@
   function renderAll() {
     if (!state.latest) return;
     const age = (Date.now() - new Date(state.latest.checked_at)) / 3.6e6;
+    // Un relevé par heure de 6h à 23h : en journée, 2 h sans relevé signalent un problème ; la nuit, 8 h.
+    const day = parisClock().hour >= 8;
     if (state.fromCache) showBanner("Hors ligne : affichage des dernières données enregistrées.");
-    else if (age > STALE_HOURS) showBanner(`Aucune analyse depuis ${Math.floor(age)} h : la veille a peut-être raté un passage.`);
+    else if (age > (day ? 2 : 8)) showBanner(`Aucun relevé depuis ${Math.floor(age)} h : le robot a peut-être raté un passage. Touche ↻ pour en lancer un.`);
     else showBanner("");
     if (state.latest.product && state.latest.product.label) $("product").textContent = state.latest.product.label;
     renderMarche();
@@ -443,18 +384,28 @@
     $("next-run").textContent = nextRun();
   }
 
-  function scheduleTimes() {
-    return (state.config && state.config.schedule && state.config.schedule.times) || ["11:58", "19:58"];
+  function parisClock() {
+    const parts = Object.fromEntries(new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Paris", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
+      .formatToParts(new Date()).map((p) => [p.type, p.value]));
+    return { hour: Number(parts.hour), minute: Number(parts.minute) };
+  }
+
+  // Relevés (et notifications) à hh:13, de 6h à 23h, heure de Paris.
+  function relevesSlots() {
+    const s = (state.config && state.config.schedule) || {};
+    const minute = s.minute ?? 13;
+    const slots = [];
+    for (let h = s.from_hour ?? 6; h <= (s.to_hour ?? 23); h++) slots.push(h * 60 + minute);
+    return slots;
   }
 
   function nextRun() {
-    const parts = Object.fromEntries(new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Paris", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
-      .formatToParts(new Date()).map((p) => [p.type, p.value]));
-    const now = Number(parts.hour) * 60 + Number(parts.minute);
-    const mins = scheduleTimes().map((t) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; }).sort((a, b) => a - b);
+    const { hour, minute } = parisClock();
+    const now = hour * 60 + minute;
+    const slots = relevesSlots();
     const fmt = (m) => `${Math.floor(m / 60)}h${String(m % 60).padStart(2, "0")}`;
-    const next = mins.find((m) => m > now);
-    return next !== undefined ? `Aujourd'hui à ${fmt(next)}` : `Demain à ${fmt(mins[0])}`;
+    const next = slots.find((m) => m > now);
+    return next !== undefined ? `Aujourd'hui à ${fmt(next)}` : `Demain à ${fmt(slots[0])}`;
   }
 
   function filteredOffers() {
@@ -766,7 +717,10 @@
     $("th-cl32-36").textContent = eur(t.cl32_36);
     $("th-5600").textContent = eur(groupLimit("5600"));
     $("th-6400").textContent = eur(groupLimit("6400"));
-    $("set-schedule").textContent = scheduleTimes().map((s) => s.replace(":", "h")).join(" · ");
+    const slots = relevesSlots();
+    const fmt = (m) => `${Math.floor(m / 60)}h${String(m % 60).padStart(2, "0")}`;
+    $("set-schedule").textContent = `toutes les heures, ${fmt(slots[0])}–${fmt(slots[slots.length - 1])}`;
+    $("ntfy-topic").textContent = ntfy().topic;
     $("set-last").textContent = shortFmt.format(new Date(state.latest.checked_at));
     const blocked = state.latest.blocked_sources || [];
     $("set-blocked").textContent = blocked.length ? blocked.join(", ") : "aucune";
@@ -797,38 +751,15 @@
     $("set-stock").checked = prefs.available;
     $("set-verified").checked = prefs.verifiedOnly;
     $("set-details").checked = prefs.details;
-    $("set-auto").checked = prefs.autoRefresh;
-    renderTokenStatus();
   }
 
-  function renderTokenStatus() {
-    const on = !!getToken();
-    const status = $("token-status");
-    status.textContent = on ? "Activée" : "Non configurée";
-    status.classList.toggle("is-on", on);
-    $("token-remove").hidden = !on;
-    $("token-input").placeholder = on ? "Remplacer la clé…" : "Colle ta clé GitHub (github_pat_…)";
-  }
-
-  async function saveToken(e) {
-    e.preventDefault();
-    const input = $("token-input");
-    const token = input.value.trim();
-    if (!token) return;
-    const previous = getToken();
-    if (!setToken(token)) {
-      showSync("Impossible d'enregistrer la clé sur ce navigateur (stockage bloqué).", "error");
-      return;
-    }
+  async function copyTopic() {
+    const topic = ntfy().topic;
     try {
-      await latestRunId();
-      input.value = "";
-      renderTokenStatus();
-      showSync("Clé enregistrée : le bouton ↻ lance maintenant une vraie recherche de prix.", "done");
-    } catch (err) {
-      setToken(previous);
-      renderTokenStatus();
-      showSync("Cette clé ne fonctionne pas : il faut le droit Actions en lecture et écriture sur le dépôt veille-ram.", "error");
+      await navigator.clipboard.writeText(topic);
+      showSync(`Nom du canal copié : ${topic}`, "done");
+    } catch (e) {
+      showSync(`Nom du canal : ${topic}`, "info");
     }
   }
 
@@ -846,20 +777,13 @@
   $("set-stock").addEventListener("change", (e) => setPref("available", e.target.checked));
   $("set-verified").addEventListener("change", (e) => setPref("verifiedOnly", e.target.checked));
   $("set-details").addEventListener("change", (e) => setPref("details", e.target.checked));
-  $("set-auto").addEventListener("change", (e) => setPref("autoRefresh", e.target.checked));
-  $("token-form").addEventListener("submit", saveToken);
-  $("token-remove").addEventListener("click", () => {
-    setToken("");
-    renderTokenStatus();
-    showSync("Clé supprimée de ce téléphone.", "done");
-  });
+  $("ntfy-copy").addEventListener("click", copyTopic);
   $("refresh").addEventListener("click", refreshPrices);
   $("set-refresh").addEventListener("click", refreshPrices);
   window.addEventListener("hashchange", () => showView(true));
   document.addEventListener("visibilitychange", async () => {
     if (document.visibilityState !== "visible" || refreshing) return;
     if (Date.now() - state.loadedAt > 60000) await load();
-    maybeAutoRefresh();
   });
   document.addEventListener("pointerdown", (e) => { if (!$("chart").contains(e.target)) hideChartTip(); });
   let resizeTimer;
@@ -887,5 +811,5 @@
   syncControls();
   showView(false);
   setupPullToRefresh();
-  load().then(maybeAutoRefresh);
+  load();
 })();
