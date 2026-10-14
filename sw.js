@@ -1,6 +1,6 @@
 // Réseau d'abord pour tout (appli et données) : on affiche toujours la dernière
 // version publiée. Le cache ne sert qu'hors ligne ou si le réseau traîne trop.
-const VERSION = "veille-ram-v9";
+const VERSION = "veille-ram-v10";
 const SHELL = [
   "./",
   "index.html",

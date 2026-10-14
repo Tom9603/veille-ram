@@ -763,6 +763,28 @@
     }
   }
 
+  // Envoyée depuis ce téléphone : vérifie que l'abonnement ntfy fonctionne.
+  async function testNotification() {
+    const { server, topic } = ntfy();
+    try {
+      const res = await fetch(`${server.replace(/\/$/, "")}/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          topic,
+          title: "Veille RAM : notifications activées",
+          message: "Test réussi. Tu recevras ici le relevé de chaque heure, de 6h13 à 23h13, et une alerte dès qu'un kit passe sous le seuil.",
+          tags: ["white_check_mark"],
+          click: location.href.split("#")[0],
+        }),
+      });
+      if (!res.ok) throw new Error(res.status === 429 ? "trop d'envois, réessaie plus tard" : `ntfy a répondu ${res.status}`);
+      showSync("Notification de test envoyée : elle doit arriver dans quelques secondes.", "done");
+    } catch (err) {
+      showSync(`Test impossible : ${err instanceof TypeError ? "pas de connexion à ntfy" : err.message}.`, "error");
+    }
+  }
+
   // ---------- Événements ----------
 
   $("cl-switch").addEventListener("click", (e) => { const b = e.target.closest("[data-cl]"); if (b) setPref("cl", b.dataset.cl); });
@@ -778,6 +800,7 @@
   $("set-verified").addEventListener("change", (e) => setPref("verifiedOnly", e.target.checked));
   $("set-details").addEventListener("change", (e) => setPref("details", e.target.checked));
   $("ntfy-copy").addEventListener("click", copyTopic);
+  $("ntfy-test").addEventListener("click", testNotification);
   $("refresh").addEventListener("click", refreshPrices);
   $("set-refresh").addEventListener("click", refreshPrices);
   window.addEventListener("hashchange", () => showView(true));
