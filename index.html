@@ -26,7 +26,7 @@
   <div class="shell">
     <header class="appbar">
       <div class="appbar-text">
-        <p class="eyebrow" id="product">DDR5 · 2×16 Go · 6000 / 5600 MHz</p>
+        <p class="eyebrow" id="product">DDR5 · 2×16 Go · 5600 MHz et plus</p>
         <h1 id="page-title">Marché</h1>
       </div>
       <button class="icon-btn" id="refresh" type="button" aria-label="Actualiser les données">
@@ -51,6 +51,7 @@
       <button type="button" role="radio" data-cl="32" aria-label="6000 MHz CL32"><span class="swatch s-cl32"></span>CL32</button>
       <button type="button" role="radio" data-cl="36" aria-label="6000 MHz CL36"><span class="swatch s-cl36"></span>CL36</button>
       <button type="button" role="radio" data-cl="5600" aria-label="5600 MHz, CL28 à CL36"><span class="swatch s-mhz5600"></span>5600</button>
+      <button type="button" role="radio" data-cl="6400" aria-label="6400 MHz et plus"><span class="swatch s-mhz6400"></span>6400+</button>
     </div>
 
     <main>
@@ -138,7 +139,7 @@
         <details class="card disclosure">
           <summary>Tous les relevés</summary>
           <table class="stats">
-            <thead><tr><th scope="col">Date</th><th scope="col">CL30</th><th scope="col">CL32</th><th scope="col">CL36</th><th scope="col">5600</th></tr></thead>
+            <thead><tr><th scope="col">Date</th><th scope="col">CL30</th><th scope="col">CL32</th><th scope="col">CL36</th><th scope="col">5600</th><th scope="col">6400+</th></tr></thead>
             <tbody id="history-rows"></tbody>
           </table>
         </details>
@@ -156,6 +157,7 @@
               <option value="32">6000 MHz CL32</option>
               <option value="36">6000 MHz CL36</option>
               <option value="5600">5600 MHz (CL28 à 36)</option>
+              <option value="6400">6400 MHz et plus</option>
             </select>
           </label>
           <div class="row">
@@ -217,11 +219,12 @@
           <div class="row"><span>Seuil 6000 MHz CL30</span><span class="value" id="th-cl30">—</span></div>
           <div class="row"><span>Seuil 6000 MHz CL32 / CL36</span><span class="value" id="th-cl32-36">—</span></div>
           <div class="row"><span>Seuil 5600 MHz</span><span class="value" id="th-5600">—</span></div>
+          <div class="row"><span>Seuil 6400 MHz et plus</span><span class="value" id="th-6400">—</span></div>
           <a class="row link" href="https://github.com/Tom9603/veille-ram/edit/gh-pages/config.json" target="_blank" rel="noopener noreferrer">
             <span>Modifier les seuils sur GitHub</span><span class="chev" aria-hidden="true">↗</span>
           </a>
         </div>
-        <p class="footnote">Une bonne affaire est une offre en stock ou sur commande, sous le seuil, dont le prix est confirmé : vu chez la boutique, ou relevé pour elle par Ledenicheur (livraison incluse).</p>
+        <p class="footnote">Une bonne affaire est une offre en stock ou sur commande, sous le seuil, dont le prix est confirmé : vu chez la boutique, ou relevé pour elle par Ledenicheur (livraison incluse). En 6400 MHz et plus, seuls les kits au moins aussi réactifs qu'un 5600 CL36 sont suivis : 6400 jusqu'à CL40, 7200 jusqu'à CL46, etc.</p>
 
         <h2 class="section-title">Analyses</h2>
         <div class="card list settings">
@@ -241,7 +244,7 @@
         <h2 class="section-title">À propos</h2>
         <div class="card list settings">
           <a class="row link" href="https://github.com/Tom9603/veille-ram" target="_blank" rel="noopener noreferrer"><span>Projet sur GitHub</span><span class="chev" aria-hidden="true">↗</span></a>
-          <div class="row"><span>Version</span><span class="value">2.0</span></div>
+          <div class="row"><span>Version</span><span class="value">2.1</span></div>
         </div>
       </section>
     </main>

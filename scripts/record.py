@@ -11,8 +11,9 @@ Entrée (run.json, écrit par l'agent HORS du dépôt) :
     {
       "name": "Kingston Fury Beast",           # nom commercial du kit
       "ref": "KF560C30BBEK2-32",               # référence fabricant ("" si inconnue)
-      "speed": 6000,                            # 6000 (par défaut) ou 5600 MHz
-      "cl": 30,                                 # 30, 32 ou 36 en 6000 ; 28 à 36 en 5600
+      "speed": 6000,                            # 6000 (par défaut), 5600, ou 6400 à 8800 MHz
+      "cl": 30,                                 # 30, 32 ou 36 en 6000 ; 28 à 36 en 5600 ;
+                                                # 6400+ : latence réelle ≤ 5600 CL36 (6400 ≤ CL40, 7200 ≤ CL46…)
       "price_eur": 529.99,                      # TTC, livraison incluse si affichée
       "shop": "Grosbill",
       "stock": "in_stock",                      # in_stock | on_order | out_of_stock | unknown
@@ -49,8 +50,17 @@ STOCK_LABELS = {
     "out_of_stock": "rupture",
     "unknown": "stock ?",
 }
-CLS = {28, 30, 32, 34, 36}
-SPEEDS = {5600, 6000}
+TARGETS = {6000: {30, 32, 36}, 5600: {28, 30, 32, 34, 36}}
+FAST_SPEEDS = {6400, 6600, 6800, 7000, 7200, 7400, 7600, 7800, 8000, 8200, 8400, 8600, 8800}
+MAX_LATENCY_NS = 36 * 2000 / 5600   # 6400 MHz et plus : pas plus lent qu'un 5600 CL36 (≈ 12,86 ns)
+
+
+def tracked(speed, cl):
+    if isinstance(cl, bool) or not isinstance(cl, int) or isinstance(speed, bool):
+        return False
+    if speed in TARGETS:
+        return cl in TARGETS[speed]
+    return speed in FAST_SPEEDS and cl >= 26 and cl * 2000 / speed <= MAX_LATENCY_NS + 1e-9
 
 
 def fail(errors):
@@ -84,10 +94,10 @@ def validate(run):
                 errors.append(f"{where}.{key} doit être un texte non vide")
         if not isinstance(o.get("ref", ""), str):
             errors.append(f"{where}.ref doit être un texte")
-        if o.get("cl") not in CLS:
-            errors.append(f"{where}.cl doit valoir 28, 30, 32, 34 ou 36 (reçu {o.get('cl')!r})")
-        if o.get("speed", 6000) not in SPEEDS:
-            errors.append(f"{where}.speed doit valoir 5600 ou 6000 (reçu {o.get('speed')!r})")
+        if not tracked(o.get("speed", 6000), o.get("cl")):
+            errors.append(
+                f"{where} : kit non suivi (reçu {o.get('speed', 6000)!r} MHz CL{o.get('cl')!r}) ; suivis : 6000 CL30/32/36, "
+                "5600 CL28 à 36, 6400 à 8800 MHz si la latence réelle ne dépasse pas celle d'un 5600 CL36")
         price = o.get("price_eur")
         if isinstance(price, bool) or not isinstance(price, (int, float)) or not 50 <= price <= 2000:
             errors.append(f"{where}.price_eur doit être un nombre entre 50 et 2000 (reçu {price!r})")
@@ -145,9 +155,11 @@ def summary(offer):
 
 
 def limit_for(offer, thresholds):
-    """Seuil d'alerte : 5600 MHz, sinon 6000 MHz CL30, sinon 6000 MHz CL32/CL36."""
+    """Seuil d'alerte : 5600 MHz, 6400 MHz et plus, sinon 6000 MHz CL30, sinon 6000 MHz CL32/CL36."""
     if offer["speed"] == 5600:
         return thresholds["mhz5600"]
+    if offer["speed"] in FAST_SPEEDS:
+        return thresholds["mhz6400plus"]
     return thresholds["cl30"] if offer["cl"] <= 30 else thresholds["cl32_36"]
 
 
@@ -187,12 +199,14 @@ def main(argv):
     best_cl36 = next((o for o in listed_6000 if o["cl"] == 36), None)
     best_cl32_36 = next((o for o in listed_6000 if o["cl"] in (32, 36)), None)
     best_5600 = next((o for o in listed if o["speed"] == 5600), None)
+    best_fast = next((o for o in listed if o["speed"] in FAST_SPEEDS), None)
     best = {
         "cl30": summary(best_cl30),
         "cl32": summary(best_cl32),
         "cl36": summary(best_cl36),
         "cl32_36": summary(best_cl32_36),
         "mhz5600": summary(best_5600),
+        "mhz6400plus": summary(best_fast),
     }
     deals = [o for o in offers if o["deal"]]
 
@@ -226,6 +240,8 @@ def main(argv):
             + part("CL32/36", best_cl32_36)
             + ", "
             + part("5600", best_5600)
+            + ", "
+            + part("6400+", best_fast)
         )
 
     latest = {
@@ -255,7 +271,7 @@ def main(argv):
     moves = [
         f"{label} {'+' if d > 0 else '−'}{eur(abs(d))} €"
         for label, d in (("CL30", changes["cl30"]), ("CL32", changes["cl32"]), ("CL36", changes["cl36"]),
-                         ("5600", changes["mhz5600"]))
+                         ("5600", changes["mhz5600"]), ("6400+", changes["mhz6400plus"]))
         if d
     ]
     if moves:

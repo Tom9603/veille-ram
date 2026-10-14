@@ -1,15 +1,20 @@
 # Veille RAM
 
 Suivi automatique du prix d'un kit **DDR5 2×16 Go** : **6000 MHz** (CL30 en priorité,
-CL32/CL36 en plan B) et **5600 MHz** (CL28 à CL36), avec une appli mobile pour
-consulter l'état du marché.
+CL32/CL36 en plan B), **5600 MHz** (CL28 à CL36) et **6400 MHz et plus** quand
+la latence réelle est au moins aussi bonne qu'en 5600 CL36 (6400 jusqu'à CL40,
+7200 jusqu'à CL46…), avec une appli mobile pour consulter l'état du marché.
 
 **Appli :** https://tom9603.github.io/veille-ram/
 
 ## Comment ça marche
 
 ```
-GitHub Actions « Actualiser les prix » (toutes les heures de 6h à 23h, et ↻ avec clé)
+GitHub Actions « Actualiser les prix » (un relevé par heure de 6h à 23h, et ↻ avec clé)
+  │  GitHub lance les tâches programmées avec des heures de retard : le robot
+  │  tourne donc en continu, fait lui-même un relevé à hh:13 (rien la nuit) et
+  │  se passe le relais avant la limite de 6 h par job ; la programmation ne
+  │  sert que de secours si la chaîne s'arrête
   │  scripts/collect.py : LDLC, Materiel.net, Alternate, Grosbill en direct,
   │                       Amazon, Cdiscount, Fnac… via les fiches Ledenicheur
   │  scripts/record.py  → data/latest.json + data/history.json
@@ -31,7 +36,7 @@ Routine Claude (11h58 et 19h58, heure de Paris)
 L'appli a quatre onglets :
 
 - **Marché** : bonne affaire ou non, meilleur prix, écart au seuil, résumé par
-  latence (CL30, CL32, CL36) et prochaine analyse.
+  catégorie (6000 CL30, CL32, CL36, 5600, 6400+) et prochaine notification.
 - **Offres** : toutes les offres relevées, filtrables par latence, triables
   (prix croissant ou décroissant, latence, boutique), avec filtres
   « disponibles » et « prix vérifiés » et des fiches détaillées (référence,
@@ -44,7 +49,7 @@ L'appli a quatre onglets :
 Une **bonne affaire** est une offre en stock (ou sur commande), dont le prix a
 été vérifié sur la page de la boutique, et sous le seuil :
 400 € ou moins pour tout kit au moins 5600 CL36 (5600 CL28 à CL36, 6000 CL30
-à CL36), modifiable dans `config.json` (`thresholds_eur`).
+à CL36, 6400 MHz et plus), modifiable dans `config.json` (`thresholds_eur`).
 
 ## Installer l'appli sur le téléphone
 

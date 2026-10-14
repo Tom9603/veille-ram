@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """Relevé automatique des prix, sans IA, pour l'actualisation à la demande.
 
-Lancé par GitHub Actions (bouton ↻ de l'appli et deux fois par jour). Sources :
+Lancé par GitHub Actions (toutes les heures en journée, et bouton ↻ de l'appli). Sources :
 
 - en direct (prix vérifiés chez la boutique) : LDLC, Materiel.net, Alternate, Grosbill ;
 - Ledenicheur : liste des kits, puis fiche des moins chers pour avoir le prix de
   chaque boutique (Amazon, Cdiscount, Fnac, TopAchat…), livraison incluse.
 
-Garde les kits DDR5 2x16 Go en 6000 MHz (CL30, CL32, CL36) et en 5600 MHz
-(CL28 à CL36), et écrit un relevé au format attendu par scripts/record.py.
+Garde les kits DDR5 2x16 Go en 6000 MHz (CL30, CL32, CL36), en 5600 MHz
+(CL28 à CL36) et en 6400 MHz et plus quand leur latence réelle vaut au moins
+celle d'un 5600 CL36 (6400 jusqu'à CL40, 7200 jusqu'à CL46…), et écrit un
+relevé au format attendu par scripts/record.py.
 
 Usage :
     python3 scripts/collect.py /chemin/vers/run.json
@@ -24,6 +26,12 @@ import urllib.request
 
 UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"
 TARGETS = {6000: {30, 32, 36}, 5600: {28, 30, 32, 34, 36}}   # latences suivies par fréquence
+FAST_SPEEDS = (6400, 6600, 6800, 7000, 7200, 7400, 7600, 7800, 8000, 8200, 8400, 8600, 8800)
+MAX_LATENCY_NS = 36 * 2000 / 5600   # 6400 MHz et plus : latence réelle d'un 5600 CL36 au maximum (≈ 12,86 ns)
+SPEEDS = (5600, 6000) + FAST_SPEEDS
+SPEED_RE = "|".join(map(str, SPEEDS))
+# Codes de fréquence dans les références : 6000C30, 560C36, 64C32, 556C36…
+SPEED_CODES = "|".join(sorted({c for s in SPEEDS for c in (str(s), str(s)[:3], str(s)[:2])} | {"556"}, key=len, reverse=True))
 PRODUCT_PAGES_PER_GROUP = 6   # fiches Ledenicheur ouvertes par catégorie (les kits les moins chers)
 KEEP_PER_GROUP = 20           # offres gardées par catégorie dans le relevé
 
@@ -34,20 +42,27 @@ LEDENICHEUR_6000_PAGES = [
 ]
 # Catégorie filtrée : 5600 MHz (1170=39864), 32 Go, 2 barrettes, CL28 à CL36.
 LEDENICHEUR_5600_PAGE = "https://ledenicheur.fr/c/memoire-ram?1170=39864&r_95336=32-32&r_1181=2-2&r_1172=28-36"
+# Toute la DDR5 de bureau (1171=37753) en 2x16 Go, 44 kits par page : sert aux 6400 MHz et plus,
+# que Ledenicheur ne permet pas de filtrer par fréquence.
+LEDENICHEUR_DDR5_PAGE = "https://ledenicheur.fr/c/memoire-ram?1171=37753&r_95336=32-32&r_1181=2-2"
+LEDENICHEUR_DDR5_MAX_PAGES = 5
 LDLC_PAGES = [
     "https://www.ldlc.com/recherche/ddr5%206000/",
     "https://www.ldlc.com/recherche/ddr5%206000/page2/",
     "https://www.ldlc.com/recherche/ddr5%206000/page3/",
     "https://www.ldlc.com/recherche/ddr5%205600/",
     "https://www.ldlc.com/recherche/ddr5%205600/page2/",
+    "https://www.ldlc.com/recherche/ddr5%206400/",
 ]
 MATERIEL_PAGES = [
     "https://www.materiel.net/recherche/ddr5%206000%202x16/",
     "https://www.materiel.net/recherche/ddr5%205600%202x16/",
+    "https://www.materiel.net/recherche/ddr5%206400%202x16/",
 ]
 ALTERNATE_PAGES = [
     "https://www.alternate.fr/listing.xhtml?q=ddr5+6000+2x16",
     "https://www.alternate.fr/listing.xhtml?q=ddr5+5600+2x16",
+    "https://www.alternate.fr/listing.xhtml?q=ddr5+6400+2x16",
 ]
 GROSBILL_PAGE = "https://www.grosbill.com/memoire-pc-2/32go-ddr5"
 
@@ -100,19 +115,18 @@ def price(raw):
 
 
 def detect_speed(blob):
-    b = blob.replace(" ", " ")
-    if re.search(r"6000|PC5-48000|6\.000|6,000", b):
-        return 6000
-    if re.search(r"5600|PC5-44800|5\.600|5,600", b):
-        return 5600
-    return None
+    """Fréquence annoncée : la plus haute citée (le texte mentionne parfois aussi la fréquence de base)."""
+    b = re.sub(r"PC5-?(\d{5})", lambda m: str(int(m.group(1)) // 8), blob)   # PC5-51200 → 6400
+    b = re.sub(r"\b([5-8])[.,](\d00)\b", r"\1\2", b)                       # 6.000 → 6000
+    found = [int(s) for s in re.findall(rf"(?<!\d)({SPEED_RE})(?!\d)", b)]
+    return max(found) if found else None
 
 
 def detect_cl(*parts):
     blob = " ".join(p for p in parts if p)
     m = re.search(r"\bCL\s?(\d{2})\b", blob, re.I)
-    if not m:  # références fabricant : 6000C30, 560C30, 5600J36, 556C36, 56C46, 6000HC30…
-        m = re.search(r"(?:6000|600|560|5600|556|60|56)H?[CJ](\d{2})", blob)
+    if not m:  # références fabricant : 6000C30, 560C30, 5600J36, 556C36, 64C32, 6400Z36, 6000HC30…
+        m = re.search(rf"(?:{SPEED_CODES})H?[CJZ](\d{{2}})", blob)
     return int(m.group(1)) if m else None
 
 
@@ -132,22 +146,25 @@ def used(blob):
 
 
 def tracked(speed, cl):
-    return speed in TARGETS and cl in TARGETS[speed]
+    if speed in TARGETS:
+        return cl in TARGETS[speed]
+    return speed in FAST_SPEEDS and cl is not None and cl >= 26 and cl * 2000 / speed <= MAX_LATENCY_NS + 1e-9
 
 
 def tidy(name):
     """Retire du nom affiché le bruit technique répété partout (DDR5, 6000 MHz, 2x16 Go…)."""
     name = re.sub(r"\([^)]*\)?", " ", name)
-    name = re.sub(r"\b(DDR5|DIMM|288-pin|RAM|PC5-48000|PC5-44800|PC48000|PC44800|\d{4}\s?MHz|\d,\d{3}\s?MHz|2\s?x\s?16\s?G[oB]?|32\s?G[oB]|CL\s?\d{2}|AMD Expo|Memory)\b",
+    name = re.sub(r"\b(DDR5|DIMM|288-pin|RAM|PC5?-?\d{5}|\d{4}\s?MHz|\d,\d{3}\s?MHz|2\s?x\s?16\s?G[oB]?|32\s?G[oB]|CL\s?\d{2}|AMD Expo|Memory)\b",
                   " ", name, flags=re.I)
+    name = re.sub(rf"(?<!\w)(?:{SPEED_RE})(?![\w-])", " ", name)   # fréquence seule : « Vengeance Black 6400 »
     return re.sub(r"\s+", " ", name).strip(" -,")
 
 
 def reference(*parts):
     blob = " ".join(p for p in parts if p)
-    for pattern in (r"\b(F5-(?:6000|5600)[A-Z0-9-]+)", r"\b(KF5(?:60|56)[A-Z0-9-]+)", r"\b(CM[A-Z0-9]*(?:6000|5600)[CZ]\d{2}[A-Z0-9]*)",
-                    r"\b(CP2K16G(?:60|56)C\d{2}[A-Z0-9]*)", r"\b(PV[A-Z0-9]*(?:600|560)C\d{2}K)",
-                    r"\b([A-Z0-9]{2,}(?:6000|5600)H?C\d{2}[A-Z0-9-]*)", r"\b([A-Z0-9]{3,}(?:60|56)C\d{2}[A-Z0-9]*)"):
+    for pattern in (r"\b(F5-\d{4}[A-Z0-9-]+)", r"\b(KF5\d{2}[A-Z0-9-]+)", r"\b(CM[A-Z0-9]*\d{4}[CZ]\d{2}[A-Z0-9]*)",
+                    r"\b(CP2K16G\d{2}C\d{2}[A-Z0-9]*)", r"\b(PV[A-Z0-9]*\d{2,3}C\d{2}K)",
+                    rf"\b([A-Z0-9]{{2,}}(?:{SPEED_RE})H?C\d{{2}}[A-Z0-9-]*)", rf"\b([A-Z0-9]{{3,}}(?:{SPEED_CODES})C\d{{2}}[A-Z0-9]*)"):
         m = re.search(pattern, blob)
         if m:
             return m.group(1)
@@ -174,6 +191,8 @@ def offer(name, ref, speed, cl, p, shop, stock, url, verified, marketplace=False
 
 
 def group(o):
+    if o["speed"] in FAST_SPEEDS:
+        return ("6400+", "all")
     return (o["speed"], o["cl"] if o["speed"] == 6000 else "all")
 
 
@@ -198,8 +217,8 @@ def ledenicheur_list(pages):
     return list(products.values())
 
 
-def ledenicheur_category(page):
-    """Page catégorie filtrée : les données de chaque kit sont dans le JSON de la page."""
+def ledenicheur_category(page, default_speed=None, speeds=SPEEDS):
+    """Page catégorie : les données de chaque kit (nom, prix, fréquence, CL) sont dans le JSON de la page."""
     products = {}
     for m in re.finditer(r'"pathName":"(/product\.php\?p=\d+)","name":"((?:[^"\\]|\\.)*)","stockStatus":"([^"]*)"', page):
         window = page[m.end():m.end() + 6000]
@@ -209,12 +228,14 @@ def ledenicheur_category(page):
         cost = re.search(r'"priceSummary":\{"regular":([\d.]+|null),"includeShipping":([\d.]+|null)', window)
         cas = re.search(r'"Latence CAS \(CL\)"[^}]*?"number":(\d+|null)', window)
         mods = re.search(r'"Nombre de modules"[^}]*?"number":(\d+|null)', window)
+        freq = re.search(r'quence de la m[^"]*moire"[^}]*?"value":"[^"]*?(\d{4})MHz"', window)
         if not cost or (mods and mods.group(1) not in ("2", "null")):
             continue
         p = price(cost.group(2) if cost.group(2) != "null" else cost.group(1))
         cl = detect_cl(name) or (int(cas.group(1)) if cas and cas.group(1) != "null" else None)
-        speed = detect_speed(name) or 5600
-        if re.search(r"so-?dimm|sodimm|ecc", name, re.I) or not tracked(speed, cl) or p is None:
+        speed = detect_speed(name) or (int(freq.group(1)) if freq else default_speed)
+        if (re.search(r"so-?dimm|sodimm|ecc", name, re.I) or speed not in speeds or not tracked(speed, cl)
+                or p is None):
             continue
         url = "https://ledenicheur.fr" + m.group(1)
         products[url] = offer(tidy(name), reference(name), speed, cl, p, "Ledenicheur (meilleur prix)",
@@ -336,7 +357,7 @@ def grosbill(page, get=fetch):
             continue
         url, title = "https://www.grosbill.com" + name.group(1), text(name.group(2))
         speed = kit_speed(f"{title} {text(row[:4000])}")
-        if speed not in TARGETS:
+        if speed not in SPEEDS:
             continue
         cl = detect_cl(title)
         if cl is None:  # le nom ne donne pas toujours la latence : on la lit sur la fiche
@@ -419,8 +440,27 @@ def collect():
             read_directly.add(DIRECT_SHOPS[label])
         offers += found
 
+    def fast_kits():
+        """DDR5 de bureau page par page, jusqu'à la dernière ; ne garde que les 6400 MHz et plus."""
+        found = {}
+        for n in range(LEDENICHEUR_DDR5_MAX_PAGES):
+            url = LEDENICHEUR_DDR5_PAGE + (f"&offset={44 * n}" if n else "")
+            try:
+                page = fetch(url, attempts=2 if n == 0 else 1)
+            except Exception:
+                if n == 0:
+                    raise
+                break
+            for product in ledenicheur_category(page, speeds=FAST_SPEEDS):
+                found.setdefault(product["url"], product)
+            if page.count('"pathName":"/product.php') < 44:
+                break
+            time.sleep(0.4)
+        return list(found.values())
+
     listed = source("ledenicheur.fr", lambda: ledenicheur_list(pages(LEDENICHEUR_6000_PAGES))
-                    + ledenicheur_category(fetch(LEDENICHEUR_5600_PAGE)))
+                    + ledenicheur_category(fetch(LEDENICHEUR_5600_PAGE), default_speed=5600))
+    listed += source("ledenicheur.fr (6400 MHz et plus)", fast_kits)
     groups = {}
     for product in sorted(listed, key=lambda p: p["price_eur"]):
         groups.setdefault(group(product), []).append(product)
@@ -451,9 +491,10 @@ def main(argv):
         shop = "Ledenicheur" if shop.startswith("Ledenicheur") else shop
         counts[shop] = counts.get(shop, 0) + 1
     n5600 = sum(1 for o in offers if o["speed"] == 5600)
+    nfast = sum(1 for o in offers if o["speed"] in FAST_SPEEDS)
     run = {
         "offers": keep_cheapest(offers),
-        "trend": f"Relevé automatique de {len(offers)} offres, dont {n5600} en 5600 MHz ("
+        "trend": f"Relevé automatique de {len(offers)} offres, dont {n5600} en 5600 MHz et {nfast} en 6400 MHz et plus ("
                  + ", ".join(f"{shop} {n}" for shop, n in sorted(counts.items())) + ").",
         "blocked_sources": blocked,
     }

@@ -17,6 +17,7 @@
   --cl32: #eb6834;
   --cl36: #1baf7a;
   --mhz5600: #eda100;
+  --mhz6400: #e87ba4;
   --good: #0ca30c;
   --good-ink: #006300;
   --good-soft: rgba(12, 163, 12, 0.10);
@@ -46,6 +47,7 @@
     --cl32: #d95926;
     --cl36: #199e70;
     --mhz5600: #c98500;
+    --mhz6400: #d55181;
     --good-ink: #0ca30c;
     --good-soft: rgba(12, 163, 12, 0.16);
     --bad-ink: #e66767;
@@ -70,6 +72,7 @@
   --cl32: #d95926;
   --cl36: #199e70;
   --mhz5600: #c98500;
+  --mhz6400: #d55181;
   --good-ink: #0ca30c;
   --good-soft: rgba(12, 163, 12, 0.16);
   --bad-ink: #e66767;
@@ -141,6 +144,7 @@ h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.025em; line-height: 1
 .s-cl32 { background: var(--cl32); }
 .s-cl36 { background: var(--cl36); }
 .s-mhz5600 { background: var(--mhz5600); }
+.s-mhz6400 { background: var(--mhz6400); }
 .cl-switch button { padding: 7px 2px; font-size: 0.8125rem; gap: 5px; }
 
 /* ---------- Vues ---------- */
@@ -268,7 +272,7 @@ h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.025em; line-height: 1
 /* ---------- Historique ---------- */
 .card-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 12px; margin-bottom: 10px; }
 .card-head h2 { font-size: 1rem; font-weight: 650; }
-.legend { list-style: none; margin: 0; padding: 0; display: flex; gap: 12px; font-size: 0.8125rem; color: var(--ink-2); }
+.legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 0.8125rem; color: var(--ink-2); }
 .legend li { display: inline-flex; align-items: center; gap: 6px; }
 .legend .key { width: 14px; height: 2px; border-radius: 1px; }
 .chart { position: relative; touch-action: pan-y; }

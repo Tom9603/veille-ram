@@ -13,8 +13,12 @@ se mette à jour, puis rendre un résumé court en français.
 - RAM DDR5 desktop (DIMM), kit **2 x 16 Go** (32 Go).
 - **6000 MHz** : CL30 en priorité, plan B CL32 ou CL36.
 - **5600 MHz** : CL28 à CL36 (champ `"speed": 5600` dans le relevé).
-- Ignore CL38 et plus, les kits 1x32 et 2x32, les SO-DIMM et les autres
-  fréquences.
+- **6400 MHz et plus** (jusqu'à 8800) : seulement si la latence réelle
+  (CL × 2000 / fréquence) ne dépasse pas celle d'un 5600 CL36, soit 6400
+  jusqu'à CL40, 7200 jusqu'à CL46, 8000 jusqu'à CL51 (champ `"speed"` = la
+  fréquence, ex. 6400).
+- Ignore les 6000 en CL38 et plus, les kits 1x32 et 2x32, les SO-DIMM et les
+  autres fréquences (6200 par exemple).
 - Neuf uniquement (pas d'occasion ni de reconditionné), livré en France.
 
 Les seuils d'alerte sont dans `config.json` (`thresholds_eur`) : relis-les à
@@ -30,7 +34,8 @@ chaque passage, ils peuvent changer.
    fonctionne), LDLC, Materiel.net, TopAchat, Alternate.fr, Cdiscount,
    Rue du Commerce, Amazon.fr.
 3. Bons plans : deals récents (moins de 48 h) sur dealabs.com pour
-   « DDR5 6000 CL30 32 Go », « DDR5 6000 CL32 32Go » et « DDR5 6000 CL36 32Go ».
+   « DDR5 6000 CL30 32 Go », « DDR5 6000 CL32 32Go », « DDR5 6000 CL36 32Go »,
+   « DDR5 5600 32Go » et « DDR5 6400 32Go ».
 
 Utilise WebSearch (mode standard, puis extended si les résultats sont pauvres)
 et WebFetch. Si une source est bloquée, passe à la suivante sans insister et

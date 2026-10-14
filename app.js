@@ -5,16 +5,18 @@
   const SVG_NS = "http://www.w3.org/2000/svg";
   const PREFS_KEY = "veille-ram:prefs";
   const STALE_HOURS = 14;
-  // Catégories suivies : DDR5 6000 MHz en CL30, CL32, CL36, et DDR5 5600 MHz (CL28 à CL36).
-  const GROUPS = ["30", "32", "36", "5600"];
+  // Catégories suivies : DDR5 6000 MHz en CL30, CL32, CL36, DDR5 5600 MHz (CL28 à CL36),
+  // et DDR5 6400 MHz et plus dont la latence réelle vaut au moins celle d'un 5600 CL36.
+  const GROUPS = ["30", "32", "36", "5600", "6400"];
   const GROUP = {
     30: { label: "CL30", long: "6000 MHz CL30", sub: "6000 MHz", color: "var(--cl30)" },
     32: { label: "CL32", long: "6000 MHz CL32", sub: "6000 MHz", color: "var(--cl32)" },
     36: { label: "CL36", long: "6000 MHz CL36", sub: "6000 MHz", color: "var(--cl36)" },
     5600: { label: "5600", long: "5600 MHz", sub: "CL28 à CL36", color: "var(--mhz5600)" },
+    6400: { label: "6400+", long: "6400 MHz et plus", sub: "6400 MHz et +", color: "var(--mhz6400)" },
   };
   const speedOf = (o) => o.speed || 6000;
-  const groupOf = (o) => (speedOf(o) === 5600 ? "5600" : String(o.cl));
+  const groupOf = (o) => (speedOf(o) >= 6400 ? "6400" : speedOf(o) === 5600 ? "5600" : String(o.cl));
   const kitLabel = (o) => `${speedOf(o)} CL${o.cl}`;
   const VIEWS = { marche: "Marché", offres: "Offres", historique: "Historique", reglages: "Réglages" };
   const STOCK = {
@@ -236,10 +238,12 @@
       while (Date.now() - started < 5 * 60 * 1000) {
         await sleep(4000);
         tick();
-        const list = await github(`/actions/workflows/${WORKFLOW}/runs?per_page=5`);
+        const list = await github(`/actions/workflows/${WORKFLOW}/runs?per_page=10`);
         if (!list.ok) continue;
         const runs = (await list.json()).workflow_runs || [];
-        run = runs.filter((r) => r.id > before).sort((a, b) => a.id - b.id)[0] || null;
+        // Seulement le relevé ponctuel demandé ici, pas la boucle horaire qui tourne en parallèle.
+        run = runs.filter((r) => r.id > before && r.event === "workflow_dispatch" && r.display_title !== "Relevé horaire")
+          .sort((a, b) => a.id - b.id)[0] || null;
         if (run && run.status === "completed") break;
       }
       if (!run || run.status !== "completed") throw new Error("la recherche prend plus de temps que prévu, les prix arriveront dans quelques minutes");
@@ -301,7 +305,12 @@
   }
 
   const thresholds = () => state.latest.thresholds_eur;
-  const groupLimit = (g) => (g === "5600" ? (thresholds().mhz5600 ?? 340) : g === "30" ? thresholds().cl30 : thresholds().cl32_36);
+  const groupLimit = (g) => {
+    const t = thresholds();
+    if (g === "6400") return t.mhz6400plus ?? t.mhz5600 ?? t.cl30;
+    if (g === "5600") return t.mhz5600 ?? t.cl30;
+    return g === "30" ? t.cl30 : t.cl32_36;
+  };
   const limitFor = (o) => groupLimit(groupOf(o));
   const selectedGroups = () => (GROUP[prefs.cl] ? [prefs.cl] : GROUPS);
   const offerKey = (o) => `${o.shop}|${o.ref || o.name}|${speedOf(o)}|${o.cl}`;
@@ -324,6 +333,7 @@
       const p = { t: new Date(h.checked_at) };
       for (const cl of [30, 32, 36]) p[cl] = pick(cl) ? pick(cl).price_eur : null;
       p["5600"] = h.mhz5600 ? h.mhz5600.price_eur : null;
+      p["6400"] = h.mhz6400plus ? h.mhz6400plus.price_eur : null;
       return p;
     }).sort((a, b) => a.t - b.t);
   }
@@ -570,7 +580,7 @@
     $("chart-hint").textContent = !points.length
       ? "Aucun relevé sur cette période pour cette catégorie."
       : points.length < 2
-        ? "L'historique se remplit à chaque passage (2 par jour)."
+        ? "L'historique se remplit à chaque relevé (toutes les heures en journée)."
         : "Touche ou glisse sur le graphique pour lire les prix d'une date.";
     if (!points.length) return;
 
@@ -582,12 +592,20 @@
 
     const keys = series.map((s) => s.key);
     const single = series.length === 1 ? series[0] : null;
-    const refs = [];
+    let refs = [];
     if (keys.includes("30")) refs.push({ v: groupLimit("30"), label: "seuil CL30", color: "var(--cl30)" });
     if (keys.includes("32") || keys.includes("36")) {
       refs.push({ v: groupLimit("36"), label: single ? `seuil ${single.name}` : "seuil CL32/36", color: single ? single.color : "var(--muted)" });
     }
     if (keys.includes("5600")) refs.push({ v: groupLimit("5600"), label: "seuil 5600", color: "var(--mhz5600)" });
+    if (keys.includes("6400")) refs.push({ v: groupLimit("6400"), label: "seuil 6400+", color: "var(--mhz6400)" });
+    // Catégories au même seuil : une seule ligne.
+    refs = refs.reduce((acc, r) => {
+      const same = acc.find((a) => a.v === r.v);
+      if (same) Object.assign(same, { label: "seuil", color: "var(--muted)" });
+      else acc.push({ ...r });
+      return acc;
+    }, []);
 
     const values = points.flatMap((p) => series.map((s) => p[s.key])).filter((v) => v != null).concat(refs.map((r) => r.v));
     let lo = Math.min(...values);
@@ -747,6 +765,7 @@
     $("th-cl30").textContent = eur(t.cl30);
     $("th-cl32-36").textContent = eur(t.cl32_36);
     $("th-5600").textContent = eur(groupLimit("5600"));
+    $("th-6400").textContent = eur(groupLimit("6400"));
     $("set-schedule").textContent = scheduleTimes().map((s) => s.replace(":", "h")).join(" · ");
     $("set-last").textContent = shortFmt.format(new Date(state.latest.checked_at));
     const blocked = state.latest.blocked_sources || [];

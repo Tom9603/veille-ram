@@ -1,12 +1,30 @@
 name: Actualiser les prix
 
-# Lancé toutes les heures en journée (GitHub décale parfois ces lancements),
-# par le bouton ↻ de l'appli quand une clé GitHub y est enregistrée
-# (workflow_dispatch), et quand le relevé lui-même est modifié.
+# GitHub lance les tâches programmées avec des heures de retard, ou pas du
+# tout : avec un lancement par heure, on n'obtenait qu'environ 3 relevés par
+# jour, à des heures quelconques. Le robot tourne donc en continu et fait
+# lui-même un relevé par heure (à hh:13, de 6h à 23h, heure de Paris ; rien
+# la nuit). Un job GitHub dure 6 h au plus : avant cette limite, il en lance
+# un autre qui prend le relais.
+#
+# - « Relevé horaire » : la boucle, entretenue par les relais. Les lancements
+#   programmés ne servent que de secours : ils la redémarrent si elle s'est
+#   arrêtée, et s'arrêtent tout de suite si elle tourne. Une modification du
+#   relevé (push) fait un relevé immédiat, puis sert de secours de la même façon.
+# - « Relevé ponctuel » : un seul relevé, pour le bouton ↻ de l'appli (quand
+#   une clé GitHub y est enregistrée).
+run-name: ${{ (github.event_name == 'workflow_dispatch' && inputs.mode == 'ponctuel') && 'Relevé ponctuel' || 'Relevé horaire' }}
+
 on:
   workflow_dispatch:
+    inputs:
+      mode:
+        description: "ponctuel : un relevé ; boucle : un relevé par heure de 6h à 23h, en continu ; relais : suite de la boucle"
+        type: choice
+        options: [ponctuel, boucle, relais]
+        default: ponctuel
   schedule:
-    - cron: "13 4-21 * * *"   # toutes les heures, de 6h13 à 23h13 à Paris (heure d'été)
+    - cron: "43 * * * *"   # secours : redémarre la boucle si elle s'est arrêtée
   push:
     branches: [gh-pages]
     paths:
@@ -15,33 +33,107 @@ on:
 
 permissions:
   contents: write
-
-concurrency:
-  group: actualiser-les-prix
-  cancel-in-progress: false
+  actions: write   # relais : lancer le job suivant de la boucle
 
 jobs:
   releve:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: ${{ (github.event_name == 'workflow_dispatch' && inputs.mode == 'ponctuel') && 15 || 355 }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Relever les prix
-        run: python3 scripts/collect.py "$RUNNER_TEMP/run.json"
-
-      - name: Mettre à jour les données
-        run: python3 scripts/record.py "$RUNNER_TEMP/run.json"
-
-      - name: Publier
+        env:
+          EVENT: ${{ github.event_name }}
+          MODE: ${{ inputs.mode }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
+          set +e
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/latest.json data/history.json
-          git diff --cached --quiet && exit 0
-          git commit -m "Relevé automatique du $(TZ=Europe/Paris date '+%d/%m à %Hh%M')"
-          for attempt in 1 2 3; do
-            git pull --rebase origin gh-pages && git push origin HEAD:gh-pages && exit 0
-            sleep $((attempt * 5))
+          case "$EVENT:$MODE" in
+            *:relais) MODE=relais ;;
+            schedule:* | *:boucle) MODE=boucle ;;
+            push:*) MODE=push ;;
+            *) MODE=ponctuel ;;
+          esac
+          run_json="$RUNNER_TEMP/run.json"
+
+          paris_hour() { TZ=Europe/Paris date +%-H; }
+          next_slot() {   # prochain hh:13, en secondes depuis 1970
+            local now=$(date +%s) next
+            next=$(( (now / 3600 + 1) * 3600 + 13 * 60 ))
+            [ $((next - now)) -gt 3600 ] && next=$((next - 3600))
+            echo "$next"
+          }
+
+          # Relevé, puis publication sur gh-pages. En cas de conflit avec un autre
+          # relevé, on repart de la version en ligne et on y réapplique celui-ci.
+          releve() {
+            python3 scripts/collect.py "$run_json" || return 1
+            for attempt in 1 2 3; do
+              git fetch -q origin gh-pages && git reset -q --hard origin/gh-pages || { sleep 5; continue; }
+              python3 scripts/record.py "$run_json" > /dev/null || return 1
+              git add data/latest.json data/history.json
+              git diff --cached --quiet && return 0
+              git commit -q -m "Relevé automatique du $(TZ=Europe/Paris date '+%d/%m à %Hh%M')"
+              git push -q origin HEAD:gh-pages && return 0
+              sleep $((attempt * 5))
+            done
+            return 1
+          }
+
+          # Dernier relevé publié il y a moins de 40 minutes ?
+          recent() {
+            git fetch -q origin gh-pages && git reset -q --hard origin/gh-pages
+            python3 -c '
+          import json, sys
+          from datetime import datetime, timezone
+          at = datetime.fromisoformat(json.load(open("data/latest.json"))["checked_at"])
+          sys.exit(0 if (datetime.now(timezone.utc) - at).total_seconds() < 40 * 60 else 1)'
+          }
+
+          if [ "$MODE" = ponctuel ]; then
+            releve
+            exit $?
+          fi
+
+          if [ "$MODE" = push ]; then
+            releve || echo "::warning::Relevé en échec."
+          fi
+
+          if [ "$MODE" != relais ]; then
+            # Une boucle plus ancienne tourne déjà (ou son relais attend) : rien à faire.
+            older=$(gh run list --workflow actualiser.yml --limit 30 --json databaseId,displayTitle,status \
+              --jq "[.[] | select(.displayTitle == \"Relevé horaire\" and .status != \"completed\" and .databaseId < $GITHUB_RUN_ID)] | length")
+            if [ "${older:-0}" -gt 0 ]; then
+              echo "La boucle horaire tourne déjà."
+              exit 0
+            fi
+          fi
+
+          started=$(date +%s)
+          first=1
+          while :; do
+            if [ "$(paris_hour)" -ge 6 ]; then
+              # Au démarrage, pas de relevé si le dernier est récent ou si le prochain créneau est proche.
+              if [ "$first" = 1 ] && { [ $(( $(next_slot) - $(date +%s) )) -le 900 ] || recent; }; then
+                echo "Pas de relevé immédiat : le prochain est à $(TZ=Europe/Paris date -d "@$(next_slot)" +%Hh%M)."
+              else
+                releve || echo "::warning::Relevé de $(TZ=Europe/Paris date +%Hh%M) en échec, nouvel essai à l'heure suivante."
+              fi
+            fi
+            first=0
+
+            next=$(next_slot)
+            if [ "$next" -gt $((started + 290 * 60)) ]; then
+              # Bientôt la limite de 6 h : un nouveau job prendra le prochain relevé.
+              wait=$((next - 120 - $(date +%s)))
+              [ "$wait" -gt 0 ] && sleep "$wait"
+              gh workflow run actualiser.yml --ref gh-pages -f mode=relais \
+                || echo "::warning::Relais impossible : la programmation redémarrera la boucle."
+              exit 0
+            fi
+            sleep $((next - $(date +%s)))
           done
-          exit 1
