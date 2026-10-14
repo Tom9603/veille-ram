@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-14T11:28+02:00",
+  "checked_at": "2026-10-14T17:04+02:00",
   "product": {
     "label": "DDR5 · 2×16 Go · 6000 / 5600 MHz",
     "kit": "2x16 Go (32 Go)",
@@ -165,20 +165,6 @@
       "marketplace": false,
       "verified": true,
       "url": "https://www.grosbill.com/corsair-vengeance-rgb-32go-2x16go-ddr5-6000mhz-cl-36-gris-143840",
-      "deal": false
-    },
-    {
-      "name": "Crucial Pro Overclocking Edition",
-      "ref": "CP2K16G60C36U5B",
-      "speed": 6000,
-      "cl": 36,
-      "price_eur": 494.07,
-      "shop": "ManoMano",
-      "stock": "in_stock",
-      "marketplace": false,
-      "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/25574/offer/87344239?client_id=1551",
-      "via": "Ledenicheur",
       "deal": false
     },
     {
@@ -580,6 +566,19 @@
       "deal": false
     },
     {
+      "name": "Corsair Vengeance RGB White",
+      "ref": "CMH32GX5M2D6000C36W",
+      "speed": 6000,
+      "cl": 36,
+      "price_eur": 554.5,
+      "shop": "Ledenicheur (meilleur prix)",
+      "stock": "unknown",
+      "marketplace": false,
+      "verified": false,
+      "url": "https://ledenicheur.fr/product.php?p=7130725",
+      "deal": false
+    },
+    {
       "name": "Kingston Fury Beast Black",
       "ref": "KF556C36BBEK2-32",
       "speed": 5600,
@@ -646,34 +645,6 @@
       "deal": false
     },
     {
-      "name": "Patriot Viper RGB LED",
-      "ref": "PVVR532G560C36K",
-      "speed": 5600,
-      "cl": 36,
-      "price_eur": 560.39,
-      "shop": "Pixmania",
-      "stock": "in_stock",
-      "marketplace": false,
-      "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/30138/offer/323321?client_id=1551",
-      "via": "Ledenicheur",
-      "deal": false
-    },
-    {
-      "name": "Patriot Viper Venom",
-      "ref": "PVV532G600C30K",
-      "speed": 6000,
-      "cl": 30,
-      "price_eur": 562.0,
-      "shop": "Pixmania",
-      "stock": "in_stock",
-      "marketplace": false,
-      "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/30138/offer/456651?client_id=1551",
-      "via": "Ledenicheur",
-      "deal": false
-    },
-    {
       "name": "Patriot Viper Venom",
       "ref": "PVV532G600C36K",
       "speed": 6000,
@@ -724,6 +695,20 @@
       "marketplace": false,
       "verified": true,
       "url": "https://www.alternate.fr/Patriot/32-Go-DDR5-5600-2x-16-Go-mémoire-vive/html/product/1855435",
+      "deal": false
+    },
+    {
+      "name": "Patriot Viper RGB LED",
+      "ref": "PVVR532G560C36K",
+      "speed": 5600,
+      "cl": 36,
+      "price_eur": 572.39,
+      "shop": "Pixmania",
+      "stock": "in_stock",
+      "marketplace": false,
+      "verified": false,
+      "url": "https://ledenicheur.fr/go-to-shop/30138/offer/323321?client_id=1551",
+      "via": "Ledenicheur",
       "deal": false
     },
     {
@@ -876,6 +861,20 @@
       "deal": false
     },
     {
+      "name": "Patriot Viper Venom RGB",
+      "ref": "PVVR532G600C30K",
+      "speed": 6000,
+      "cl": 30,
+      "price_eur": 599.09,
+      "shop": "TopBiz",
+      "stock": "in_stock",
+      "marketplace": false,
+      "verified": false,
+      "url": "https://ledenicheur.fr/go-to-shop/25076/offer/395468?client_id=1551",
+      "via": "Ledenicheur",
+      "deal": false
+    },
+    {
       "name": "Kingston Fury Beast Black",
       "ref": "KF556C36BBEK2-32",
       "speed": 5600,
@@ -903,16 +902,16 @@
       "deal": false
     },
     {
-      "name": "Patriot Viper Venom RGB",
-      "ref": "PVVR532G600C30K",
+      "name": "Patriot Viper Venom",
+      "ref": "PVV532G600C30K",
       "speed": 6000,
       "cl": 30,
-      "price_eur": 609.09,
-      "shop": "TopBiz",
+      "price_eur": 608.38,
+      "shop": "Pixmania",
       "stock": "in_stock",
       "marketplace": false,
       "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/25076/offer/395468?client_id=1551",
+      "url": "https://ledenicheur.fr/go-to-shop/30138/offer/456651?client_id=1551",
       "via": "Ledenicheur",
       "deal": false
     },
@@ -959,6 +958,20 @@
       "deal": false
     },
     {
+      "name": "Lexar Ares OC",
+      "ref": "LD5U16G60C320A",
+      "speed": 6000,
+      "cl": 32,
+      "price_eur": 733.29,
+      "shop": "Pixmania",
+      "stock": "in_stock",
+      "marketplace": false,
+      "verified": false,
+      "url": "https://ledenicheur.fr/go-to-shop/30138/offer/578686?client_id=1551",
+      "via": "Ledenicheur",
+      "deal": false
+    },
+    {
       "name": "Kingston Fury Renegade",
       "ref": "KF560C32RSK2-32",
       "speed": 6000,
@@ -977,7 +990,7 @@
       "ref": "LD5U16G60C320A",
       "speed": 6000,
       "cl": 32,
-      "price_eur": 773.16,
+      "price_eur": 772.21,
       "shop": "Amazon.fr Marketplace",
       "stock": "in_stock",
       "marketplace": true,
@@ -1144,20 +1157,6 @@
       "deal": false
     },
     {
-      "name": "Lexar Ares OC",
-      "ref": "LD5U16G60C320A",
-      "speed": 6000,
-      "cl": 32,
-      "price_eur": 899.99,
-      "shop": "Pixmania",
-      "stock": "in_stock",
-      "marketplace": false,
-      "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/30138/offer/578686?client_id=1551",
-      "via": "Ledenicheur",
-      "deal": false
-    },
-    {
       "name": "G.Skill Trident Z5 Neo",
       "ref": "F5-6000J3238F16GX2-TZ5N",
       "speed": 6000,
@@ -1172,7 +1171,7 @@
       "deal": false
     }
   ],
-  "trend": "Relevé automatique de 227 offres, dont 50 en 5600 MHz (Alternate 24, Grosbill 9, LDLC 38, Ledenicheur 36, Materiel.net 38, autres boutiques via Ledenicheur 82).",
+  "trend": "Relevé automatique de 226 offres, dont 48 en 5600 MHz (Alternate 24, Grosbill 9, LDLC 38, Ledenicheur 37, Materiel.net 38, autres boutiques via Ledenicheur 80).",
   "blocked_sources": [],
-  "notification": "RAM DDR5 32 Go : pas d'affaire. Meilleur CL30 507 € (Alternate), meilleur CL32/36 474,99 € (Amazon.fr Marketplace), meilleur 5600 427,49 € (Grosbill)\n\n| Kit | MHz | CL | Prix | Boutique | Stock | Lien |\n|---|---|---|---|---|---|---|\n| Team Group Noir | 5600 | 36 | 401 € | Alternate | rupture | https://www.alternate.fr/Team-Group/32-Go-DDR5-5600-2x-16-Go-mémoire-vive/html/product/1843561 |\n| Kingston Fury Beast | 5600 | 36 | 427,49 € | Grosbill | en stock | https://www.grosbill.com/kingston-fury-beast-32go-2x16go-ddr5-5600mhz-170286 |\n| Patriot Viper RGB LED | 5600 | 36 | 459,99 € (marketplace) (via Ledenicheur) | Amazon.fr Marketplace | en stock | https://ledenicheur.fr/go-to-shop/26551/offer/B09XY7JBR7?client_id=1551 |\n| Corsair Vengeance | 6000 | 36 | 469,99 € | Grosbill | rupture | https://www.grosbill.com/corsair-vengeance-32go-2x16go-ddr5-6000mhz-137375 |\n| Patriot Viper Venom | 6000 | 36 | 474,99 € (marketplace) (via Ledenicheur) | Amazon.fr Marketplace | en stock | https://ledenicheur.fr/go-to-shop/26551/offer/B09XY6KX8P?client_id=1551 |\n\nTendance : Relevé automatique de 227 offres, dont 50 en 5600 MHz (Alternate 24, Grosbill 9, LDLC 38, Ledenicheur 36, Materiel.net 38, autres boutiques via Ledenicheur 82).\nAppli : https://tom9603.github.io/veille-ram/"
+  "notification": "RAM DDR5 32 Go : pas d'affaire. Meilleur CL30 507 € (Alternate), meilleur CL32/36 474,99 € (Amazon.fr Marketplace), meilleur 5600 427,49 € (Grosbill)\n\n| Kit | MHz | CL | Prix | Boutique | Stock | Lien |\n|---|---|---|---|---|---|---|\n| Team Group Noir | 5600 | 36 | 401 € | Alternate | rupture | https://www.alternate.fr/Team-Group/32-Go-DDR5-5600-2x-16-Go-mémoire-vive/html/product/1843561 |\n| Kingston Fury Beast | 5600 | 36 | 427,49 € | Grosbill | en stock | https://www.grosbill.com/kingston-fury-beast-32go-2x16go-ddr5-5600mhz-170286 |\n| Patriot Viper RGB LED | 5600 | 36 | 459,99 € (marketplace) (via Ledenicheur) | Amazon.fr Marketplace | en stock | https://ledenicheur.fr/go-to-shop/26551/offer/B09XY7JBR7?client_id=1551 |\n| Corsair Vengeance | 6000 | 36 | 469,99 € | Grosbill | rupture | https://www.grosbill.com/corsair-vengeance-32go-2x16go-ddr5-6000mhz-137375 |\n| Patriot Viper Venom | 6000 | 36 | 474,99 € (marketplace) (via Ledenicheur) | Amazon.fr Marketplace | en stock | https://ledenicheur.fr/go-to-shop/26551/offer/B09XY6KX8P?client_id=1551 |\n\nTendance : Relevé automatique de 226 offres, dont 48 en 5600 MHz (Alternate 24, Grosbill 9, LDLC 38, Ledenicheur 37, Materiel.net 38, autres boutiques via Ledenicheur 80).\nAppli : https://tom9603.github.io/veille-ram/"
 }
