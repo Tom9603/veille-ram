@@ -21,8 +21,8 @@
   },
   "thresholds_eur": {
     "cl30": 400,
-    "cl32_36": 360,
-    "mhz5600": 340
+    "cl32_36": 400,
+    "mhz5600": 400
   },
   "schedule": {
     "timezone": "Europe/Paris",

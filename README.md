@@ -43,8 +43,8 @@ L'appli a quatre onglets :
 
 Une **bonne affaire** est une offre en stock (ou sur commande), dont le prix a
 été vérifié sur la page de la boutique, et sous le seuil :
-6000 CL30 ≤ 400 €, 6000 CL32/CL36 ≤ 360 €, 5600 ≤ 340 € (modifiable dans
-`config.json`, clé `mhz5600` pour le 5600).
+400 € ou moins pour tout kit au moins 5600 CL36 (5600 CL28 à CL36, 6000 CL30
+à CL36), modifiable dans `config.json` (`thresholds_eur`).
 
 ## Installer l'appli sur le téléphone
 
