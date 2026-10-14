@@ -26,6 +26,10 @@ on:
         type: choice
         options: [ponctuel, boucle, relais]
         default: ponctuel
+      precedent:
+        description: "relais : numéro du job de la boucle qui passe la main"
+        required: false
+        default: ""
   schedule:
     - cron: "43 * * * *"   # secours : redémarre la boucle si elle s'est arrêtée
   push:
@@ -51,6 +55,7 @@ jobs:
         env:
           EVENT: ${{ github.event_name }}
           MODE: ${{ inputs.mode }}
+          PRECEDENT: ${{ inputs.precedent }}
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
@@ -143,16 +148,16 @@ jobs:
             releve manuel || echo "::warning::Relevé en échec."
           fi
 
-          if [ "$MODE" != relais ]; then
-            older=$(gh run list --workflow actualiser.yml --limit 30 --json databaseId,displayTitle,status \
-              --jq ".[] | select(.displayTitle == \"Relevé horaire\" and .status != \"completed\" and .databaseId < $GITHUB_RUN_ID) | .databaseId")
-            if [ -n "$older" ] && [ "$MODE" = push ]; then
-              # Nouvelle version du relevé : elle remplace la boucle en cours.
-              for id in $older; do gh run cancel "$id" || true; done
-            elif [ -n "$older" ]; then
-              echo "La boucle horaire tourne déjà."
-              exit 0
-            fi
+          # Une seule boucle à la fois : on regarde les boucles plus anciennes encore
+          # actives (sauf, pour un relais, le job qui vient de lui passer la main).
+          older=$(gh run list --workflow actualiser.yml --limit 30 --json databaseId,displayTitle,status \
+            --jq ".[] | select(.displayTitle == \"Relevé horaire\" and .status != \"completed\" and .databaseId < $GITHUB_RUN_ID and (.databaseId | tostring) != \"${PRECEDENT:-0}\") | .databaseId")
+          if [ -n "$older" ] && [ "$MODE" = push ]; then
+            # Nouvelle version du relevé : elle remplace la boucle en cours.
+            for id in $older; do gh run cancel "$id" || echo "::warning::Impossible d'arrêter la boucle $id."; done
+          elif [ -n "$older" ]; then
+            echo "Une autre boucle horaire tourne déjà."
+            exit 0
           fi
 
           started=$(date +%s)
@@ -172,7 +177,7 @@ jobs:
             if [ "$next" -gt $((started + 290 * 60)) ]; then
               # Bientôt la limite de 6 h : un nouveau job prendra le prochain relevé.
               wait_until $((next - 120))
-              gh workflow run actualiser.yml --ref gh-pages -f mode=relais \
+              gh workflow run actualiser.yml --ref gh-pages -f mode=relais -f precedent="$GITHUB_RUN_ID" \
                 || echo "::warning::Relais impossible : la programmation redémarrera la boucle."
               exit 0
             fi
