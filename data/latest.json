@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-15T00:03+02:00",
+  "checked_at": "2026-10-15T00:27+02:00",
   "product": {
     "label": "DDR5 · 2×16 Go · 5600 MHz et plus",
     "kit": "2x16 Go (32 Go)",
@@ -101,7 +101,7 @@
     "cl36": 0.0,
     "cl32_36": 0.0,
     "mhz5600": 0.0,
-    "mhz6400plus": null
+    "mhz6400plus": 0.0
   },
   "offers": [
     {
@@ -1454,5 +1454,12 @@
   ],
   "trend": "Relevé automatique de 364 offres, dont 47 en 5600 MHz et 129 en 6400 MHz et plus (Alternate 42, Grosbill 10, LDLC 55, Ledenicheur 107, Materiel.net 55, autres boutiques via Ledenicheur 95).",
   "blocked_sources": [],
-  "notification": "RAM DDR5 32 Go : pas d'affaire. Meilleur CL30 507 € (Alternate), meilleur CL32/36 474,99 € (Amazon.fr Marketplace), meilleur 5600 459,99 € (Amazon.fr Marketplace), meilleur 6400+ 455,76 € (Pixmania)\n\n| Kit | MHz | CL | Prix | Boutique | Stock | Lien |\n|---|---|---|---|---|---|---|\n| Kingston Fury Beast | 5600 | 36 | 449,99 € | Grosbill | rupture | https://www.grosbill.com/kingston-fury-beast-32go-2x16go-ddr5-5600mhz-125798 |\n| Patriot Viper Venom | 6400 | 32 | 455,76 € (via Ledenicheur) | Pixmania | en stock | https://ledenicheur.fr/go-to-shop/30138/offer/323898?client_id=1551 |\n| Corsair VENGEANCE Black | 6400 | 32 | 459,99 € | Grosbill | rupture | https://www.grosbill.com/corsair-vengeance-ddr5-black-2x16go-ddr5-6400-135672 |\n| Patriot Viper RGB LED | 5600 | 36 | 459,99 € (marketplace) (via Ledenicheur) | Amazon.fr Marketplace | en stock | https://ledenicheur.fr/go-to-shop/26551/offer/B09XY7JBR7?client_id=1551 |\n| Corsair Vengeance | 6000 | 36 | 469,99 € | Grosbill | rupture | https://www.grosbill.com/corsair-vengeance-32go-2x16go-ddr5-6000mhz-137375 |\n\nTendance : Relevé automatique de 364 offres, dont 47 en 5600 MHz et 129 en 6400 MHz et plus (Alternate 42, Grosbill 10, LDLC 55, Ledenicheur 107, Materiel.net 55, autres boutiques via Ledenicheur 95).\nAppli : https://tom9603.github.io/veille-ram/"
+  "notification": "RAM DDR5 32 Go : pas d'affaire. Meilleur CL30 507 € (Alternate), meilleur CL32/36 474,99 € (Amazon.fr Marketplace), meilleur 5600 459,99 € (Amazon.fr Marketplace), meilleur 6400+ 455,76 € (Pixmania)\n\n| Kit | MHz | CL | Prix | Boutique | Stock | Lien |\n|---|---|---|---|---|---|---|\n| Kingston Fury Beast | 5600 | 36 | 449,99 € | Grosbill | rupture | https://www.grosbill.com/kingston-fury-beast-32go-2x16go-ddr5-5600mhz-125798 |\n| Patriot Viper Venom | 6400 | 32 | 455,76 € (via Ledenicheur) | Pixmania | en stock | https://ledenicheur.fr/go-to-shop/30138/offer/323898?client_id=1551 |\n| Corsair VENGEANCE Black | 6400 | 32 | 459,99 € | Grosbill | rupture | https://www.grosbill.com/corsair-vengeance-ddr5-black-2x16go-ddr5-6400-135672 |\n| Patriot Viper RGB LED | 5600 | 36 | 459,99 € (marketplace) (via Ledenicheur) | Amazon.fr Marketplace | en stock | https://ledenicheur.fr/go-to-shop/26551/offer/B09XY7JBR7?client_id=1551 |\n| Corsair Vengeance | 6000 | 36 | 469,99 € | Grosbill | rupture | https://www.grosbill.com/corsair-vengeance-32go-2x16go-ddr5-6000mhz-137375 |\n\nTendance : Relevé automatique de 364 offres, dont 47 en 5600 MHz et 129 en 6400 MHz et plus (Alternate 42, Grosbill 10, LDLC 55, Ledenicheur 107, Materiel.net 55, autres boutiques via Ledenicheur 95).\nAppli : https://tom9603.github.io/veille-ram/",
+  "push": {
+    "title": "Pas d'affaire : 455,76 € au mieux",
+    "message": "Patriot Viper Venom 6400 MHz CL32 chez Pixmania, 55,76 € au-dessus du seuil.\n6400+ 455,76 € · 5600 459,99 € · CL36 474,99 € · CL30 507 € · CL32 541,99 €",
+    "priority": 2,
+    "tags": [],
+    "click": "https://tom9603.github.io/veille-ram/"
+  }
 }
