@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-16T13:13+02:00",
+  "checked_at": "2026-10-16T14:13+02:00",
   "product": {
     "label": "DDR5 · 2×16 Go · 5600 MHz et plus",
     "kit": "2x16 Go (32 Go)",
@@ -96,10 +96,10 @@
     }
   },
   "change_since_previous_eur": {
-    "cl30": -38.15,
+    "cl30": 0.0,
     "cl32": 0.0,
-    "cl36": -4.93,
-    "cl32_36": -4.93,
+    "cl36": 0.0,
+    "cl32_36": 0.0,
     "mhz5600": 0.0,
     "mhz6400plus": 0.0
   },
@@ -396,11 +396,12 @@
       "speed": 6400,
       "cl": 36,
       "price_eur": 529.0,
-      "shop": "Ledenicheur (meilleur prix)",
-      "stock": "unknown",
+      "shop": "Amazon.fr",
+      "stock": "in_stock",
       "marketplace": false,
       "verified": false,
-      "url": "https://ledenicheur.fr/product.php?p=13944306",
+      "url": "https://ledenicheur.fr/go-to-shop/18708/offer/B0DJW4SPPK?client_id=1551",
+      "via": "Ledenicheur",
       "deal": false
     },
     {
@@ -654,7 +655,7 @@
       "cl": 36,
       "price_eur": 549.0,
       "shop": "Alternate",
-      "stock": "out_of_stock",
+      "stock": "in_stock",
       "marketplace": false,
       "verified": true,
       "url": "https://www.alternate.fr/Corsair/Vengeance-RGB-32-Go-DDR5-6400-2x-16-Go-mémoire-vive/html/product/1917732",
@@ -698,6 +699,20 @@
       "marketplace": true,
       "verified": false,
       "url": "https://ledenicheur.fr/go-to-shop/42189/offer/450356485?client_id=1551",
+      "via": "Ledenicheur",
+      "deal": false
+    },
+    {
+      "name": "Corsair Vengeance RGB",
+      "ref": "CMH32GX5M2B6400Z36",
+      "speed": 6400,
+      "cl": 36,
+      "price_eur": 554.34,
+      "shop": "1FODISCOUNT",
+      "stock": "in_stock",
+      "marketplace": false,
+      "verified": false,
+      "url": "https://ledenicheur.fr/go-to-shop/24810/offer/ADS222041?client_id=1551",
       "via": "Ledenicheur",
       "deal": false
     },
@@ -791,6 +806,20 @@
       "marketplace": false,
       "verified": false,
       "url": "https://ledenicheur.fr/go-to-shop/30138/offer/456651?client_id=1551",
+      "via": "Ledenicheur",
+      "deal": false
+    },
+    {
+      "name": "Corsair Vengeance RGB",
+      "ref": "CMH32GX5M2B6400Z36",
+      "speed": 6400,
+      "cl": 36,
+      "price_eur": 559.99,
+      "shop": "Pixmania",
+      "stock": "in_stock",
+      "marketplace": false,
+      "verified": false,
+      "url": "https://ledenicheur.fr/go-to-shop/30138/offer/373399?client_id=1551",
       "via": "Ledenicheur",
       "deal": false
     },
@@ -970,6 +999,20 @@
       "deal": false
     },
     {
+      "name": "Corsair Vengeance RGB",
+      "ref": "CMH32GX5M2B6400Z36",
+      "speed": 6400,
+      "cl": 36,
+      "price_eur": 590.65,
+      "shop": "Cdiscount Marketplace",
+      "stock": "in_stock",
+      "marketplace": true,
+      "verified": false,
+      "url": "https://ledenicheur.fr/go-to-shop/36493/offer/COR1733359236284-4293697927?client_id=1551",
+      "via": "Ledenicheur",
+      "deal": false
+    },
+    {
       "name": "Corsair Vengeance",
       "ref": "CMK32GX5M2B6000Z30",
       "speed": 6000,
@@ -1119,19 +1162,6 @@
       "deal": false
     },
     {
-      "name": "Corsair Vengeance Black",
-      "ref": "CMK32GX5M2B6400C32",
-      "speed": 6400,
-      "cl": 32,
-      "price_eur": 609.25,
-      "shop": "Ledenicheur (meilleur prix)",
-      "stock": "unknown",
-      "marketplace": false,
-      "verified": false,
-      "url": "https://ledenicheur.fr/product.php?p=11366778",
-      "deal": false
-    },
-    {
       "name": "Kingston Fury Beast Black RGB",
       "ref": "KF556C36BBEAK2-32",
       "speed": 5600,
@@ -1142,33 +1172,6 @@
       "marketplace": false,
       "verified": true,
       "url": "https://www.alternate.fr/Kingston-FURY/Beast-RGB-32-Go-DDR5-5600-2x-16-Go-mémoire-vive/html/product/1866397",
-      "deal": false
-    },
-    {
-      "name": "Corsair Vengeance RGB Black",
-      "ref": "CMH32GX5M2B6400C36",
-      "speed": 6400,
-      "cl": 36,
-      "price_eur": 612.57,
-      "shop": "Cdiscount Marketplace",
-      "stock": "in_stock",
-      "marketplace": true,
-      "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/36493/offer/COR1691056867572-4308195964?client_id=1551",
-      "via": "Ledenicheur",
-      "deal": false
-    },
-    {
-      "name": "Corsair Vengeance RGB",
-      "ref": "CMH32GX5M2B6400Z32",
-      "speed": 6400,
-      "cl": 32,
-      "price_eur": 614.21,
-      "shop": "Ledenicheur (meilleur prix)",
-      "stock": "unknown",
-      "marketplace": false,
-      "verified": false,
-      "url": "https://ledenicheur.fr/product.php?p=13814394",
       "deal": false
     },
     {
@@ -1244,7 +1247,7 @@
       "ref": "LD5U16G60C320A",
       "speed": 6000,
       "cl": 32,
-      "price_eur": 768.61,
+      "price_eur": 768.26,
       "shop": "Amazon.fr Marketplace",
       "stock": "in_stock",
       "marketplace": true,
@@ -1453,12 +1456,12 @@
       "deal": false
     }
   ],
-  "trend": "Relevé automatique de 362 offres, dont 45 en 5600 MHz et 134 en 6400 MHz et plus (Alternate 43, Grosbill 10, LDLC 55, Ledenicheur 106, Materiel.net 55, autres boutiques via Ledenicheur 93).",
+  "trend": "Relevé automatique de 363 offres, dont 45 en 5600 MHz et 135 en 6400 MHz et plus (Alternate 43, Grosbill 10, LDLC 55, Ledenicheur 106, Materiel.net 55, autres boutiques via Ledenicheur 94).",
   "blocked_sources": [],
-  "notification": "RAM DDR5 32 Go : pas d'affaire. Meilleur CL30 468,85 € (ManoMano), meilleur CL32/36 494,07 € (ManoMano), meilleur 5600 459,99 € (Amazon.fr Marketplace), meilleur 6400+ 489,99 € (Amazon.fr Marketplace)\nDepuis le dernier passage : CL30 −38,15 €, CL36 −4,93 €\n\n| Kit | MHz | CL | Prix | Boutique | Stock | Lien |\n|---|---|---|---|---|---|---|\n| Kingston Fury Beast | 5600 | 36 | 449,99 € | Grosbill | rupture | https://www.grosbill.com/kingston-fury-beast-32go-2x16go-ddr5-5600mhz-125798 |\n| Corsair VENGEANCE Black | 6400 | 32 | 459,99 € | Grosbill | rupture | https://www.grosbill.com/corsair-vengeance-ddr5-black-2x16go-ddr5-6400-135672 |\n| Patriot Viper RGB LED | 5600 | 36 | 459,99 € (marketplace) (via Ledenicheur) | Amazon.fr Marketplace | en stock | https://ledenicheur.fr/go-to-shop/26551/offer/B09XYSN5DY?client_id=1551 |\n| Team Group Blanc | 6400 | 40 | 461 € | Alternate | rupture | https://www.alternate.fr/Team-Group/32-Go-DDR5-6400-2x-16-Go-mémoire-vive/html/product/100040411 |\n| Patriot Viper Venom | 6000 | 30 | 468,85 € (via Ledenicheur) | ManoMano | en stock | https://ledenicheur.fr/go-to-shop/25574/offer/89326946?client_id=1551 |\n\nTendance : Relevé automatique de 362 offres, dont 45 en 5600 MHz et 134 en 6400 MHz et plus (Alternate 43, Grosbill 10, LDLC 55, Ledenicheur 106, Materiel.net 55, autres boutiques via Ledenicheur 93).\nAppli : https://tom9603.github.io/veille-ram/",
+  "notification": "RAM DDR5 32 Go : pas d'affaire. Meilleur CL30 468,85 € (ManoMano), meilleur CL32/36 494,07 € (ManoMano), meilleur 5600 459,99 € (Amazon.fr Marketplace), meilleur 6400+ 489,99 € (Amazon.fr Marketplace)\n\n| Kit | MHz | CL | Prix | Boutique | Stock | Lien |\n|---|---|---|---|---|---|---|\n| Kingston Fury Beast | 5600 | 36 | 449,99 € | Grosbill | rupture | https://www.grosbill.com/kingston-fury-beast-32go-2x16go-ddr5-5600mhz-125798 |\n| Corsair VENGEANCE Black | 6400 | 32 | 459,99 € | Grosbill | rupture | https://www.grosbill.com/corsair-vengeance-ddr5-black-2x16go-ddr5-6400-135672 |\n| Patriot Viper RGB LED | 5600 | 36 | 459,99 € (marketplace) (via Ledenicheur) | Amazon.fr Marketplace | en stock | https://ledenicheur.fr/go-to-shop/26551/offer/B09XYSN5DY?client_id=1551 |\n| Team Group Blanc | 6400 | 40 | 461 € | Alternate | rupture | https://www.alternate.fr/Team-Group/32-Go-DDR5-6400-2x-16-Go-mémoire-vive/html/product/100040411 |\n| Patriot Viper Venom | 6000 | 30 | 468,85 € (via Ledenicheur) | ManoMano | en stock | https://ledenicheur.fr/go-to-shop/25574/offer/89326946?client_id=1551 |\n\nTendance : Relevé automatique de 363 offres, dont 45 en 5600 MHz et 135 en 6400 MHz et plus (Alternate 43, Grosbill 10, LDLC 55, Ledenicheur 106, Materiel.net 55, autres boutiques via Ledenicheur 94).\nAppli : https://tom9603.github.io/veille-ram/",
   "push": {
     "title": "Pas d'affaire : 459,99 € au mieux",
-    "message": "Patriot Viper RGB LED 5600 MHz CL36 chez Amazon.fr Marketplace, 59,99 € au-dessus du seuil.\n5600 459,99 € · CL30 468,85 € · 6400+ 489,99 € · CL36 494,07 € · CL32 541,99 €\nDepuis le relevé précédent : CL36 −4,93 €, CL30 −38,15 €",
+    "message": "Patriot Viper RGB LED 5600 MHz CL36 chez Amazon.fr Marketplace, 59,99 € au-dessus du seuil.\n5600 459,99 € · CL30 468,85 € · 6400+ 489,99 € · CL36 494,07 € · CL32 541,99 €",
     "priority": 2,
     "tags": [],
     "click": "https://tom9603.github.io/veille-ram/"
