@@ -4269,5 +4269,70 @@
   },
   "deal": false,
   "offers_count": 96
+ },
+ {
+  "checked_at": "2026-10-17T08:14+02:00",
+  "cl30": {
+   "name": "Patriot Viper Venom",
+   "ref": "PVV532G600C30K",
+   "speed": 6000,
+   "cl": 30,
+   "price_eur": 507.0,
+   "shop": "Alternate",
+   "stock": "in_stock",
+   "url": "https://www.alternate.fr/Patriot/32-Go-DDR5-6000-2x-16-Go-mémoire-vive/html/product/100063948"
+  },
+  "cl32": {
+   "name": "Lexar Ares OC",
+   "ref": "LD5U16G60C320A",
+   "speed": 6000,
+   "cl": 32,
+   "price_eur": 541.99,
+   "shop": "Cdiscount",
+   "stock": "in_stock",
+   "url": "https://ledenicheur.fr/go-to-shop/24166/offer/LEX1759298414731?client_id=1551"
+  },
+  "cl36": {
+   "name": "Patriot Viper Venom",
+   "ref": "PVV532G600C36K",
+   "speed": 6000,
+   "cl": 36,
+   "price_eur": 499.0,
+   "shop": "Alternate",
+   "stock": "in_stock",
+   "url": "https://www.alternate.fr/Patriot/32-Go-DDR5-6000-2x-16-Go-mémoire-vive/html/product/1878869"
+  },
+  "cl32_36": {
+   "name": "Patriot Viper Venom",
+   "ref": "PVV532G600C36K",
+   "speed": 6000,
+   "cl": 36,
+   "price_eur": 499.0,
+   "shop": "Alternate",
+   "stock": "in_stock",
+   "url": "https://www.alternate.fr/Patriot/32-Go-DDR5-6000-2x-16-Go-mémoire-vive/html/product/1878869"
+  },
+  "mhz5600": {
+   "name": "Patriot Viper RGB LED",
+   "ref": "PVVR532G560C36K",
+   "speed": 5600,
+   "cl": 36,
+   "price_eur": 459.99,
+   "shop": "Amazon.fr Marketplace",
+   "stock": "in_stock",
+   "url": "https://ledenicheur.fr/go-to-shop/26551/offer/B09XYSN5DY?client_id=1551"
+  },
+  "mhz6400plus": {
+   "name": "Patriot Viper Venom",
+   "ref": "PVV532G640C32K",
+   "speed": 6400,
+   "cl": 32,
+   "price_eur": 489.99,
+   "shop": "Amazon.fr Marketplace",
+   "stock": "in_stock",
+   "url": "https://ledenicheur.fr/go-to-shop/26551/offer/B0BT2546S9?client_id=1551"
+  },
+  "deal": false,
+  "offers_count": 100
  }
 ]

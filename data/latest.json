@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-17T07:15+02:00",
+  "checked_at": "2026-10-17T08:14+02:00",
   "product": {
     "label": "DDR5 · 2×16 Go · 5600 MHz et plus",
     "kit": "2x16 Go (32 Go)",
@@ -32,17 +32,17 @@
     "mhz6400plus": 400
   },
   "deal": false,
-  "headline": "RAM DDR5 32 Go : pas d'affaire. Meilleur CL30 468,85 € (ManoMano), meilleur CL32/36 494,07 € (ManoMano), meilleur 5600 459,99 € (Amazon.fr Marketplace), meilleur 6400+ 489,99 € (Amazon.fr Marketplace)",
+  "headline": "RAM DDR5 32 Go : pas d'affaire. Meilleur CL30 507 € (Alternate), meilleur CL32/36 499 € (Alternate), meilleur 5600 459,99 € (Amazon.fr Marketplace), meilleur 6400+ 489,99 € (Amazon.fr Marketplace)",
   "best": {
     "cl30": {
       "name": "Patriot Viper Venom",
       "ref": "PVV532G600C30K",
       "speed": 6000,
       "cl": 30,
-      "price_eur": 468.85,
-      "shop": "ManoMano",
+      "price_eur": 507.0,
+      "shop": "Alternate",
       "stock": "in_stock",
-      "url": "https://ledenicheur.fr/go-to-shop/25574/offer/89326946?client_id=1551"
+      "url": "https://www.alternate.fr/Patriot/32-Go-DDR5-6000-2x-16-Go-mémoire-vive/html/product/100063948"
     },
     "cl32": {
       "name": "Lexar Ares OC",
@@ -55,24 +55,24 @@
       "url": "https://ledenicheur.fr/go-to-shop/24166/offer/LEX1759298414731?client_id=1551"
     },
     "cl36": {
-      "name": "Crucial Pro Overclocking Edition",
-      "ref": "CP2K16G60C36U5B",
+      "name": "Patriot Viper Venom",
+      "ref": "PVV532G600C36K",
       "speed": 6000,
       "cl": 36,
-      "price_eur": 494.07,
-      "shop": "ManoMano",
+      "price_eur": 499.0,
+      "shop": "Alternate",
       "stock": "in_stock",
-      "url": "https://ledenicheur.fr/go-to-shop/25574/offer/87344239?client_id=1551"
+      "url": "https://www.alternate.fr/Patriot/32-Go-DDR5-6000-2x-16-Go-mémoire-vive/html/product/1878869"
     },
     "cl32_36": {
-      "name": "Crucial Pro Overclocking Edition",
-      "ref": "CP2K16G60C36U5B",
+      "name": "Patriot Viper Venom",
+      "ref": "PVV532G600C36K",
       "speed": 6000,
       "cl": 36,
-      "price_eur": 494.07,
-      "shop": "ManoMano",
+      "price_eur": 499.0,
+      "shop": "Alternate",
       "stock": "in_stock",
-      "url": "https://ledenicheur.fr/go-to-shop/25574/offer/87344239?client_id=1551"
+      "url": "https://www.alternate.fr/Patriot/32-Go-DDR5-6000-2x-16-Go-mémoire-vive/html/product/1878869"
     },
     "mhz5600": {
       "name": "Patriot Viper RGB LED",
@@ -96,10 +96,10 @@
     }
   },
   "change_since_previous_eur": {
-    "cl30": 0.0,
+    "cl30": 38.15,
     "cl32": 0.0,
-    "cl36": 0.0,
-    "cl32_36": 0.0,
+    "cl36": 4.93,
+    "cl32_36": 4.93,
     "mhz5600": 0.0,
     "mhz6400plus": 0.0
   },
@@ -158,20 +158,6 @@
       "deal": false
     },
     {
-      "name": "Patriot Viper Venom",
-      "ref": "PVV532G600C30K",
-      "speed": 6000,
-      "cl": 30,
-      "price_eur": 468.85,
-      "shop": "ManoMano",
-      "stock": "in_stock",
-      "marketplace": false,
-      "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/25574/offer/89326946?client_id=1551",
-      "via": "Ledenicheur",
-      "deal": false
-    },
-    {
       "name": "Corsair Vengeance",
       "ref": "",
       "speed": 6000,
@@ -212,20 +198,6 @@
       "deal": false
     },
     {
-      "name": "Crucial Pro Overclocking Edition",
-      "ref": "CP2K16G60C36U5B",
-      "speed": 6000,
-      "cl": 36,
-      "price_eur": 494.07,
-      "shop": "ManoMano",
-      "stock": "in_stock",
-      "marketplace": false,
-      "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/25574/offer/87344239?client_id=1551",
-      "via": "Ledenicheur",
-      "deal": false
-    },
-    {
       "name": "Corsair Vengeance RGB Black",
       "ref": "CMH32GX5M2B5600C36K",
       "speed": 5600,
@@ -250,20 +222,6 @@
       "marketplace": false,
       "verified": false,
       "url": "https://ledenicheur.fr/go-to-shop/29810/offer/v1%7C127851914803%7C0?client_id=1551",
-      "via": "Ledenicheur",
-      "deal": false
-    },
-    {
-      "name": "Corsair Vengeance RGB Black",
-      "ref": "CMH32GX5M2B5600C36K",
-      "speed": 5600,
-      "cl": 36,
-      "price_eur": 499.0,
-      "shop": "Fnac Marketplace",
-      "stock": "in_stock",
-      "marketplace": true,
-      "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/28695/offer/3-49127199?client_id=1551",
       "via": "Ledenicheur",
       "deal": false
     },
@@ -682,12 +640,12 @@
       "ref": "PVV532G600C36K",
       "speed": 6000,
       "cl": 36,
-      "price_eur": 552.79,
-      "shop": "Kaufland Marketplace",
+      "price_eur": 552.36,
+      "shop": "Cdiscount Marketplace",
       "stock": "in_stock",
       "marketplace": true,
       "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/42189/offer/450356485?client_id=1551",
+      "url": "https://ledenicheur.fr/go-to-shop/36493/offer/PAT1690976818007-4308121473?client_id=1551",
       "via": "Ledenicheur",
       "deal": false
     },
@@ -696,12 +654,12 @@
       "ref": "PVV532G600C36K",
       "speed": 6000,
       "cl": 36,
-      "price_eur": 554.28,
-      "shop": "Fnac Marketplace",
+      "price_eur": 552.79,
+      "shop": "Kaufland Marketplace",
       "stock": "in_stock",
       "marketplace": true,
       "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/28695/offer/3-52051946?client_id=1551",
+      "url": "https://ledenicheur.fr/go-to-shop/42189/offer/450356485?client_id=1551",
       "via": "Ledenicheur",
       "deal": false
     },
@@ -853,6 +811,20 @@
       "deal": false
     },
     {
+      "name": "Crucial Pro Overclocking Edition",
+      "ref": "CP2K16G60C36U5B",
+      "speed": 6000,
+      "cl": 36,
+      "price_eur": 569.06,
+      "shop": "Cdiscount Marketplace",
+      "stock": "in_stock",
+      "marketplace": true,
+      "verified": false,
+      "url": "https://ledenicheur.fr/go-to-shop/36493/offer/CRU1710032862892-3364769142?client_id=1551",
+      "via": "Ledenicheur",
+      "deal": false
+    },
+    {
       "name": "Patriot Noir",
       "ref": "PVV532G560C36K",
       "speed": 5600,
@@ -916,20 +888,6 @@
       "marketplace": false,
       "verified": false,
       "url": "https://ledenicheur.fr/product.php?p=15838362",
-      "deal": false
-    },
-    {
-      "name": "Patriot Viper RGB LED",
-      "ref": "PVVR532G560C36K",
-      "speed": 5600,
-      "cl": 36,
-      "price_eur": 584.56,
-      "shop": "Fnac Marketplace",
-      "stock": "in_stock",
-      "marketplace": true,
-      "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/28695/offer/3-48527433?client_id=1551",
-      "via": "Ledenicheur",
       "deal": false
     },
     {
@@ -1026,20 +984,6 @@
       "marketplace": true,
       "verified": false,
       "url": "https://ledenicheur.fr/go-to-shop/36493/offer/COR1733359236284-4293697927?client_id=1551",
-      "via": "Ledenicheur",
-      "deal": false
-    },
-    {
-      "name": "Patriot Viper Venom",
-      "ref": "PVV532G640C32K",
-      "speed": 6400,
-      "cl": 32,
-      "price_eur": 591.46,
-      "shop": "Fnac Marketplace",
-      "stock": "in_stock",
-      "marketplace": true,
-      "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/28695/offer/3-52340364?client_id=1551",
       "via": "Ledenicheur",
       "deal": false
     },
@@ -1165,6 +1109,20 @@
       "deal": false
     },
     {
+      "name": "Corsair Vengeance RGB Black",
+      "ref": "CMH32GX5M2B6400C36",
+      "speed": 6400,
+      "cl": 36,
+      "price_eur": 600.31,
+      "shop": "Cdiscount Marketplace",
+      "stock": "in_stock",
+      "marketplace": true,
+      "verified": false,
+      "url": "https://ledenicheur.fr/go-to-shop/36493/offer/COR1691056867572-2921328348?client_id=1551",
+      "via": "Ledenicheur",
+      "deal": false
+    },
+    {
       "name": "Patriot Viper Venom",
       "ref": "PVV532G640C32K",
       "speed": 6400,
@@ -1193,6 +1151,20 @@
       "deal": false
     },
     {
+      "name": "Corsair Vengeance",
+      "ref": "CMK32GX5M2B6000Z30",
+      "speed": 6000,
+      "cl": 30,
+      "price_eur": 604.78,
+      "shop": "1FODISCOUNT",
+      "stock": "in_stock",
+      "marketplace": false,
+      "verified": false,
+      "url": "https://ledenicheur.fr/go-to-shop/24810/offer/ADS198608?client_id=1551",
+      "via": "Ledenicheur",
+      "deal": false
+    },
+    {
       "name": "Lexar Ares Noir",
       "ref": "LD5U16G80C38BR",
       "speed": 8000,
@@ -1210,12 +1182,39 @@
       "ref": "CMK32GX5M2B6400C32",
       "speed": 6400,
       "cl": 32,
-      "price_eur": 609.25,
+      "price_eur": 606.17,
       "shop": "Ledenicheur (meilleur prix)",
       "stock": "unknown",
       "marketplace": false,
       "verified": false,
       "url": "https://ledenicheur.fr/product.php?p=11366778",
+      "deal": false
+    },
+    {
+      "name": "Kingston Fury Beast Black RGB",
+      "ref": "KF556C36BBEAK2-32",
+      "speed": 5600,
+      "cl": 36,
+      "price_eur": 610.0,
+      "shop": "Alternate",
+      "stock": "in_stock",
+      "marketplace": false,
+      "verified": true,
+      "url": "https://www.alternate.fr/Kingston-FURY/Beast-RGB-32-Go-DDR5-5600-2x-16-Go-mémoire-vive/html/product/1866397",
+      "deal": false
+    },
+    {
+      "name": "Corsair Dominator Platinum RGB Black",
+      "ref": "CMT32GX5M2X5600C36",
+      "speed": 5600,
+      "cl": 36,
+      "price_eur": 626.24,
+      "shop": "Amazon.fr Marketplace",
+      "stock": "in_stock",
+      "marketplace": true,
+      "verified": false,
+      "url": "https://ledenicheur.fr/go-to-shop/26551/offer/B0BD4QYTTT?client_id=1551",
+      "via": "Ledenicheur",
       "deal": false
     },
     {
@@ -1261,20 +1260,6 @@
       "deal": false
     },
     {
-      "name": "Lexar Ares OC",
-      "ref": "LD5U16G60C320A",
-      "speed": 6000,
-      "cl": 32,
-      "price_eur": 719.73,
-      "shop": "Fnac Marketplace",
-      "stock": "in_stock",
-      "marketplace": true,
-      "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/28695/offer/3-51824566?client_id=1551",
-      "via": "Ledenicheur",
-      "deal": false
-    },
-    {
       "name": "Kingston Fury Renegade",
       "ref": "KF560C32RSK2-32",
       "speed": 6000,
@@ -1289,25 +1274,11 @@
       "deal": false
     },
     {
-      "name": "G.Skill Trident Z5 Neo",
-      "ref": "F5-6000J3238F16GX2-TZ5N",
-      "speed": 6000,
-      "cl": 32,
-      "price_eur": 744.94,
-      "shop": "Fnac Marketplace",
-      "stock": "in_stock",
-      "marketplace": true,
-      "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/28695/offer/3-51018439?client_id=1551",
-      "via": "Ledenicheur",
-      "deal": false
-    },
-    {
       "name": "Lexar Ares OC",
       "ref": "LD5U16G60C320A",
       "speed": 6000,
       "cl": 32,
-      "price_eur": 767.16,
+      "price_eur": 766.81,
       "shop": "Amazon.fr Marketplace",
       "stock": "in_stock",
       "marketplace": true,
@@ -1317,7 +1288,7 @@
       "deal": false
     },
     {
-      "name": "G.Skill",
+      "name": "G.Skill Flare X5",
       "ref": "F5-6000J3238F16GX2-FX5",
       "speed": 6000,
       "cl": 32,
@@ -1344,6 +1315,136 @@
       "deal": false
     },
     {
+      "name": "G.Skill Flare X5 Series Low Profile",
+      "ref": "F5-6000J3238F16GX2-FX5",
+      "speed": 6000,
+      "cl": 32,
+      "price_eur": 839.95,
+      "shop": "LDLC",
+      "stock": "in_stock",
+      "marketplace": false,
+      "verified": true,
+      "url": "https://www.ldlc.com/fiche/PB00519091.html",
+      "deal": false
+    },
+    {
+      "name": "G.Skill Flare X5",
+      "ref": "F5-6000J3238F16GX2-FX5",
+      "speed": 6000,
+      "cl": 32,
+      "price_eur": 839.95,
+      "shop": "Materiel.net",
+      "stock": "in_stock",
+      "marketplace": false,
+      "verified": true,
+      "url": "https://www.materiel.net/produit/202209060016.html",
+      "deal": false
+    },
+    {
+      "name": "G.Skill Ripjaws M5 RGB - Noir",
+      "ref": "F5-6000J3238F16GX2-RM5RK",
+      "speed": 6000,
+      "cl": 32,
+      "price_eur": 859.95,
+      "shop": "LDLC",
+      "stock": "in_stock",
+      "marketplace": false,
+      "verified": true,
+      "url": "https://www.ldlc.com/fiche/PB00616257.html",
+      "deal": false
+    },
+    {
+      "name": "G.Skill Ripjaws M5 RGB Black",
+      "ref": "F5-6000J3238F16GX2-RM5RK",
+      "speed": 6000,
+      "cl": 32,
+      "price_eur": 859.95,
+      "shop": "Materiel.net",
+      "stock": "in_stock",
+      "marketplace": false,
+      "verified": true,
+      "url": "https://www.materiel.net/produit/202405200012.html",
+      "deal": false
+    },
+    {
+      "name": "G.Skill Trident Z5 RGB - Noir",
+      "ref": "F5-6000J3238F16GX2-TZ5RK",
+      "speed": 6000,
+      "cl": 32,
+      "price_eur": 865.95,
+      "shop": "LDLC",
+      "stock": "in_stock",
+      "marketplace": false,
+      "verified": true,
+      "url": "https://www.ldlc.com/fiche/PB00497125.html",
+      "deal": false
+    },
+    {
+      "name": "G.Skill Trident Z5 RGB - Argent",
+      "ref": "F5-6000J3238F16GX2-TZ5RS",
+      "speed": 6000,
+      "cl": 32,
+      "price_eur": 865.95,
+      "shop": "LDLC",
+      "stock": "on_order",
+      "marketplace": false,
+      "verified": true,
+      "url": "https://www.ldlc.com/fiche/PB00497123.html",
+      "deal": false
+    },
+    {
+      "name": "G.Skill Trident Z5 RGB Black",
+      "ref": "F5-6000J3238F16GX2-TZ5RK",
+      "speed": 6000,
+      "cl": 32,
+      "price_eur": 865.95,
+      "shop": "Materiel.net",
+      "stock": "in_stock",
+      "marketplace": false,
+      "verified": true,
+      "url": "https://www.materiel.net/produit/202204200063.html",
+      "deal": false
+    },
+    {
+      "name": "G.Skill Trident Z5 RGB Silver",
+      "ref": "F5-6000J3238F16GX2-TZ5RS",
+      "speed": 6000,
+      "cl": 32,
+      "price_eur": 865.95,
+      "shop": "Materiel.net",
+      "stock": "on_order",
+      "marketplace": false,
+      "verified": true,
+      "url": "https://www.materiel.net/produit/202204200062.html",
+      "deal": false
+    },
+    {
+      "name": "G.Skill Ripjaws M5 RGB - Blanc",
+      "ref": "F5-6000J3238F16GX2-RM5RW",
+      "speed": 6000,
+      "cl": 32,
+      "price_eur": 881.95,
+      "shop": "LDLC",
+      "stock": "in_stock",
+      "marketplace": false,
+      "verified": true,
+      "url": "https://www.ldlc.com/fiche/PB00616251.html",
+      "deal": false
+    },
+    {
+      "name": "G.Skill Ripjaws M5 RGB White",
+      "ref": "F5-6000J3238F16GX2-RM5RW",
+      "speed": 6000,
+      "cl": 32,
+      "price_eur": 881.95,
+      "shop": "Materiel.net",
+      "stock": "in_stock",
+      "marketplace": false,
+      "verified": true,
+      "url": "https://www.materiel.net/produit/202405200011.html",
+      "deal": false
+    },
+    {
       "name": "Lexar Ares OC",
       "ref": "LD5U16G60C320A",
       "speed": 6000,
@@ -1356,73 +1457,14 @@
       "url": "https://ledenicheur.fr/go-to-shop/30138/offer/578686?client_id=1551",
       "via": "Ledenicheur",
       "deal": false
-    },
-    {
-      "name": "G.Skill Trident Z5 Neo",
-      "ref": "F5-6000J3238F16GX2-TZ5N",
-      "speed": 6000,
-      "cl": 32,
-      "price_eur": 989.0,
-      "shop": "Kaufland Marketplace",
-      "stock": "in_stock",
-      "marketplace": true,
-      "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/42189/offer/445370494?client_id=1551",
-      "via": "Ledenicheur",
-      "deal": false
-    },
-    {
-      "name": "G.Skill Trident Z5 White RGB",
-      "ref": "F5-6000J3238F16GX2-TZ5RW",
-      "speed": 6000,
-      "cl": 32,
-      "price_eur": 1131.0,
-      "shop": "Kaufland Marketplace",
-      "stock": "in_stock",
-      "marketplace": true,
-      "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/42189/offer/472161977?client_id=1551",
-      "via": "Ledenicheur",
-      "deal": false
-    },
-    {
-      "name": "G.Skill Trident Z5 White RGB",
-      "ref": "F5-6000J3238F16GX2-TZ5RW",
-      "speed": 6000,
-      "cl": 32,
-      "price_eur": 1159.08,
-      "shop": "Fnac Marketplace",
-      "stock": "in_stock",
-      "marketplace": true,
-      "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/28695/offer/3-51018380?client_id=1551",
-      "via": "Ledenicheur",
-      "deal": false
-    },
-    {
-      "name": "G.Skill Trident Z5 White RGB",
-      "ref": "F5-6000J3238F16GX2-TZ5RW",
-      "speed": 6000,
-      "cl": 32,
-      "price_eur": 1191.74,
-      "shop": "Pixmania",
-      "stock": "in_stock",
-      "marketplace": false,
-      "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/30138/offer/323170?client_id=1551",
-      "via": "Ledenicheur",
-      "deal": false
     }
   ],
-  "trend": "Relevé automatique de 264 offres, dont 41 en 5600 MHz et 101 en 6400 MHz et plus (Alternate 41, Grosbill 10, Ledenicheur 105, autres boutiques via Ledenicheur 108).",
-  "blocked_sources": [
-    "ldlc.com",
-    "materiel.net"
-  ],
-  "notification": "RAM DDR5 32 Go : pas d'affaire. Meilleur CL30 468,85 € (ManoMano), meilleur CL32/36 494,07 € (ManoMano), meilleur 5600 459,99 € (Amazon.fr Marketplace), meilleur 6400+ 489,99 € (Amazon.fr Marketplace)\n\n| Kit | MHz | CL | Prix | Boutique | Stock | Lien |\n|---|---|---|---|---|---|---|\n| Team Group Noir | 6400 | 40 | 415 € | Alternate | rupture | https://www.alternate.fr/Team-Group/32-Go-DDR5-6400-2x-16-Go-mémoire-vive/html/product/1799247 |\n| Kingston Fury Beast | 5600 | 36 | 449,99 € | Grosbill | rupture | https://www.grosbill.com/kingston-fury-beast-32go-2x16go-ddr5-5600mhz-125798 |\n| Corsair VENGEANCE Black | 6400 | 32 | 459,99 € | Grosbill | rupture | https://www.grosbill.com/corsair-vengeance-ddr5-black-2x16go-ddr5-6400-135672 |\n| Patriot Viper RGB LED | 5600 | 36 | 459,99 € (marketplace) (via Ledenicheur) | Amazon.fr Marketplace | en stock | https://ledenicheur.fr/go-to-shop/26551/offer/B09XYSN5DY?client_id=1551 |\n| Patriot Viper Venom | 6000 | 30 | 468,85 € (via Ledenicheur) | ManoMano | en stock | https://ledenicheur.fr/go-to-shop/25574/offer/89326946?client_id=1551 |\n\nTendance : Relevé automatique de 264 offres, dont 41 en 5600 MHz et 101 en 6400 MHz et plus (Alternate 41, Grosbill 10, Ledenicheur 105, autres boutiques via Ledenicheur 108).\nSources bloquées : ldlc.com, materiel.net\nAppli : https://tom9603.github.io/veille-ram/",
+  "trend": "Relevé automatique de 365 offres, dont 48 en 5600 MHz et 134 en 6400 MHz et plus (Alternate 41, Grosbill 10, LDLC 55, Ledenicheur 106, Materiel.net 55, autres boutiques via Ledenicheur 98).",
+  "blocked_sources": [],
+  "notification": "RAM DDR5 32 Go : pas d'affaire. Meilleur CL30 507 € (Alternate), meilleur CL32/36 499 € (Alternate), meilleur 5600 459,99 € (Amazon.fr Marketplace), meilleur 6400+ 489,99 € (Amazon.fr Marketplace)\nDepuis le dernier passage : CL30 +38,15 €, CL36 +4,93 €\n\n| Kit | MHz | CL | Prix | Boutique | Stock | Lien |\n|---|---|---|---|---|---|---|\n| Team Group Noir | 6400 | 40 | 415 € | Alternate | rupture | https://www.alternate.fr/Team-Group/32-Go-DDR5-6400-2x-16-Go-mémoire-vive/html/product/1799247 |\n| Kingston Fury Beast | 5600 | 36 | 449,99 € | Grosbill | rupture | https://www.grosbill.com/kingston-fury-beast-32go-2x16go-ddr5-5600mhz-125798 |\n| Corsair VENGEANCE Black | 6400 | 32 | 459,99 € | Grosbill | rupture | https://www.grosbill.com/corsair-vengeance-ddr5-black-2x16go-ddr5-6400-135672 |\n| Patriot Viper RGB LED | 5600 | 36 | 459,99 € (marketplace) (via Ledenicheur) | Amazon.fr Marketplace | en stock | https://ledenicheur.fr/go-to-shop/26551/offer/B09XYSN5DY?client_id=1551 |\n| Corsair Vengeance | 6000 | 36 | 469,99 € | Grosbill | rupture | https://www.grosbill.com/corsair-vengeance-32go-2x16go-ddr5-6000mhz-137375 |\n\nTendance : Relevé automatique de 365 offres, dont 48 en 5600 MHz et 134 en 6400 MHz et plus (Alternate 41, Grosbill 10, LDLC 55, Ledenicheur 106, Materiel.net 55, autres boutiques via Ledenicheur 98).\nAppli : https://tom9603.github.io/veille-ram/",
   "push": {
     "title": "Pas d'affaire : 459,99 € au mieux",
-    "message": "Patriot Viper RGB LED 5600 MHz CL36 chez Amazon.fr Marketplace, 59,99 € au-dessus du seuil.\n5600 459,99 € · CL30 468,85 € · 6400+ 489,99 € · CL36 494,07 € · CL32 541,99 €",
+    "message": "Patriot Viper RGB LED 5600 MHz CL36 chez Amazon.fr Marketplace, 59,99 € au-dessus du seuil.\n5600 459,99 € · 6400+ 489,99 € · CL36 499 € · CL30 507 € · CL32 541,99 €\nDepuis le relevé précédent : CL36 +4,93 €, CL30 +38,15 €",
     "priority": 2,
     "tags": [],
     "click": "https://tom9603.github.io/veille-ram/"
