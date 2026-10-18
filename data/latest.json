@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-18T11:13+02:00",
+  "checked_at": "2026-10-18T12:13+02:00",
   "product": {
     "label": "DDR5 · 2×16 Go · 5600 MHz et plus",
     "kit": "2x16 Go (32 Go)",
@@ -841,7 +841,7 @@
       "ref": "CMH32GX5M2B6400C32",
       "speed": 6400,
       "cl": 32,
-      "price_eur": 580.42,
+      "price_eur": 580.57,
       "shop": "Ledenicheur (meilleur prix)",
       "stock": "unknown",
       "marketplace": false,
