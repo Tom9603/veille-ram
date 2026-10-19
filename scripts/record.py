@@ -1,34 +1,32 @@
 #!/usr/bin/env python3
-"""Valide les relevés d'un passage de l'agent et met à jour les données de l'appli.
+"""Valide un relevé de prix du Ryzen 7 7800X3D et met à jour les données de l'appli.
 
 Usage :
     python3 scripts/record.py /chemin/vers/run.json [--dry-run]
 
-Entrée (run.json, écrit par l'agent HORS du dépôt) :
+Entrée (run.json, écrit par scripts/collect.py HORS du dépôt) :
 {
-  "checked_at": "2026-10-07T19:58:00+02:00",   # optionnel, défaut = maintenant
+  "checked_at": "2026-10-16T19:13:00+02:00",   # optionnel, défaut = maintenant
   "offers": [
     {
-      "name": "Kingston Fury Beast",           # nom commercial du kit
-      "ref": "KF560C30BBEK2-32",               # référence fabricant ("" si inconnue)
-      "speed": 6000,                            # 6000 (par défaut), 5600, ou 6400 à 8800 MHz
-      "cl": 30,                                 # 30, 32 ou 36 en 6000 ; 28 à 36 en 5600 ;
-                                                # 6400+ : latence réelle ≤ 5600 CL36 (6400 ≤ CL40, 7200 ≤ CL46…)
-      "price_eur": 529.99,                      # TTC, livraison incluse si affichée
-      "shop": "Grosbill",
-      "stock": "in_stock",                      # in_stock | on_order | out_of_stock | unknown
-      "marketplace": false,                     # vendeur tiers ?
-      "verified": true,                         # prix vu sur la page produit ?
-      "via": "Ledenicheur",                     # optionnel : prix d'une boutique précise relevé par un comparateur
+      "name": "AMD Ryzen 7 7800X3D",            # libellé court
+      "ref": "100-100000910WOF",                # référence fabricant ("" si inconnue)
+      "version": "box",                          # box (en boîte) | tray (sans boîte, OEM)
+      "price_eur": 309.0,                        # TTC, livraison incluse si affichée
+      "shop": "Fnac Marketplace",
+      "stock": "in_stock",                       # in_stock | on_order | out_of_stock | unknown
+      "marketplace": true,                       # vendeur tiers ?
+      "verified": false,                         # prix vu sur la page de la boutique ?
+      "via": "Ledenicheur",                      # optionnel : prix d'une boutique relevé par un comparateur
       "url": "https://..."
     }
   ],
-  "trend": "Une phrase sur la tendance.",
-  "blocked_sources": ["idealo.fr"]
+  "trend": "Une phrase sur le relevé.",
+  "blocked_sources": ["amazon.fr"]
 }
 
 Sorties : data/latest.json (état courant) et data/history.json (une ligne par
-passage). Le texte de la notification est affiché sur la sortie standard et
+relevé). Le texte de la notification est affiché sur la sortie standard et
 enregistré dans data/latest.json (champ « notification ») ; sa version courte
 pour le téléphone (ntfy) est dans le champ « push », envoyée par scripts/notify.py.
 """
@@ -44,6 +42,7 @@ CONFIG = ROOT / "config.json"
 LATEST = ROOT / "data" / "latest.json"
 HISTORY = ROOT / "data" / "history.json"
 
+VERSIONS = {"box": "Box", "tray": "Tray"}
 STOCKS = {"in_stock", "on_order", "out_of_stock", "unknown"}
 STOCK_LABELS = {
     "in_stock": "en stock",
@@ -51,17 +50,6 @@ STOCK_LABELS = {
     "out_of_stock": "rupture",
     "unknown": "stock ?",
 }
-TARGETS = {6000: {30, 32, 36}, 5600: {28, 30, 32, 34, 36}}
-FAST_SPEEDS = {6400, 6600, 6800, 7000, 7200, 7400, 7600, 7800, 8000, 8200, 8400, 8600, 8800}
-MAX_LATENCY_NS = 36 * 2000 / 5600   # 6400 MHz et plus : pas plus lent qu'un 5600 CL36 (≈ 12,86 ns)
-
-
-def tracked(speed, cl):
-    if isinstance(cl, bool) or not isinstance(cl, int) or isinstance(speed, bool):
-        return False
-    if speed in TARGETS:
-        return cl in TARGETS[speed]
-    return speed in FAST_SPEEDS and cl >= 26 and cl * 2000 / speed <= MAX_LATENCY_NS + 1e-9
 
 
 def fail(errors):
@@ -95,10 +83,8 @@ def validate(run):
                 errors.append(f"{where}.{key} doit être un texte non vide")
         if not isinstance(o.get("ref", ""), str):
             errors.append(f"{where}.ref doit être un texte")
-        if not tracked(o.get("speed", 6000), o.get("cl")):
-            errors.append(
-                f"{where} : kit non suivi (reçu {o.get('speed', 6000)!r} MHz CL{o.get('cl')!r}) ; suivis : 6000 CL30/32/36, "
-                "5600 CL28 à 36, 6400 à 8800 MHz si la latence réelle ne dépasse pas celle d'un 5600 CL36")
+        if o.get("version") not in VERSIONS:
+            errors.append(f"{where}.version doit valoir box ou tray (reçu {o.get('version')!r})")
         price = o.get("price_eur")
         if isinstance(price, bool) or not isinstance(price, (int, float)) or not 50 <= price <= 2000:
             errors.append(f"{where}.price_eur doit être un nombre entre 50 et 2000 (reçu {price!r})")
@@ -127,85 +113,69 @@ def validate(run):
         fail(errors)
 
 
+def offer_key(o):
+    return (o["shop"].strip().lower(), o["version"], o["url"].strip())
+
+
 def dedupe(offers):
-    """Garde l'offre la moins chère par (boutique, kit, fréquence, CL)."""
+    """Une seule fois chaque offre (même boutique, même version, même lien) : la moins chère."""
     best = {}
     for o in offers:
-        key = (o["shop"].strip().lower(), (o.get("ref") or o["name"]).strip().lower(), o.get("speed", 6000), o["cl"])
+        key = offer_key(o)
         if key not in best or o["price_eur"] < best[key]["price_eur"]:
             best[key] = o
-    return sorted(best.values(), key=lambda o: (o["price_eur"], o["cl"]))
-
-
-def migrate(entry):
-    """Anciennes lignes d'historique : CL32 et CL36 étaient regroupés dans cl32_36."""
-    if "cl32" not in entry or "cl36" not in entry:
-        merged = entry.get("cl32_36")
-        entry = {
-            **entry,
-            "cl32": merged if merged and merged["cl"] == 32 else None,
-            "cl36": merged if merged and merged["cl"] == 36 else None,
-        }
-    return entry
+    return sorted(best.values(), key=lambda o: (o["price_eur"], o["version"]))
 
 
 def summary(offer):
     if offer is None:
         return None
-    return {k: offer[k] for k in ("name", "ref", "speed", "cl", "price_eur", "shop", "stock", "url")}
+    return {k: offer[k] for k in ("name", "ref", "version", "price_eur", "shop", "stock", "url")}
 
 
-def offer_key(o):
-    return (o["shop"].strip().lower(), (o.get("ref") or o["name"]).strip().lower(), o.get("speed", 6000), o["cl"])
+def limit_for(offer, thresholds):
+    return thresholds.get(offer["version"], thresholds.get("box"))
 
 
 def push_message(offers, deals, best, changes, thresholds, previous_latest, app_url):
     """Notification courte pour le téléphone : titre, texte, priorité ntfy, lien."""
-    labels = (("mhz6400plus", "6400+"), ("mhz5600", "5600"), ("cl36", "CL36"), ("cl32", "CL32"), ("cl30", "CL30"))
-    ranked = sorted(((best[k]["price_eur"], label) for k, label in labels if best.get(k)))
-    summary_line = " · ".join(f"{label} {eur(p)} €" for p, label in ranked)
-    moves = [f"{label} {'+' if changes[k] > 0 else '−'}{eur(abs(changes[k]))} €" for k, label in labels if changes.get(k)]
     if deals:
         top = deals[0]
         before = {offer_key(o) for o in (previous_latest or {}).get("offers", []) if o.get("deal")}
         new = [o for o in deals if offer_key(o) not in before]
-        lines = [f"{top['name']} {top['speed']} MHz CL{top['cl']} chez {top['shop']} ({STOCK_LABELS[top['stock']]}), "
+        lines = [f"{top['name']} {VERSIONS[top['version']]} chez {top['shop']} ({STOCK_LABELS[top['stock']]}), "
                  f"seuil {eur(limit_for(top, thresholds))} €."]
         if len(deals) > 1:
             lines.append(f"{len(deals) - 1} autre{'s' if len(deals) > 2 else ''} offre{'s' if len(deals) > 2 else ''} sous le seuil.")
         return {
-            "title": f"{'Bonne affaire' if new else 'Toujours en cours'} : {eur(top['price_eur'])} € pour 32 Go DDR5",
+            "title": f"{'Bonne affaire' if new else 'Toujours en cours'} : 7800X3D {VERSIONS[top['version']]} à {eur(top['price_eur'])} €",
             "message": "\n".join(lines),
-            "priority": 5 if new else 4,
+            "priority": 5 if new else 3,   # déjà signalée : rappel sans insister
             "tags": ["rotating_light"] if new else ["moneybag"],
             "click": top["url"],
         }
-    listed = [o for o in offers if o["stock"] != "out_of_stock"]
-    top = listed[0] if listed else None
     lines = []
-    if top:
-        lines.append(f"{top['name']} {top['speed']} MHz CL{top['cl']} chez {top['shop']}, "
-                     f"{eur(top['price_eur'] - limit_for(top, thresholds))} € au-dessus du seuil.")
-    if summary_line:
-        lines.append(summary_line)
+    for version, label in VERSIONS.items():
+        o = best.get(version)
+        if o:
+            gap = o["price_eur"] - limit_for(o, thresholds)
+            note = f"{eur(gap)} € au-dessus du seuil" if gap > 0 else "sous le seuil, mais stock ou prix non confirmé"
+            lines.append(f"{label} {eur(o['price_eur'])} € chez {o['shop']} ({note})")
+        else:
+            lines.append(f"{label} : aucune offre disponible")
+    moves = [f"{label} {'+' if changes[v] > 0 else '−'}{eur(abs(changes[v]))} €" for v, label in VERSIONS.items() if changes.get(v)]
     if moves:
         lines.append("Depuis le relevé précédent : " + ", ".join(moves))
+    tops = [o for o in best.values() if o]
+    top = min(tops, key=lambda o: o["price_eur"]) if tops else None
     return {
-        "title": f"Pas d'affaire : {eur(top['price_eur'])} € au mieux" if top else "Pas d'affaire : aucune offre disponible",
-        "message": "\n".join(lines) or "Aucune offre relevée.",
+        "title": f"Pas d'affaire : {eur(top['price_eur'])} € au mieux ({VERSIONS[top['version']]})" if top
+        else "Pas d'affaire : aucune offre disponible",
+        "message": "\n".join(lines),
         "priority": 2,
         "tags": [],
         "click": app_url,
     }
-
-
-def limit_for(offer, thresholds):
-    """Seuil d'alerte : 5600 MHz, 6400 MHz et plus, sinon 6000 MHz CL30, sinon 6000 MHz CL32/CL36."""
-    if offer["speed"] == 5600:
-        return thresholds["mhz5600"]
-    if offer["speed"] in FAST_SPEEDS:
-        return thresholds["mhz6400plus"]
-    return thresholds["cl30"] if offer["cl"] <= 30 else thresholds["cl32_36"]
 
 
 def main(argv):
@@ -225,39 +195,24 @@ def main(argv):
 
     offers = []
     for o in dedupe(run["offers"]):
-        o = {**o, "ref": o.get("ref", "").strip(), "speed": o.get("speed", 6000), "price_eur": round(float(o["price_eur"]), 2)}
-        limit = limit_for(o, thresholds)
+        o = {**o, "ref": o.get("ref", "").strip(), "price_eur": round(float(o["price_eur"]), 2)}
         # Bonne affaire : disponible, sous le seuil, et prix d'une boutique identifiée
         # (vu chez elle, ou relevé pour elle par un comparateur).
         o["deal"] = (
             o["stock"] in ("in_stock", "on_order")
             and (o["verified"] or bool(o.get("via")))
-            and o["price_eur"] <= limit
+            and o["price_eur"] <= limit_for(o, thresholds)
         )
         offers.append(o)
 
-    # Meilleur prix « listé » : tout sauf les ruptures confirmées.
+    # Meilleur prix « listé » par version : tout sauf les ruptures confirmées.
     listed = [o for o in offers if o["stock"] != "out_of_stock"]
-    listed_6000 = [o for o in listed if o["speed"] == 6000]
-    best_cl30 = next((o for o in listed_6000 if o["cl"] == 30), None)
-    best_cl32 = next((o for o in listed_6000 if o["cl"] == 32), None)
-    best_cl36 = next((o for o in listed_6000 if o["cl"] == 36), None)
-    best_cl32_36 = next((o for o in listed_6000 if o["cl"] in (32, 36)), None)
-    best_5600 = next((o for o in listed if o["speed"] == 5600), None)
-    best_fast = next((o for o in listed if o["speed"] in FAST_SPEEDS), None)
-    best = {
-        "cl30": summary(best_cl30),
-        "cl32": summary(best_cl32),
-        "cl36": summary(best_cl36),
-        "cl32_36": summary(best_cl32_36),
-        "mhz5600": summary(best_5600),
-        "mhz6400plus": summary(best_fast),
-    }
+    best = {v: summary(next((o for o in listed if o["version"] == v), None)) for v in VERSIONS}
     deals = [o for o in offers if o["deal"]]
 
     previous_latest = json.loads(LATEST.read_text(encoding="utf-8")) if LATEST.exists() else None
     history = json.loads(HISTORY.read_text(encoding="utf-8")) if HISTORY.exists() else []
-    history = [migrate(h) for h in history if h["checked_at"] != checked_at]
+    history = [h for h in history if h["checked_at"] != checked_at]
     previous = history[-1] if history else None
 
     def change(key):
@@ -270,25 +225,13 @@ def main(argv):
 
     if deals:
         top = deals[0]
-        headline = (
-            f"🚨 BONNE AFFAIRE RAM : {top['name']} {top['speed']} MHz CL{top['cl']} à {eur(top['price_eur'])} € "
-            f"chez {top['shop']}"
-        )
+        headline = (f"🚨 BONNE AFFAIRE : {top['name']} {VERSIONS[top['version']]} à {eur(top['price_eur'])} € "
+                    f"chez {top['shop']}")
     else:
-        def part(label, o):
-            return f"meilleur {label} {eur(o['price_eur'])} € ({o['shop']})" if o else f"aucun {label} trouvé"
-
-        first = part("CL30", best_cl30)
-        headline = (
-            "RAM DDR5 32 Go : pas d'affaire. "
-            + first[0].upper() + first[1:]
-            + ", "
-            + part("CL32/36", best_cl32_36)
-            + ", "
-            + part("5600", best_5600)
-            + ", "
-            + part("6400+", best_fast)
-        )
+        parts = [f"meilleur {label} {eur(best[v]['price_eur'])} € ({best[v]['shop']})" if best[v] else f"aucun {label} disponible"
+                 for v, label in VERSIONS.items()]
+        text = ", ".join(parts)
+        headline = "Ryzen 7 7800X3D : pas d'affaire. " + text[0].upper() + text[1:]
 
     latest = {
         "checked_at": checked_at,
@@ -302,39 +245,25 @@ def main(argv):
         "trend": run.get("trend", "").strip(),
         "blocked_sources": run.get("blocked_sources", []),
     }
-    history.append(
-        {
-            "checked_at": checked_at,
-            **best,
-            "deal": bool(deals),
-            "offers_count": len(offers),
-        }
-    )
+    history.append({"checked_at": checked_at, **best, "deal": bool(deals), "offers_count": len(offers)})
     history.sort(key=lambda h: datetime.fromisoformat(h["checked_at"]))
 
-    # Texte de la notification, prêt à recopier tel quel.
+    # Texte complet du relevé, prêt à recopier tel quel.
     lines = [headline]
-    moves = [
-        f"{label} {'+' if d > 0 else '−'}{eur(abs(d))} €"
-        for label, d in (("CL30", changes["cl30"]), ("CL32", changes["cl32"]), ("CL36", changes["cl36"]),
-                         ("5600", changes["mhz5600"]), ("6400+", changes["mhz6400plus"]))
-        if d
-    ]
+    moves = [f"{label} {'+' if changes[v] > 0 else '−'}{eur(abs(changes[v]))} €" for v, label in VERSIONS.items() if changes[v]]
     if moves:
-        lines.append("Depuis le dernier passage : " + ", ".join(moves))
-    lines += ["", "| Kit | MHz | CL | Prix | Boutique | Stock | Lien |", "|---|---|---|---|---|---|---|"]
-    for o in offers[:5]:
+        lines.append("Depuis le relevé précédent : " + ", ".join(moves))
+    lines += ["", "| Version | Prix | Boutique | Stock | Lien |", "|---|---|---|---|---|"]
+    for o in offers[:6]:
         flags = (" (marketplace)" if o["marketplace"] else "") + (
             "" if o["verified"] else f" (via {o['via']})" if o.get("via") else " (non vérifié)")
-        lines.append(
-            f"| {o['name']} | {o['speed']} | {o['cl']} | {eur(o['price_eur'])} €{flags} | {o['shop']} "
-            f"| {STOCK_LABELS[o['stock']]} | {o['url']} |"
-        )
+        lines.append(f"| {VERSIONS[o['version']]} | {eur(o['price_eur'])} €{flags} | {o['shop']} "
+                     f"| {STOCK_LABELS[o['stock']]} | {o['url']} |")
     if not offers:
-        lines.append("| aucune offre trouvée | | | | | | |")
+        lines.append("| aucune offre trouvée | | | | |")
     lines.append("")
     if latest["trend"]:
-        lines.append(f"Tendance : {latest['trend']}")
+        lines.append(f"Relevé : {latest['trend']}")
     if latest["blocked_sources"]:
         lines.append("Sources bloquées : " + ", ".join(latest["blocked_sources"]))
     lines.append(f"Appli : {config['app_url']}")

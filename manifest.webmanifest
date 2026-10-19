@@ -1,7 +1,7 @@
 {
-  "name": "Veille RAM DDR5",
-  "short_name": "Veille RAM",
-  "description": "Prix des kits DDR5 2x16 Go 6000 MHz CL30-36, mis à jour deux fois par jour.",
+  "name": "Veille 7800X3D",
+  "short_name": "Veille CPU",
+  "description": "Prix de l'AMD Ryzen 7 7800X3D neuf (Box et Tray), relevé toutes les heures.",
   "lang": "fr",
   "start_url": "./",
   "scope": "./",
