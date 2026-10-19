@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-19T13:15+02:00",
+  "checked_at": "2026-10-19T14:15+02:00",
   "product": {
     "label": "DDR5 · 2×16 Go · 5600 MHz et plus",
     "kit": "2x16 Go (32 Go)",
@@ -1290,7 +1290,7 @@
       "ref": "LD5U16G60C320A",
       "speed": 6000,
       "cl": 32,
-      "price_eur": 804.7,
+      "price_eur": 804.55,
       "shop": "Cdiscount Marketplace",
       "stock": "in_stock",
       "marketplace": true,
