@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Veille 7800X3D</title>
-  <meta name="description" content="Suivi du prix de l'AMD Ryzen 7 7800X3D neuf (Box et Tray), relevé toutes les heures.">
+  <title>Veille X3D</title>
+  <meta name="description" content="Suivi du prix des AMD Ryzen 7 7800X3D et 9800X3D neufs (Box et Tray), relevé toutes les heures.">
   <meta name="theme-color" content="#f4f4f1">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Veille 7800X3D">
+  <meta name="apple-mobile-web-app-title" content="Veille X3D">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -43,6 +43,11 @@
     <div class="sync" id="sync" role="status" hidden>
       <span class="sync-spinner" aria-hidden="true"></span>
       <span id="sync-text">Recherche des prix en cours…</span>
+    </div>
+
+    <div class="segmented product-switch" id="product-switch" role="radiogroup" aria-label="Processeur">
+      <button type="button" role="radio" data-product="7800x3d" aria-label="Ryzen 7 7800X3D">7800X3D</button>
+      <button type="button" role="radio" data-product="9800x3d" aria-label="Ryzen 7 9800X3D">9800X3D</button>
     </div>
 
     <div class="segmented cat-switch" id="cat-switch" role="radiogroup" aria-label="Version">
@@ -156,10 +161,17 @@
             <span>Installer ntfy sur Android</span><span class="chev" aria-hidden="true">↗</span>
           </a>
         </div>
-        <p class="footnote">Dans l'appli ntfy (gratuite, sans compte) : touche +, colle le nom du canal, puis « S'abonner ». Tu reçois une notification à chaque relevé de l'heure, de 6h13 à 23h13 : discrète s'il n'y a pas d'affaire, avec une alerte dès que le 7800X3D passe sous le seuil. Le bouton ↻ lance un relevé immédiat (1 à 2 minutes), sans clé.</p>
+        <p class="footnote">Dans l'appli ntfy (gratuite, sans compte) : touche +, colle le nom du canal, puis « S'abonner ». Tu reçois une notification à chaque relevé de l'heure, de 6h13 à 23h13 : discrète s'il n'y a pas d'affaire, avec une alerte dès qu'un processeur suivi passe sous son seuil. Le bouton ↻ lance un relevé immédiat (1 à 2 minutes), sans clé.</p>
 
         <h2 class="section-title">Général</h2>
         <div class="card list settings">
+          <label class="row">
+            <span>Processeur affiché</span>
+            <select id="set-product">
+              <option value="7800x3d">Ryzen 7 7800X3D</option>
+              <option value="9800x3d">Ryzen 7 9800X3D</option>
+            </select>
+          </label>
           <label class="row">
             <span>Version affichée</span>
             <select id="set-cat">
@@ -204,14 +216,12 @@
         </div>
 
         <h2 class="section-title">Alertes</h2>
-        <div class="card list settings">
-          <div class="row"><span>Seuil Box</span><span class="value" id="th-box">—</span></div>
-          <div class="row"><span>Seuil Tray</span><span class="value" id="th-tray">—</span></div>
+        <div class="card list settings" id="thresholds">
           <a class="row link" href="https://github.com/Tom9603/veille-ram/edit/gh-pages/config.json" target="_blank" rel="noopener noreferrer">
             <span>Modifier les seuils sur GitHub</span><span class="chev" aria-hidden="true">↗</span>
           </a>
         </div>
-        <p class="footnote">Une bonne affaire est une offre en stock ou sur commande, sous le seuil, dont le prix est confirmé : vu chez la boutique, ou relevé pour elle par Ledenicheur (livraison incluse quand elle est connue ; sinon la fiche l'indique). Seul le 7800X3D neuf est suivi : pas d'occasion, de reconditionné, de lot ni de PC complet. Le Tray est le même processeur, vendu sans boîte, avec la garantie du vendeur.</p>
+        <p class="footnote">Une bonne affaire est une offre en stock ou sur commande, sous le seuil, dont le prix est confirmé : vu chez la boutique, ou relevé pour elle par Ledenicheur (livraison incluse quand elle est connue ; sinon la fiche l'indique). Seuls les 7800X3D et 9800X3D neufs sont suivis : pas d'occasion, de reconditionné, de lot ni de PC complet. Le Tray est le même processeur, vendu sans boîte, avec la garantie du vendeur.</p>
 
         <h2 class="section-title">Analyses</h2>
         <div class="card list settings">
@@ -230,7 +240,7 @@
         <h2 class="section-title">À propos</h2>
         <div class="card list settings">
           <a class="row link" href="https://github.com/Tom9603/veille-ram" target="_blank" rel="noopener noreferrer"><span>Projet sur GitHub</span><span class="chev" aria-hidden="true">↗</span></a>
-          <div class="row"><span>Version</span><span class="value">3.0</span></div>
+          <div class="row"><span>Version</span><span class="value">3.1</span></div>
         </div>
       </section>
     </main>

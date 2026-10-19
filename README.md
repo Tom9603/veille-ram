@@ -1,8 +1,8 @@
-# Veille 7800X3D
+# Veille X3D
 
-Suivi automatique du prix de l'**AMD Ryzen 7 7800X3D neuf**, en version **Box**
-(en boîte, garantie AMD 3 ans) et **Tray** (sans boîte, OEM, garantie du
-vendeur), avec une appli mobile et une notification chaque heure.
+Suivi automatique du prix des **AMD Ryzen 7 7800X3D** et **9800X3D** neufs, en
+version **Box** (en boîte, garantie AMD 3 ans) et **Tray** (sans boîte, OEM,
+garantie du vendeur), avec une appli mobile et une notification chaque heure.
 
 **Appli :** https://tom9603.github.io/veille-ram/
 
@@ -19,8 +19,9 @@ GitHub Actions « Actualiser les prix » (un relevé par heure de 6h à 23h, et 
   │  tourne donc en continu, fait lui-même un relevé à hh:13 (rien la nuit) et
   │  se passe le relais avant la limite de 6 h par job ; la programmation ne
   │  sert que de secours si la chaîne s'arrête
-  │  scripts/collect.py : boutiques lues en direct (scripts/sources/), puis les
-  │                       fiches Box et Tray de Ledenicheur (Amazon, Cdiscount,
+  │  scripts/collect.py : pour chaque processeur (PRODUCTS), boutiques lues en
+  │                       direct (scripts/sources/), puis les fiches Box et Tray
+  │                       de Ledenicheur (Amazon, Cdiscount,
   │                       Fnac, AliExpress…, livraison incluse si connue)
   │  scripts/record.py  → data/cpu/latest.json + data/cpu/history.json
   │  scripts/notify.py  → notification ntfy (chaque heure ; sinon seulement si affaire)
@@ -32,10 +33,11 @@ Bouton ↻ de l'appli
   └──────────────► le robot, qui surveille ce canal toutes les 15 s, fait un relevé
 ```
 
-- `config.json` : le produit, les **seuils d'alerte** (`thresholds_eur.box`,
-  `thresholds_eur.tray`), l'horaire et le canal ntfy.
-- `scripts/collect.py` : le relevé ; `scripts/sources/` : un module par boutique
-  lue en direct (`collect(fetch)` renvoie ses offres).
+- `config.json` : les processeurs suivis, les **seuils d'alerte** par processeur
+  et version (`thresholds_eur["9800x3d"].box`…), l'horaire et le canal ntfy.
+- `scripts/collect.py` : le relevé, et la liste des processeurs suivis
+  (`PRODUCTS` : références AMD, fiches Ledenicheur) ; `scripts/sources/` : un
+  module par boutique lue en direct (`collect(fetch, product)` renvoie ses offres).
 - `scripts/record.py` : valide le relevé, calcule les meilleurs prix et les
   « bonnes affaires », met à jour les données et prépare la notification.
 - `index.html`, `app.js`, `style.css`, `sw.js`, `manifest.webmanifest` :
@@ -43,7 +45,8 @@ Bouton ↻ de l'appli
 
 L'appli a quatre onglets :
 
-- **Marché** : bonne affaire ou non, meilleur prix, écart au seuil, résumé Box
+- **Marché** : choix du processeur (7800X3D ou 9800X3D), bonne affaire ou non
+  (y compris sur l'autre processeur), meilleur prix, écart au seuil, résumé Box
   et Tray, prochain relevé.
 - **Offres** : toutes les offres relevées, filtrables (Box, Tray, disponibles,
   prix confirmés) et triables, avec des fiches détaillées.

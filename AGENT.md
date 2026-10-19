@@ -6,22 +6,23 @@ les seuils, modifie `config.json`.
 
 ## Mission
 
-Trouver le meilleur prix actuel **en France** de l'**AMD Ryzen 7 7800X3D neuf**,
-en version **Box** (en boîte, réf. 100-100000910WOF, garantie AMD 3 ans) et
-**Tray** (sans boîte, OEM/MPK, réf. 100-000000910, garantie du vendeur).
+Trouver le meilleur prix actuel **en France** des **AMD Ryzen 7 7800X3D** et
+**9800X3D** neufs, en version **Box** (en boîte, garantie AMD 3 ans ; réf.
+100-100000910WOF et 100-100001084WOF) et **Tray** (sans boîte, OEM/MPK, garantie
+du vendeur ; réf. 100-000000910 et 100-000001084). Champ `product` de chaque
+offre : `7800x3d` ou `9800x3d`.
 
 - Ignore l'occasion, le reconditionné, les lots (processeur + carte mère…), les
-  PC complets et les autres processeurs (9800X3D, 7900X3D, 7800X…).
+  PC complets et les autres processeurs (7900X3D, 7800X…).
 - Les marketplaces (Amazon, Cdiscount, Fnac, AliExpress…) comptent : marque-les
   `marketplace: true`.
-- Seuils d'alerte : `thresholds_eur.box` et `thresholds_eur.tray` dans
-  `config.json`.
+- Seuils d'alerte : `thresholds_eur` dans `config.json`, par processeur et version.
 
 ## Où chercher
 
-1. Ledenicheur : fiches Box https://ledenicheur.fr/product.php?p=8053700&filters=price_inc_shipping et
-   Tray https://ledenicheur.fr/product.php?p=8053713&filters=price_inc_shipping (offres les moins chères,
-   livraison incluse).
+1. Ledenicheur : fiches Box et Tray de chaque processeur (liens dans
+   `PRODUCTS` de `scripts/collect.py`, avec `&filters=price_inc_shipping` :
+   offres les moins chères, livraison incluse).
 2. Boutiques et marketplaces : LDLC, Materiel.net, Alternate, Grosbill,
    TopAchat, Amazon.fr, Cdiscount, Fnac, AliExpress.
 3. Bons plans récents (moins de 48 h) sur dealabs.com.

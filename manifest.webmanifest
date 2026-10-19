@@ -1,7 +1,7 @@
 {
-  "name": "Veille 7800X3D",
+  "name": "Veille X3D",
   "short_name": "Veille CPU",
-  "description": "Prix de l'AMD Ryzen 7 7800X3D neuf (Box et Tray), relevé toutes les heures.",
+  "description": "Prix des AMD Ryzen 7 7800X3D et 9800X3D neufs (Box et Tray), relevés toutes les heures.",
   "lang": "fr",
   "start_url": "./",
   "scope": "./",

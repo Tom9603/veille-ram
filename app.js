@@ -4,8 +4,11 @@
   const $ = (id) => document.getElementById(id);
   const SVG_NS = "http://www.w3.org/2000/svg";
   const PREFS_KEY = "veille-ram:prefs";
-  // Catégories suivies : AMD Ryzen 7 7800X3D neuf, en version Box (boîte, garantie AMD)
-  // et en version Tray (sans boîte, garantie du vendeur).
+  // Processeurs suivis (7800X3D, 9800X3D : voir config.json « products »), chacun neuf, en version
+  // Box (boîte, garantie AMD) et en version Tray (sans boîte, garantie du vendeur).
+  const PRODUCTS = { "7800x3d": { name: "AMD Ryzen 7 7800X3D", model: "7800X3D" }, "9800x3d": { name: "AMD Ryzen 7 9800X3D", model: "9800X3D" } };
+  const LEGACY = "7800x3d";   // premières données, d'avant le suivi de plusieurs processeurs
+  const productOf = (o) => o.product || LEGACY;
   const GROUPS = ["box", "tray"];
   const GROUP = {
     box: { label: "Box", long: "Version Box", sub: "En boîte, garantie AMD 3 ans", color: "var(--box)" },
@@ -24,11 +27,12 @@
 
   // ---------- Préférences (mémorisées sur l'appareil) ----------
 
-  const DEFAULT_PREFS = { cat: "all", sort: "price-asc", available: false, verifiedOnly: false, details: false, theme: "auto", period: "all" };
+  const DEFAULT_PREFS = { product: LEGACY, cat: "all", sort: "price-asc", available: false, verifiedOnly: false, details: false, theme: "auto", period: "all" };
   let prefs = { ...DEFAULT_PREFS };
   try { prefs = { ...DEFAULT_PREFS, ...JSON.parse(localStorage.getItem(PREFS_KEY) || "{}") }; } catch (e) { /* stockage indisponible */ }
   // Préférences de l'ancienne veille RAM (latences, tri par CL) : remises par défaut.
   if (!GROUP[prefs.cat]) prefs.cat = "all";
+  if (!PRODUCTS[prefs.product]) prefs.product = LEGACY;
   if (!SORT_LABELS[prefs.sort]) prefs.sort = "price-asc";
   delete prefs.cl;
 
@@ -243,11 +247,16 @@
   }
 
   const thresholds = () => state.latest.thresholds_eur || {};
-  const groupLimit = (g) => {
-    const v = thresholds()[g] ?? thresholds().box;
+  const limitOf = (product, g) => {
+    const t = thresholds()[product] || {};
+    const v = t[g] ?? t.box;
     return typeof v === "number" ? v : null;
   };
-  const limitFor = (o) => groupLimit(groupOf(o));
+  const groupLimit = (g) => limitOf(prefs.product, g);
+  const limitFor = (o) => limitOf(productOf(o), groupOf(o));
+  const modelOf = (product) => (PRODUCTS[product] || { model: product }).model;
+  // Offres du processeur affiché.
+  const currentOffers = () => state.latest.offers.filter((o) => productOf(o) === prefs.product);
   const selectedGroups = () => (GROUP[prefs.cat] ? [prefs.cat] : GROUPS);
   const offerKey = (o) => `${o.shop}|${o.ref || o.name}|${groupOf(o)}|${o.url}`;
   const gapText = (o) => {
@@ -255,19 +264,28 @@
     const gap = o.price_eur - limitFor(o);
     return gap > 0 ? `${eurRound(gap)} au-dessus du seuil` : `${eurRound(-gap)} sous le seuil`;
   };
-  const hasDeal = (g) => state.latest.offers.some((o) => o.deal && groupOf(o) === g);
+  const hasDeal = (g) => currentOffers().some((o) => o.deal && groupOf(o) === g);
 
   function bestListed(g) {
-    return state.latest.offers
+    return currentOffers()
       .filter((o) => o.stock !== "out_of_stock" && (g == null || groupOf(o) === g))
       .reduce((best, o) => (!best || o.price_eur < best.price_eur ? o : best), null);
+  }
+
+  // Meilleure offre d'une ligne d'historique ; les premières lignes ne connaissaient que le 7800X3D.
+  function rowBest(h, product, g) {
+    if (h.best) return (h.best[product] || {})[g] || null;
+    return product === LEGACY ? h[g] || null : null;
   }
 
   // Relevés incomplets (une source bloquée) : meilleurs prix peut-être faussés, non tracés.
   function historyPoints() {
     return state.history.filter((h) => !h.partial).map((h) => {
       const p = { t: new Date(h.checked_at) };
-      for (const g of GROUPS) p[g] = h[g] ? h[g].price_eur : null;
+      for (const g of GROUPS) {
+        const b = rowBest(h, prefs.product, g);
+        p[g] = b ? b.price_eur : null;
+      }
       return p;
     }).sort((a, b) => a.t - b.t);
   }
@@ -291,6 +309,7 @@
     for (const key of Object.keys(VIEWS)) $(`view-${key}`).hidden = key !== v;
     $("page-title").textContent = VIEWS[v];
     $("cat-switch").hidden = v === "reglages";
+    $("product-switch").hidden = v === "reglages";
     document.querySelectorAll(".tabbar a").forEach((a) => {
       if (a.dataset.tab === v) a.setAttribute("aria-current", "page");
       else a.removeAttribute("aria-current");
@@ -314,7 +333,7 @@
     if (state.fromCache) showBanner("Hors ligne : affichage des dernières données enregistrées.");
     else if (age > (day ? 2 : 8)) showBanner(`Aucun relevé depuis ${Math.floor(age)} h : le robot a peut-être raté un passage. Touche ↻ pour en lancer un.`);
     else showBanner("");
-    if (state.latest.product && state.latest.product.label) $("product").textContent = state.latest.product.label;
+    $("product").textContent = `${(PRODUCTS[prefs.product] || {}).name || ""} · neuf`;
     renderMarche();
     renderOffres();
     renderHistorique();
@@ -324,19 +343,21 @@
   function renderMarche() {
     const latest = state.latest;
     const groups = selectedGroups();
-    const deals = latest.offers.filter((o) => o.deal && groups.includes(groupOf(o))).sort((a, b) => a.price_eur - b.price_eur);
+    const deals = currentOffers().filter((o) => o.deal && groups.includes(groupOf(o))).sort((a, b) => a.price_eur - b.price_eur);
     const deal = deals[0] || null;
     const offer = deal || bestListed(groups.length === 1 ? groups[0] : null);
-    // Une affaire sur l'autre version que celle affichée : on le dit, et un toucher l'affiche.
-    const elsewhere = !deal && GROUPS.find((g) => !groups.includes(g) && hasDeal(g));
+    // Une affaire hors de ce qui est affiché (autre version, autre processeur) : on le dit, et un toucher l'affiche.
+    const other = deal ? null : latest.offers.filter((o) => o.deal).sort((a, b) => a.price_eur - b.price_eur)[0] || null;
+    const elsewhere = other && (productOf(other) !== prefs.product
+      ? `Bonne affaire sur le ${modelOf(productOf(other))} › voir` : `Bonne affaire en ${GROUP[groupOf(other)].label} › voir`);
 
     const pill = $("status-pill");
     pill.classList.toggle("is-deal", !!(deal || elsewhere));
     pill.classList.toggle("is-link", !!elsewhere);
-    pill.onclick = elsewhere ? () => setPref("cat", "all") : null;
+    pill.onclick = elsewhere ? () => { prefs.product = productOf(other); setPref("cat", "all"); } : null;
     pill.replaceChildren(icon(deal || elsewhere ? "check" : "clock"),
-      deal ? "Bonne affaire !" : elsewhere ? `Bonne affaire en ${GROUP[elsewhere].label} › voir`
-        : groups.length === 1 ? `Pas d'affaire en ${GROUP[groups[0]].label}` : "Pas d'affaire pour l'instant");
+      deal ? "Bonne affaire !" : elsewhere
+        || (groups.length === 1 ? `Pas d'affaire en ${GROUP[groups[0]].label}` : "Pas d'affaire pour l'instant"));
     $("updated-pill").textContent = `Mis à jour ${relative(new Date(latest.checked_at))}`;
 
     $("hero").classList.toggle("is-deal", !!deal);
@@ -364,7 +385,7 @@
     const list = $("by-cat");
     list.replaceChildren(...GROUPS.map((g) => {
       const best = bestListed(g);
-      const out = best ? 0 : latest.offers.filter((o) => groupOf(o) === g).length;   // toutes en rupture ?
+      const out = best ? 0 : currentOffers().filter((o) => groupOf(o) === g).length;   // toutes en rupture ?
       return el("button", {
         type: "button",
         class: `row-cat${prefs.cat === g ? " is-selected" : ""}`,
@@ -420,7 +441,7 @@
       version: (a, b) => GROUPS.indexOf(groupOf(a)) - GROUPS.indexOf(groupOf(b)) || a.price_eur - b.price_eur,
       shop: (a, b) => a.shop.localeCompare(b.shop, "fr") || a.price_eur - b.price_eur,
     };
-    return state.latest.offers
+    return currentOffers()
       .filter((o) => groups.includes(groupOf(o)))
       .filter((o) => !prefs.available || o.stock === "in_stock" || o.stock === "on_order")
       .filter((o) => !prefs.verifiedOnly || o.verified || o.via)
@@ -429,7 +450,7 @@
 
   function renderOffres() {
     const offers = filteredOffers();
-    const total = state.latest.offers.filter((o) => selectedGroups().includes(groupOf(o))).length;
+    const total = currentOffers().filter((o) => selectedGroups().includes(groupOf(o))).length;
     $("result-count").textContent = offers.length
       ? `${offers.length} offre${offers.length > 1 ? "s" : ""}${offers.length < total ? ` sur ${total}` : ""} · ${SORT_LABELS[prefs.sort] || ""}`
       : "";
@@ -709,8 +730,11 @@
   // ---------- Réglages ----------
 
   function renderReglages() {
-    $("th-box").textContent = eur(groupLimit("box"));
-    $("th-tray").textContent = eur(groupLimit("tray"));
+    const card = $("thresholds");
+    card.querySelectorAll(".th-row").forEach((r) => r.remove());
+    card.prepend(...Object.keys(PRODUCTS).flatMap((product) => GROUPS.map((g) =>
+      el("div", { class: "row th-row" }, el("span", null, `Seuil ${modelOf(product)} ${GROUP[g].label}`),
+        el("span", { class: "value" }, eur(limitOf(product, g)))))));
     const slots = relevesSlots();
     const fmt = (m) => `${Math.floor(m / 60)}h${String(m % 60).padStart(2, "0")}`;
     $("set-schedule").textContent = `toutes les heures, ${fmt(slots[0])}–${fmt(slots[slots.length - 1])}`;
@@ -733,12 +757,14 @@
   }
 
   function syncControls() {
+    setChecked($("product-switch"), "data-product", prefs.product);
     setChecked($("cat-switch"), "data-cat", prefs.cat);
     setChecked($("period"), "data-period", prefs.period);
     setChecked($("set-theme"), "data-theme-value", prefs.theme);
     $("sort").value = prefs.sort;
     $("set-sort").value = prefs.sort;
     $("set-cat").value = prefs.cat;
+    $("set-product").value = prefs.product;
     $("f-stock").setAttribute("aria-pressed", String(prefs.available));
     $("f-verified").setAttribute("aria-pressed", String(prefs.verifiedOnly));
     $("f-details").setAttribute("aria-pressed", String(prefs.details));
@@ -766,8 +792,8 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           topic,
-          title: "Veille 7800X3D : notifications activées",
-          message: "Test réussi. Tu recevras ici le relevé de chaque heure, de 6h13 à 23h13, et une alerte dès que le 7800X3D passe sous le seuil.",
+          title: "Veille X3D : notifications activées",
+          message: "Test réussi. Tu recevras ici le relevé de chaque heure, de 6h13 à 23h13, et une alerte dès qu'un processeur suivi passe sous son seuil.",
           tags: ["white_check_mark"],
           click: location.href.split("#")[0],
         }),
@@ -781,12 +807,14 @@
 
   // ---------- Événements ----------
 
+  $("product-switch").addEventListener("click", (e) => { const b = e.target.closest("[data-product]"); if (b) setPref("product", b.dataset.product); });
   $("cat-switch").addEventListener("click", (e) => { const b = e.target.closest("[data-cat]"); if (b) setPref("cat", b.dataset.cat); });
   $("period").addEventListener("click", (e) => { const b = e.target.closest("[data-period]"); if (b) setPref("period", b.dataset.period); });
   $("set-theme").addEventListener("click", (e) => { const b = e.target.closest("[data-theme-value]"); if (b) setPref("theme", b.dataset.themeValue); });
   $("sort").addEventListener("change", (e) => setPref("sort", e.target.value));
   $("set-sort").addEventListener("change", (e) => setPref("sort", e.target.value));
   $("set-cat").addEventListener("change", (e) => setPref("cat", e.target.value));
+  $("set-product").addEventListener("change", (e) => setPref("product", e.target.value));
   $("f-stock").addEventListener("click", () => setPref("available", !prefs.available));
   $("f-verified").addEventListener("click", () => setPref("verifiedOnly", !prefs.verifiedOnly));
   $("f-details").addEventListener("click", () => { openOffers.clear(); setPref("details", !prefs.details); });

@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-"""Relevé automatique du prix de l'AMD Ryzen 7 7800X3D neuf, sans IA.
+"""Relevé automatique du prix des processeurs AMD Ryzen 7 7800X3D et 9800X3D neufs, sans IA.
 
 Lancé par GitHub Actions (toutes les heures en journée, et bouton ↻ de l'appli).
 Sources :
 
 - en direct (prix vu chez la boutique) : les modules de scripts/sources/,
   un par boutique (voir SOURCES plus bas) ;
-- Ledenicheur : fiches du 7800X3D Box et Tray, avec le prix de chaque boutique
+- Ledenicheur : fiches Box et Tray de chaque processeur, avec le prix de chaque boutique
   (Amazon, Cdiscount, Fnac, AliExpress…), livraison incluse quand elle est connue.
 
 Garde le processeur seul, neuf, en version Box (en boîte) ou Tray (sans boîte,
-OEM), et écrit un relevé au format attendu par scripts/record.py.
+OEM), et écrit un relevé au format attendu par scripts/record.py (champ
+« product » : clé du processeur dans PRODUCTS).
 
 Usage :
     python3 scripts/collect.py /chemin/vers/run.json
@@ -26,15 +27,22 @@ import time
 import urllib.request
 
 UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"
-NAME = "AMD Ryzen 7 7800X3D"
-REFS = {"box": "100-100000910WOF", "tray": "100-000000910"}
+LN = "https://ledenicheur.fr/product.php?p={}&filters=price_inc_shipping"
 
-# Fiches Ledenicheur, prix livraison incluse : les offres affichées sont les moins chères,
-# celles dont les frais de port sont connus d'abord, puis les autres.
-LEDENICHEUR = {
-    "box": "https://ledenicheur.fr/product.php?p=8053700&filters=price_inc_shipping",
-    "tray": "https://ledenicheur.fr/product.php?p=8053713&filters=price_inc_shipping",
+# Processeurs suivis. Fiches Ledenicheur, prix livraison incluse : les offres affichées sont
+# les moins chères, celles dont les frais de port sont connus d'abord, puis les autres.
+# price_range : fourchette plausible d'un prix neuf (écarte leurres et prix fantaisistes).
+PRODUCTS = {
+    "7800x3d": {"key": "7800x3d", "model": "7800X3D", "name": "AMD Ryzen 7 7800X3D",
+                "refs": {"box": "100-100000910WOF", "tray": "100-000000910"},
+                "ledenicheur": {"box": LN.format(8053700), "tray": LN.format(8053713)},
+                "price_range": (200, 600)},
+    "9800x3d": {"key": "9800x3d", "model": "9800X3D", "name": "AMD Ryzen 7 9800X3D",
+                "refs": {"box": "100-100001084WOF", "tray": "100-000001084"},
+                "ledenicheur": {"box": LN.format(13951156), "tray": LN.format(13963569)},
+                "price_range": (280, 800)},
 }
+OTHER_X3D = ("7800x3d", "9800x3d", "7900x3d", "7950x3d", "9900x3d", "9950x3d", "5800x3d", "5700x3d")
 
 # Boutiques lues en direct : (libellé, module de scripts/sources/, noms des boutiques
 # couvertes). Si la lecture réussit, leurs offres vues via Ledenicheur sont ignorées
@@ -109,31 +117,33 @@ def used(blob):
     return bool(re.search(r"occasion|reconditionn|seconde main|refurb|comme neuf|d'exposition", blob, re.I))
 
 
-def other_product(title):
+def other_product(title, product):
     """Autre processeur, lot ou PC complet : hors sujet."""
     t = title.lower()
-    if "7800x3d" not in t.replace(" ", ""):
+    if product["key"] not in t.replace(" ", ""):
         return True
-    return bool(re.search(r"9800x3d|7900x3d|7950x3d|\bpc (?:gamer|gaming|fixe|complet|de bureau)|gaming pc|"
+    if any(x in t for x in OTHER_X3D if x != product["key"]):
+        return True
+    return bool(re.search(r"\bpc (?:gamer|gaming|fixe|complet|de bureau)|gaming pc|"
                           r"(?<!processeur d')(?<!processeur pour )ordinateur|"
                           r"unit[ée] centrale|\bkit\b|\bpack\b|bundle|\+ ?carte|carte m[èe]re|\bb650|\bx670|\bx870|"
                           r"\bb850|\brtx\b|\brx ?\d{4}|\bssd\b|\d+ ?go (?:de )?ram", t))
 
 
-def version_of(title, default):
+def version_of(title, default, product):
     """Box ou Tray d'après le titre de l'offre ; à défaut, la version de la fiche."""
-    t = title.lower()
-    if re.search(r"\btray\b|\boem\b|\bmpk\b|\bbulk\b|en vrac|sans bo[iî]te|sans emballage|(?<!socket de )plateau|"
-                 r"100-000000910\b", t):
+    t, refs = title.lower(), product["refs"]
+    if (re.search(r"\btray\b|\boem\b|\bmpk\b|\bbulk\b|en vrac|sans bo[iî]te|sans emballage|(?<!socket de )plateau", t)
+            or refs["tray"] in t):
         return "tray"
-    if re.search(r"\bbox\b|\bwof\b|en bo[iî]te|bo[iî]te|100-100000910", t):
+    if re.search(r"\bbox\b|\bwof\b|en bo[iî]te|bo[iî]te", t) or refs["box"][:13].lower() in t:
         return "box"
     return default
 
 
-def offer(version, p, shop, stock, url, verified, marketplace=False, via=None, name=NAME, ref=None, shipping=None):
-    o = {"name": name, "ref": REFS[version] if ref is None else ref, "version": version, "price_eur": p, "shop": shop,
-         "stock": stock, "marketplace": marketplace, "verified": verified, "url": url}
+def offer(product, version, p, shop, stock, url, verified, marketplace=False, via=None, shipping=None):
+    o = {"product": product["key"], "name": product["name"], "ref": product["refs"][version], "version": version,
+         "price_eur": p, "shop": shop, "stock": stock, "marketplace": marketplace, "verified": verified, "url": url}
     if via:
         o["via"] = via
     if shipping:
@@ -143,7 +153,7 @@ def offer(version, p, shop, stock, url, verified, marketplace=False, via=None, n
 
 # ---------- Ledenicheur ----------
 
-def ledenicheur(page, version, skip_shops=frozenset()):
+def ledenicheur(page, product, version, skip_shops=frozenset()):
     """Fiche produit : une offre par boutique (prix livraison incluse, stock, lien)."""
     if 'data-test="OfferListItem"' not in page:   # page anti-robot ou nouvelle mise en page
         raise RuntimeError("aucune offre dans la page")
@@ -158,7 +168,7 @@ def ledenicheur(page, version, skip_shops=frozenset()):
         if not (shop and link and cost):
             continue
         title = re.sub(r"[|\s]+", " ", body[:cost.start()]).strip()
-        if 'data-test="UsedBadge"' in block or used(title) or other_product(title):
+        if 'data-test="UsedBadge"' in block or used(title) or other_product(title, product):
             continue
         shop_name = html.unescape(shop.group(1)).strip()
         if shop_name.lower().replace(" marketplace", "") in skip_shops:
@@ -169,7 +179,8 @@ def ledenicheur(page, version, skip_shops=frozenset()):
         stock = re.search(r"(En stock|Pas en stock|Stock inconnu|Rupture[^|]*|Expédié[^|]{0,40}|Sous \d+[^|]{0,30}|Sur commande)", body, re.I)
         shipping = re.search(r"Livraison gratuite|Livraison \d|Frais de livraison inconnus", body, re.I)
         url = html.unescape(link.group(1))
-        offers.append(offer(version_of(title, version), p, shop_name, stock_from(stock.group(1)) if stock else "unknown",
+        offers.append(offer(product, version_of(title, version, product), p, shop_name,
+                            stock_from(stock.group(1)) if stock else "unknown",
                             url if url.startswith("http") else "https://ledenicheur.fr" + url, False,
                             marketplace="marketplace" in shop_name.lower() or shop_name in ("AliExpress", "eBay"),
                             via="Ledenicheur",
@@ -180,45 +191,53 @@ def ledenicheur(page, version, skip_shops=frozenset()):
 # ---------- Assemblage ----------
 
 def dedupe(offers):
-    """Une seule fois chaque offre (boutique, version, lien) : la moins chère."""
+    """Une seule fois chaque offre (processeur, boutique, version, lien) : la moins chère."""
     best = {}
     for o in offers:
-        key = (o["shop"].lower(), o["version"], o["url"])
+        key = (o["product"], o["shop"].lower(), o["version"], o["url"])
         if key not in best or o["price_eur"] < best[key]["price_eur"]:
             best[key] = o
     return sorted(best.values(), key=lambda o: o["price_eur"])
 
 
-def collect():
-    offers, blocked, read_directly = [], [], set()
-
+def collect_product(product, blocked):
+    """Offres d'un processeur : boutiques en direct, puis Ledenicheur pour les autres."""
+    offers, read_directly = [], set()
     for label, module, shops in SOURCES:
         try:
-            found = importlib.import_module(f"sources.{module}").collect(fetch)
+            found = importlib.import_module(f"sources.{module}").collect(fetch, product)
         except Exception as err:  # une source en panne ne doit pas bloquer les autres
-            print(f"{label} : {err}", file=sys.stderr)
-            blocked.append(label)
+            print(f"{label} ({product['model']}) : {err}", file=sys.stderr)
+            if label not in blocked:
+                blocked.append(label)
             continue
         if not found:
-            print(f"{label} : aucune offre reconnue", file=sys.stderr)
+            print(f"{label} ({product['model']}) : aucune offre reconnue", file=sys.stderr)
         # Seules les boutiques effectivement lues remplacent leurs offres vues via Ledenicheur.
         read_directly.update(shop for shop in shops if any(o["shop"].lower() == shop for o in found))
-        offers += found
+        offers += [{**o, "product": product["key"]} for o in found]
 
-    for version, url in LEDENICHEUR.items():
+    for version, url in product["ledenicheur"].items():
         try:
             time.sleep(0.4)
-            offers += ledenicheur(fetch(url), version, frozenset(read_directly))
+            offers += ledenicheur(fetch(url), product, version, frozenset(read_directly))
         except Exception as err:
-            print(f"Ledenicheur {version} : {err}", file=sys.stderr)
+            print(f"Ledenicheur {product['model']} {version} : {err}", file=sys.stderr)
             if "ledenicheur.fr" not in blocked:
                 blocked.append("ledenicheur.fr")
+    return offers
+
+
+def collect():
+    offers, blocked = [], []
+    for product in PRODUCTS.values():
+        offers += collect_product(product, blocked)
     return dedupe(offers), blocked
 
 
 def valid(o):
     """Offre acceptée par scripts/record.py ? Une offre bancale est écartée, pas tout le relevé."""
-    return (o.get("version") in REFS and isinstance(o.get("price_eur"), (int, float)) and 50 <= o["price_eur"] <= 2000
+    return (o.get("product") in PRODUCTS and o.get("version") in ("box", "tray") and isinstance(o.get("price_eur"), (int, float)) and 50 <= o["price_eur"] <= 2000
             and all(isinstance(o.get(k), str) and o[k].strip() for k in ("name", "shop", "url"))
             and o["url"].startswith("https://") and isinstance(o.get("ref", ""), str)
             and o.get("stock") in ("in_stock", "on_order", "out_of_stock", "unknown")
@@ -236,14 +255,15 @@ def main(argv):
     if not offers:
         print("ERREUR : aucune offre relevée, rien n'est écrit.", file=sys.stderr)
         sys.exit(3)
-    counts = {}
-    for o in offers:
-        counts[o["shop"]] = counts.get(o["shop"], 0) + 1
-    n = {v: sum(1 for o in offers if o["version"] == v) for v in ("box", "tray")}
+    parts = []
+    for key, product in PRODUCTS.items():
+        mine = [o for o in offers if o["product"] == key]
+        n = {v: sum(1 for o in mine if o["version"] == v) for v in ("box", "tray")}
+        parts.append(f"{product['model']} : {len(mine)} offres ({n['box']} Box, {n['tray']} Tray)")
+    shops = sorted({o["shop"] for o in offers})
     run = {
         "offers": offers,
-        "trend": f"{len(offers)} offres relevées ({n['box']} Box, {n['tray']} Tray) : "
-                 + ", ".join(f"{shop} {k}" for shop, k in sorted(counts.items())) + ".",
+        "trend": " · ".join(parts) + f". Boutiques : {', '.join(shops)}.",
         "blocked_sources": blocked,
     }
     with open(argv[0], "w", encoding="utf-8") as f:

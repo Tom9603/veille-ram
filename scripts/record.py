@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Valide un relevé de prix du Ryzen 7 7800X3D et met à jour les données de l'appli.
+"""Valide un relevé de prix des processeurs suivis (7800X3D, 9800X3D) et met à jour les données de l'appli.
 
 Usage :
     python3 scripts/record.py /chemin/vers/run.json [--dry-run]
@@ -9,6 +9,7 @@ Entrée (run.json, écrit par scripts/collect.py HORS du dépôt) :
   "checked_at": "2026-10-16T19:13:00+02:00",   # optionnel, défaut = maintenant
   "offers": [
     {
+      "product": "7800x3d",                      # processeur : clé de config.json « products »
       "name": "AMD Ryzen 7 7800X3D",            # libellé court
       "ref": "100-100000910WOF",                # référence fabricant ("" si inconnue)
       "version": "box",                          # box (en boîte) | tray (sans boîte, OEM)
@@ -28,9 +29,10 @@ Entrée (run.json, écrit par scripts/collect.py HORS du dépôt) :
 
 Sorties : data/cpu/latest.json (état courant) et data/cpu/history.json (une ligne
 par relevé). data/latest.json et data/history.json sont les données figées de
-l'ancienne veille RAM, gardées pour les appareils qui ont encore l'ancienne appli. Le texte de la notification est affiché sur la sortie standard et
-enregistré dans data/latest.json (champ « notification ») ; sa version courte
-pour le téléphone (ntfy) est dans le champ « push », envoyée par scripts/notify.py.
+l'ancienne veille RAM, gardées pour les appareils qui ont encore l'ancienne appli.
+Le texte complet du relevé est affiché sur la sortie standard et enregistré dans
+data/cpu/latest.json (champ « notification ») ; sa version courte pour le
+téléphone (ntfy) est dans le champ « push », envoyée par scripts/notify.py.
 """
 
 import json
@@ -44,6 +46,7 @@ CONFIG = ROOT / "config.json"
 LATEST = ROOT / "data" / "cpu" / "latest.json"
 HISTORY = ROOT / "data" / "cpu" / "history.json"
 NOTIFIED_HOURS = 24   # une affaire absente des relevés plus longtemps sera annoncée de nouveau
+LEGACY = "7800x3d"    # premières données, d'avant le suivi de plusieurs processeurs
 
 VERSIONS = {"box": "Box", "tray": "Tray"}
 STOCKS = {"in_stock", "on_order", "out_of_stock", "unknown"}
@@ -69,7 +72,7 @@ def eur(value):
     return text[:-3] if text.endswith(",00") else text
 
 
-def validate(run):
+def validate(run, products):
     errors = []
     if not isinstance(run, dict):
         fail(["le fichier doit contenir un objet JSON"])
@@ -81,6 +84,8 @@ def validate(run):
         if not isinstance(o, dict):
             errors.append(f"{where} doit être un objet")
             continue
+        if o.get("product", LEGACY) not in products:
+            errors.append(f"{where}.product doit être l'un de {sorted(products)} (reçu {o.get('product')!r})")
         for key in ("name", "shop", "url"):
             if not isinstance(o.get(key), str) or not o[key].strip():
                 errors.append(f"{where}.{key} doit être un texte non vide")
@@ -119,11 +124,11 @@ def validate(run):
 
 
 def offer_key(o):
-    return (o["shop"].strip().lower(), o["version"], o["url"].strip())
+    return (o["product"], o["shop"].strip().lower(), o["version"], o["url"].strip())
 
 
 def dedupe(offers):
-    """Une seule fois chaque offre (même boutique, même version, même lien) : la moins chère."""
+    """Une seule fois chaque offre (processeur, boutique, version, lien) : la moins chère."""
     best = {}
     for o in offers:
         key = offer_key(o)
@@ -135,16 +140,29 @@ def dedupe(offers):
 def summary(offer):
     if offer is None:
         return None
-    return {k: offer[k] for k in ("name", "ref", "version", "price_eur", "shop", "stock", "url")}
+    return {k: offer[k] for k in ("product", "name", "ref", "version", "price_eur", "shop", "stock", "url")}
 
 
 def limit_for(offer, thresholds):
-    return thresholds.get(offer["version"], thresholds.get("box"))
+    t = thresholds.get(offer["product"], {})
+    return t.get(offer["version"], t.get("box"))
+
+
+def label(offer, products):
+    """« 7800X3D Tray »."""
+    return f"{products[offer['product']]['model']} {VERSIONS[offer['version']]}"
+
+
+def row_best(row, product, version):
+    """Meilleure offre d'une ligne d'historique ; les premières lignes ne connaissaient que le 7800X3D."""
+    if "best" in row:
+        return (row["best"].get(product) or {}).get(version)
+    return row.get(version) if product == LEGACY else None
 
 
 def deal_key(o):
-    """Une affaire = une boutique et une version, quel que soit le lien (direct ou via Ledenicheur)."""
-    return f"{o['shop'].strip().lower().replace(' marketplace', '')}|{o['version']}"
+    """Une affaire = un processeur, une boutique et une version, quel que soit le lien (direct ou via Ledenicheur)."""
+    return f"{o['product']}|{o['shop'].strip().lower().replace(' marketplace', '')}|{o['version']}"
 
 
 def announce(deals, previous_latest, checked_at):
@@ -156,6 +174,8 @@ def announce(deals, previous_latest, checked_at):
     now = datetime.fromisoformat(checked_at)
     notified = {}
     for key, n in ((previous_latest or {}).get("notified") or {}).items():
+        if key.count("|") == 1:
+            key = f"{LEGACY}|{key}"   # mémoire d'avant le suivi de plusieurs processeurs
         try:
             if (now - datetime.fromisoformat(n["seen"])).total_seconds() < NOTIFIED_HOURS * 3600:
                 notified[key] = n
@@ -172,7 +192,12 @@ def announce(deals, previous_latest, checked_at):
     return new, notified
 
 
-def push_message(deals, new, best, changes, thresholds, blocked, app_url):
+def moves_text(changes, products):
+    return [f"{products[p]['model']} {VERSIONS[v]} {'+' if d > 0 else '−'}{eur(abs(d))} €"
+            for p, per in changes.items() for v, d in per.items() if d]
+
+
+def push_message(deals, new, best, changes, thresholds, blocked, products, app_url):
     """Notification courte pour le téléphone : titre, texte, priorité ntfy, lien."""
     if deals:
         top = new[0] if new else deals[0]
@@ -182,34 +207,42 @@ def push_message(deals, new, best, changes, thresholds, blocked, app_url):
             lines.append("Frais de port inconnus : vérifie le total avant d'acheter.")
         if len(deals) > 1:
             lines.append(f"{len(deals) - 1} autre{'s' if len(deals) > 2 else ''} offre{'s' if len(deals) > 2 else ''} sous le seuil.")
+        for p, product in products.items():   # processeurs sans affaire : leur meilleur prix
+            if not any(o["product"] == p for o in deals):
+                tops = [o for o in best[p].values() if o]
+                if tops:
+                    o = min(tops, key=lambda o: o["price_eur"])
+                    lines.append(f"{product['model']} : {eur(o['price_eur'])} € au mieux ({VERSIONS[o['version']]}, "
+                                 f"seuil {eur(limit_for(o, thresholds))} €)")
         return {
-            "title": f"{'Bonne affaire' if new else 'Toujours en cours'} : 7800X3D {VERSIONS[top['version']]} à {eur(top['price_eur'])} €",
+            "title": f"{'Bonne affaire' if new else 'Toujours en cours'} : {label(top, products)} à {eur(top['price_eur'])} €",
             "message": "\n".join(lines),
             # Nouvelle affaire : alerte. Affaire déjà annoncée : rappel silencieux, comme « pas d'affaire ».
             "priority": 5 if new else 2,
             "tags": ["rotating_light"] if new else ["moneybag"],
             "click": top["url"],
         }
-    lines = []
-    for version, label in VERSIONS.items():
-        o = best.get(version)
-        if o:
+    lines, tops = [], []
+    for p, product in products.items():
+        for v, name in VERSIONS.items():
+            o = best[p][v]
+            if not o:
+                lines.append(f"{product['model']} {name} : aucune offre disponible")
+                continue
+            tops.append(o)
             gap = o["price_eur"] - limit_for(o, thresholds)
-            note = f"{eur(gap)} € au-dessus du seuil" if gap > 0 else "sous le seuil, mais stock ou prix non confirmé"
-            lines.append(f"{label} {eur(o['price_eur'])} € chez {o['shop']} ({note})")
-        else:
-            lines.append(f"{label} : aucune offre disponible")
-    moves = [f"{label} {'+' if changes[v] > 0 else '−'}{eur(abs(changes[v]))} €" for v, label in VERSIONS.items() if changes.get(v)]
+            note = f"+{eur(gap)} € / seuil" if gap > 0 else "sous le seuil, stock ou prix non confirmé"
+            lines.append(f"{product['model']} {name} {eur(o['price_eur'])} € chez {o['shop']} ({note})")
+    moves = moves_text(changes, products)
     if moves:
         lines.append("Depuis le relevé précédent : " + ", ".join(moves))
     if blocked:
         lines.append(f"Source{'s' if len(blocked) > 1 else ''} inaccessible{'s' if len(blocked) > 1 else ''} : "
                      f"{', '.join(blocked)} (prix peut-être incomplets)")
-    tops = [o for o in best.values() if o]
-    top = min(tops, key=lambda o: o["price_eur"]) if tops else None
+    cheapest = {p: min((o for o in tops if o["product"] == p), key=lambda o: o["price_eur"], default=None) for p in products}
+    title = " · ".join(f"{products[p]['model']} {eur(o['price_eur'])} €" for p, o in cheapest.items() if o)
     return {
-        "title": f"Pas d'affaire : {eur(top['price_eur'])} € au mieux ({VERSIONS[top['version']]})" if top
-        else "Pas d'affaire : aucune offre disponible",
+        "title": f"Pas d'affaire : {title}" if title else "Pas d'affaire : aucune offre disponible",
         "message": "\n".join(lines),
         "priority": 2,
         "tags": [],
@@ -225,15 +258,16 @@ def main(argv):
         sys.exit(1)
 
     config = json.loads(CONFIG.read_text(encoding="utf-8"))
+    products = config["products"]
     tz = ZoneInfo(config["schedule"]["timezone"])
     run = json.loads(Path(args[0]).read_text(encoding="utf-8"))
-    validate(run)
+    validate(run, products)
 
     thresholds = config["thresholds_eur"]
     checked_at = run.get("checked_at") or datetime.now(tz).isoformat(timespec="minutes")
 
     offers = []
-    for o in dedupe(run["offers"]):
+    for o in dedupe([{**o, "product": o.get("product", LEGACY)} for o in run["offers"]]):
         o = {**o, "ref": o.get("ref", "").strip(), "price_eur": round(float(o["price_eur"]), 2)}
         # Bonne affaire : disponible, sous le seuil, et prix d'une boutique identifiée
         # (vu chez elle, ou relevé pour elle par un comparateur).
@@ -244,9 +278,10 @@ def main(argv):
         )
         offers.append(o)
 
-    # Meilleur prix « listé » par version : tout sauf les ruptures confirmées.
+    # Meilleur prix « listé » par processeur et version : tout sauf les ruptures confirmées.
     listed = [o for o in offers if o["stock"] != "out_of_stock"]
-    best = {v: summary(next((o for o in listed if o["version"] == v), None)) for v in VERSIONS}
+    best = {p: {v: summary(next((o for o in listed if o["product"] == p and o["version"] == v), None)) for v in VERSIONS}
+            for p in products}
     deals = [o for o in offers if o["deal"]]
 
     previous_latest = json.loads(LATEST.read_text(encoding="utf-8")) if LATEST.exists() else None
@@ -254,30 +289,29 @@ def main(argv):
     history = [h for h in history if h["checked_at"] != checked_at]
     previous = next((h for h in reversed(history) if not h.get("partial")), None)   # dernier relevé complet
 
-    def change(key):
-        now, before = best[key], (previous or {}).get(key)
+    def change(p, v):
+        now, before = best[p][v], row_best(previous, p, v) if previous else None
         if now is None or before is None:
             return None
         return round(now["price_eur"] - before["price_eur"], 2)
 
     # Relevé incomplet (source bloquée) : pas de « depuis le relevé précédent », ce serait une fausse variation.
     blocked = run.get("blocked_sources", [])
-    changes = {key: None if blocked else change(key) for key in best}
+    changes = {p: {v: None if blocked else change(p, v) for v in VERSIONS} for p in products}
     new, notified = announce(deals, previous_latest, checked_at)
 
     if deals:
         top = deals[0]
-        headline = (f"🚨 BONNE AFFAIRE : {top['name']} {VERSIONS[top['version']]} à {eur(top['price_eur'])} € "
-                    f"chez {top['shop']}")
+        headline = f"🚨 BONNE AFFAIRE : {top['name']} {VERSIONS[top['version']]} à {eur(top['price_eur'])} € chez {top['shop']}"
     else:
-        parts = [f"meilleur {label} {eur(best[v]['price_eur'])} € ({best[v]['shop']})" if best[v] else f"aucun {label} disponible"
-                 for v, label in VERSIONS.items()]
-        text = ", ".join(parts)
-        headline = "Ryzen 7 7800X3D : pas d'affaire. " + text[0].upper() + text[1:]
+        parts = [f"{product['model']} {VERSIONS[v]} {eur(best[p][v]['price_eur'])} € ({best[p][v]['shop']})"
+                 if best[p][v] else f"{product['model']} {VERSIONS[v]} : aucune offre"
+                 for p, product in products.items() for v in VERSIONS]
+        headline = "Pas d'affaire. Meilleurs prix : " + ", ".join(parts)
 
     latest = {
         "checked_at": checked_at,
-        "product": config["product"],
+        "products": products,
         "thresholds_eur": thresholds,
         "deal": bool(deals),
         "headline": headline,
@@ -288,7 +322,7 @@ def main(argv):
         "blocked_sources": blocked,
         "notified": notified,
     }
-    row = {"checked_at": checked_at, **best, "deal": bool(deals), "offers_count": len(offers)}
+    row = {"checked_at": checked_at, "best": best, "deal": bool(deals), "offers_count": len(offers)}
     if blocked:
         row["partial"] = True   # meilleurs prix peut-être faussés : l'appli ne les trace pas
     history.append(row)
@@ -296,25 +330,26 @@ def main(argv):
 
     # Texte complet du relevé, prêt à recopier tel quel.
     lines = [headline]
-    moves = [f"{label} {'+' if changes[v] > 0 else '−'}{eur(abs(changes[v]))} €" for v, label in VERSIONS.items() if changes[v]]
+    moves = moves_text(changes, products)
     if moves:
         lines.append("Depuis le relevé précédent : " + ", ".join(moves))
-    lines += ["", "| Version | Prix | Boutique | Stock | Lien |", "|---|---|---|---|---|"]
-    for o in offers[:6]:
-        flags = (" (marketplace)" if o["marketplace"] else "") + (
-            "" if o["verified"] else f" (via {o['via']})" if o.get("via") else " (non vérifié)")
-        lines.append(f"| {VERSIONS[o['version']]} | {eur(o['price_eur'])} €{flags} | {o['shop']} "
-                     f"| {STOCK_LABELS[o['stock']]} | {o['url']} |")
+    lines += ["", "| Processeur | Prix | Boutique | Stock | Lien |", "|---|---|---|---|---|"]
+    for p in products:
+        for o in [o for o in offers if o["product"] == p][:4]:
+            flags = (" (marketplace)" if o["marketplace"] else "") + (
+                "" if o["verified"] else f" (via {o['via']})" if o.get("via") else " (non vérifié)")
+            lines.append(f"| {label(o, products)} | {eur(o['price_eur'])} €{flags} | {o['shop']} "
+                         f"| {STOCK_LABELS[o['stock']]} | {o['url']} |")
     if not offers:
         lines.append("| aucune offre trouvée | | | | |")
     lines.append("")
     if latest["trend"]:
         lines.append(f"Relevé : {latest['trend']}")
-    if latest["blocked_sources"]:
-        lines.append("Sources bloquées : " + ", ".join(latest["blocked_sources"]))
+    if blocked:
+        lines.append("Sources bloquées : " + ", ".join(blocked))
     lines.append(f"Appli : {config['app_url']}")
     latest["notification"] = "\n".join(lines)
-    latest["push"] = push_message(deals, new, best, changes, thresholds, blocked, config["app_url"])
+    latest["push"] = push_message(deals, new, best, changes, thresholds, blocked, products, config["app_url"])
 
     if not dry_run:
         LATEST.parent.mkdir(parents=True, exist_ok=True)

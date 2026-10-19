@@ -1,15 +1,27 @@
 {
-  "product": {
-    "label": "AMD Ryzen 7 7800X3D · neuf",
-    "name": "AMD Ryzen 7 7800X3D",
-    "versions": {
-      "box": "Box (en boîte, garantie AMD 3 ans)",
-      "tray": "Tray (sans boîte, OEM, garantie vendeur)"
+  "products": {
+    "7800x3d": {
+      "name": "AMD Ryzen 7 7800X3D",
+      "model": "7800X3D"
+    },
+    "9800x3d": {
+      "name": "AMD Ryzen 7 9800X3D",
+      "model": "9800X3D"
     }
   },
+  "versions": {
+    "box": "Box (en boîte, garantie AMD 3 ans)",
+    "tray": "Tray (sans boîte, OEM, garantie vendeur)"
+  },
   "thresholds_eur": {
-    "box": 280,
-    "tray": 280
+    "7800x3d": {
+      "box": 280,
+      "tray": 280
+    },
+    "9800x3d": {
+      "box": 350,
+      "tray": 350
+    }
   },
   "schedule": {
     "timezone": "Europe/Paris",

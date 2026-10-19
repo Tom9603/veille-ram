@@ -1,6 +1,6 @@
-"""Alternate France : AMD Ryzen 7 7800X3D neuf, versions box et tray.
+"""Alternate France : processeur suivi (7800X3D, 9800X3D…) neuf, versions box et tray.
 
-La recherche liste les fiches (une « Tray », une « processeur en boîte ») ; chaque fiche 7800X3D est
+La recherche liste les fiches (une « Tray », une « processeur en boîte ») ; chaque fiche du processeur est
 ensuite ouverte pour y lire, sur le site même de la boutique, la référence AMD (mpn du JSON-LD), le prix,
 le stock et les frais d'expédition affichés (« en sus à partir de € 9,90 »), ajoutés au prix.
 Si une fiche ne répond pas, on garde le prix de la liste, plus le port lu sur l'autre fiche s'il y en a un.
@@ -15,12 +15,13 @@ import time
 from collect import price, stock_from, text
 
 SHIPPING_DEFAULT = 9.90   # « frais d'expédition en sus à partir de € 9,90 »
-URLS = ["https://www.alternate.fr/listing.xhtml?q=7800x3d"]   # + les fiches produit trouvées dans la liste
+SEARCH = "https://www.alternate.fr/listing.xhtml?q={key}"   # + les fiches produit trouvées dans la liste
 
-REFS = {"box": "100-100000910WOF", "tray": "100-000000910"}
 
-# Écarte les PC (« ALTERNATE PC Gaming… ») et les autres CPU ; « Ryzen™ » toléré (déjà vu sur le 9800X3D)
-CPU = re.compile(r"^AMD Ryzen[™®]? 7 7800X3D\b", re.I)
+def cpu(product):
+    """Écarte les PC (« ALTERNATE PC Gaming… ») et les autres CPU ; « Ryzen™ » toléré (vu sur le 9800X3D)."""
+    return re.compile(rf"^AMD Ryzen[™®]? 7 {product['model']}\b", re.I)
+
 EXCLUDE = re.compile(r"\+|bundle|\bkit\b|\bpack\b|\bPC\b|ventirad|watercooling|carte m[eè]re|d[ée]lid"
                      r"|occasion|reconditionn|refurb|comme neuf|seconde main", re.I)
 TRAY = re.compile(r"\btray\b|\boem\b|\bmpk\b|sans bo[iî]te|plateau", re.I)
@@ -39,9 +40,9 @@ def euros(raw):
     return float(m.group(1).replace(".", "") + "." + m.group(2)) if m else None
 
 
-def listing(page):
-    """Cartes de la recherche : (lien, nom, sous-titre, prix, disponibilité) des seuls 7800X3D neufs."""
-    cards = []
+def listing(page, product):
+    """Cartes de la recherche : (lien, nom, sous-titre, prix, disponibilité) du seul processeur suivi, neuf."""
+    cards, cpu_re = [], cpu(product)
     for block in re.split(r'<a href="(?=https://www\.alternate\.fr/[^"]+/html/product/)', page)[1:]:
         url = block.split('"', 1)[0]
         name = re.search(r'<div class="product-name[^"]*">(.*?)</div>', block, re.S)
@@ -52,7 +53,7 @@ def listing(page):
             continue
         name, sub = text(name.group(1)), text(sub.group(1)) if sub else ""
         p = price(text(cost.group(1)))
-        if not CPU.search(name) or EXCLUDE.search(f"{name} {sub}") or p is None:
+        if not cpu_re.search(name) or EXCLUDE.search(f"{name} {sub}") or p is None:
             continue
         cards.append((url, name, sub, p, text(avail.group(1)) if avail else ""))
     return cards
@@ -78,12 +79,13 @@ def product(page):
     return None
 
 
-def collect(fetch):
-    page = fetch(URLS[0])   # première page : une erreur remonte (source bloquée)
+def collect(fetch, product):
+    refs = product["refs"]
+    page = fetch(SEARCH.format(key=product["key"]))   # première page : une erreur remonte (source bloquée)
     if "Résultats pour" not in page:   # page anti-robot ou d'erreur servie en 200 : bloquée, pas « vide »
         raise RuntimeError("Alternate : page de recherche méconnaissable (blocage ?)")
     cards = []
-    for card in listing(page):
+    for card in listing(page, product):
         try:
             time.sleep(0.4)
             info = product(fetch(card[0]))
@@ -96,18 +98,18 @@ def collect(fetch):
     offers = []
     for (url, name, sub, p, avail), info in cards:
         version = "tray" if TRAY.search(sub) or TRAY.search(name) else "box"   # sans mention : boîte
-        ref, label, seller, ship = REFS[version], avail, "ALTERNATE", known[0]
+        ref, label, seller, ship = refs[version], avail, "ALTERNATE", known[0]
         if info:
             if not info["new"]:
                 continue
-            if info["mpn"] in REFS.values():
+            if info["mpn"] in refs.values():
                 ref = info["mpn"]
-                version = "box" if ref == REFS["box"] else "tray"
+                version = "box" if ref == refs["box"] else "tray"
             p, ship = info["price"], ship if info["shipping"] is None else info["shipping"]
             label, seller = info["stock"] or avail, info["seller"] or seller
         p = round(p + ship, 2)
         marketplace = "alternate" not in seller.lower()   # Alternate vend lui-même (« ALTERNATE GmbH »)
-        offers.append({"name": "AMD Ryzen 7 7800X3D", "ref": ref, "version": version, "price_eur": p,
+        offers.append({"name": product["name"], "ref": ref, "version": version, "price_eur": p,
                        "shop": "Alternate", "stock": stock(label) if label else "unknown",
                        "marketplace": marketplace, "verified": True, "url": url})
     return offers
