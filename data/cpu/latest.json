@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-19T23:19+02:00",
+  "checked_at": "2026-10-19T23:50+02:00",
   "product": {
     "label": "AMD Ryzen 7 7800X3D · neuf",
     "name": "AMD Ryzen 7 7800X3D",
@@ -649,20 +649,20 @@
   "notified": {
     "aliexpress|tray": {
       "price": 259.52,
-      "seen": "2026-10-19T23:19+02:00"
+      "seen": "2026-10-19T23:50+02:00"
     },
     "cdiscount|tray": {
       "price": 275.0,
-      "seen": "2026-10-19T23:19+02:00"
+      "seen": "2026-10-19T23:50+02:00"
     }
   },
   "notification": "🚨 BONNE AFFAIRE : AMD Ryzen 7 7800X3D Tray à 259,52 € chez AliExpress\n\n| Version | Prix | Boutique | Stock | Lien |\n|---|---|---|---|---|\n| Tray | 259,52 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005012541014380.html |\n| Tray | 263,64 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005009737339401.html |\n| Tray | 266,29 € (marketplace) | AliExpress | stock ? | https://fr.aliexpress.com/item/1005012055514852.html |\n| Tray | 269,43 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005010764145839.html |\n| Tray | 271,47 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005012043304711.html |\n| Tray | 273,51 € (marketplace) | AliExpress | stock ? | https://fr.aliexpress.com/item/1005012591264618.html |\n\nRelevé : 48 offres relevées (13 Box, 35 Tray) : 1FODISCOUNT 2, AliExpress 24, Alternate 2, Amazon.fr 1, Amazon.fr Marketplace 1, Cdiscount Marketplace 2, Fnac Marketplace 1, Grosbill 2, Hello Edge 1, Kaufland Marketplace 1, LDLC 2, Materiel.net 2, Pixmania 2, TopAchat 2, TopBiz 1, eBay 2.\nAppli : https://tom9603.github.io/veille-ram/",
   "push": {
-    "title": "Bonne affaire : 7800X3D Tray à 259,52 €",
+    "title": "Toujours en cours : 7800X3D Tray à 259,52 €",
     "message": "AMD Ryzen 7 7800X3D Tray chez AliExpress (en stock), seuil 280 €.\n5 autres offres sous le seuil.",
-    "priority": 5,
+    "priority": 2,
     "tags": [
-      "rotating_light"
+      "moneybag"
     ],
     "click": "https://fr.aliexpress.com/item/1005012541014380.html"
   }
