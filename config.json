@@ -1,34 +1,15 @@
 {
   "product": {
-    "label": "DDR5 · 2×16 Go · 5600 MHz et plus",
-    "kit": "2x16 Go (32 Go)",
-    "speed_mts": 6000,
-    "preferred_cl": 30,
-    "fallback_cl": [
-      32,
-      36
-    ],
-    "alt_speed": {
-      "speed_mts": 5600,
-      "cl": [
-        28,
-        30,
-        32,
-        34,
-        36
-      ]
-    },
-    "fast_speed": {
-      "min_speed_mts": 6400,
-      "max_latency_ns": 12.86,
-      "rule": "latence réelle au plus celle d'un 5600 CL36 (CL × 2000 / MHz)"
+    "label": "AMD Ryzen 7 7800X3D · neuf",
+    "name": "AMD Ryzen 7 7800X3D",
+    "versions": {
+      "box": "Box (en boîte, garantie AMD 3 ans)",
+      "tray": "Tray (sans boîte, OEM, garantie vendeur)"
     }
   },
   "thresholds_eur": {
-    "cl30": 400,
-    "cl32_36": 400,
-    "mhz5600": 400,
-    "mhz6400plus": 400
+    "box": 280,
+    "tray": 280
   },
   "schedule": {
     "timezone": "Europe/Paris",

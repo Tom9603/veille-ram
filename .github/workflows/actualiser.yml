@@ -38,6 +38,7 @@ on:
       - scripts/collect.py
       - scripts/record.py
       - scripts/notify.py
+      - scripts/sources/**
       - .github/workflows/actualiser.yml
 
 permissions:

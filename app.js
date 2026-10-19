@@ -4,19 +4,15 @@
   const $ = (id) => document.getElementById(id);
   const SVG_NS = "http://www.w3.org/2000/svg";
   const PREFS_KEY = "veille-ram:prefs";
-  // Catégories suivies : DDR5 6000 MHz en CL30, CL32, CL36, DDR5 5600 MHz (CL28 à CL36),
-  // et DDR5 6400 MHz et plus dont la latence réelle vaut au moins celle d'un 5600 CL36.
-  const GROUPS = ["30", "32", "36", "5600", "6400"];
+  // Catégories suivies : AMD Ryzen 7 7800X3D neuf, en version Box (boîte, garantie AMD)
+  // et en version Tray (sans boîte, garantie du vendeur).
+  const GROUPS = ["box", "tray"];
   const GROUP = {
-    30: { label: "CL30", long: "6000 MHz CL30", sub: "6000 MHz", color: "var(--cl30)" },
-    32: { label: "CL32", long: "6000 MHz CL32", sub: "6000 MHz", color: "var(--cl32)" },
-    36: { label: "CL36", long: "6000 MHz CL36", sub: "6000 MHz", color: "var(--cl36)" },
-    5600: { label: "5600", long: "5600 MHz", sub: "CL28 à CL36", color: "var(--mhz5600)" },
-    6400: { label: "6400+", long: "6400 MHz et plus", sub: "6400 MHz et +", color: "var(--mhz6400)" },
+    box: { label: "Box", long: "Version Box", sub: "En boîte, garantie AMD 3 ans", color: "var(--box)" },
+    tray: { label: "Tray", long: "Version Tray", sub: "Sans boîte, garantie vendeur", color: "var(--tray)" },
   };
-  const speedOf = (o) => o.speed || 6000;
-  const groupOf = (o) => (speedOf(o) >= 6400 ? "6400" : speedOf(o) === 5600 ? "5600" : String(o.cl));
-  const kitLabel = (o) => `${speedOf(o)} CL${o.cl}`;
+  const groupOf = (o) => (o.version === "tray" ? "tray" : "box");
+  const versionLabel = (o) => GROUP[groupOf(o)].label;
   const VIEWS = { marche: "Marché", offres: "Offres", historique: "Historique", reglages: "Réglages" };
   const STOCK = {
     in_stock: { label: "En stock", color: "var(--good)" },
@@ -24,13 +20,17 @@
     out_of_stock: { label: "Rupture", color: "var(--critical)" },
     unknown: { label: "Stock non affiché", color: "var(--muted)" },
   };
-  const SORT_LABELS = { "price-asc": "prix croissant", "price-desc": "prix décroissant", cl: "latence", shop: "boutique" };
+  const SORT_LABELS = { "price-asc": "prix croissant", "price-desc": "prix décroissant", version: "version", shop: "boutique" };
 
   // ---------- Préférences (mémorisées sur l'appareil) ----------
 
-  const DEFAULT_PREFS = { cl: "all", sort: "price-asc", available: false, verifiedOnly: false, details: false, theme: "auto", period: "all" };
+  const DEFAULT_PREFS = { cat: "all", sort: "price-asc", available: false, verifiedOnly: false, details: false, theme: "auto", period: "all" };
   let prefs = { ...DEFAULT_PREFS };
   try { prefs = { ...DEFAULT_PREFS, ...JSON.parse(localStorage.getItem(PREFS_KEY) || "{}") }; } catch (e) { /* stockage indisponible */ }
+  // Préférences de l'ancienne veille RAM (latences, tri par CL) : remises par défaut.
+  if (!GROUP[prefs.cat]) prefs.cat = "all";
+  if (!SORT_LABELS[prefs.sort]) prefs.sort = "price-asc";
+  delete prefs.cl;
 
   function setPref(key, value) {
     prefs[key] = value;
@@ -48,7 +48,6 @@
   };
   const eur = (v) => (v == null ? "—" : (Number.isInteger(v) ? eurFmt.int : eurFmt.dec).format(v));
   const eurRound = (v) => eurFmt.int.format(Math.round(v));
-  const perGo = (v) => `${new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v / 32)} €/Go`;
   const dateFmt = new Intl.DateTimeFormat("fr-FR", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" });
   const shortFmt = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" });
   const dayFmt = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", timeZone: "Europe/Paris" });
@@ -243,16 +242,15 @@
     window.addEventListener("touchcancel", reset);
   }
 
-  const thresholds = () => state.latest.thresholds_eur;
-  const groupLimit = (g) => {
-    const t = thresholds();
-    if (g === "6400") return t.mhz6400plus ?? t.mhz5600 ?? t.cl30;
-    if (g === "5600") return t.mhz5600 ?? t.cl30;
-    return g === "30" ? t.cl30 : t.cl32_36;
-  };
+  const thresholds = () => state.latest.thresholds_eur || {};
+  const groupLimit = (g) => thresholds()[g] ?? thresholds().box;
   const limitFor = (o) => groupLimit(groupOf(o));
-  const selectedGroups = () => (GROUP[prefs.cl] ? [prefs.cl] : GROUPS);
-  const offerKey = (o) => `${o.shop}|${o.ref || o.name}|${speedOf(o)}|${o.cl}`;
+  const selectedGroups = () => (GROUP[prefs.cat] ? [prefs.cat] : GROUPS);
+  const offerKey = (o) => `${o.shop}|${o.ref || o.name}|${groupOf(o)}|${o.url}`;
+  const gapText = (o) => {
+    const gap = o.price_eur - limitFor(o);
+    return gap > 0 ? `${eurRound(gap)} au-dessus du seuil` : `${eurRound(-gap)} sous le seuil`;
+  };
 
   function bestListed(g) {
     return state.latest.offers
@@ -260,19 +258,10 @@
       .reduce((best, o) => (!best || o.price_eur < best.price_eur ? o : best), null);
   }
 
-  // Les anciennes lignes d'historique regroupaient CL32 et CL36 dans « cl32_36 ».
   function historyPoints() {
     return state.history.map((h) => {
-      const merged = h.cl32_36;
-      const pick = (cl) => {
-        const v = h[`cl${cl}`];
-        if (v !== undefined) return v;
-        return merged && merged.cl === cl ? merged : null;
-      };
       const p = { t: new Date(h.checked_at) };
-      for (const cl of [30, 32, 36]) p[cl] = pick(cl) ? pick(cl).price_eur : null;
-      p["5600"] = h.mhz5600 ? h.mhz5600.price_eur : null;
-      p["6400"] = h.mhz6400plus ? h.mhz6400plus.price_eur : null;
+      for (const g of GROUPS) p[g] = h[g] ? h[g].price_eur : null;
       return p;
     }).sort((a, b) => a.t - b.t);
   }
@@ -295,7 +284,7 @@
     const v = currentView();
     for (const key of Object.keys(VIEWS)) $(`view-${key}`).hidden = key !== v;
     $("page-title").textContent = VIEWS[v];
-    $("cl-switch").hidden = v === "reglages";
+    $("cat-switch").hidden = v === "reglages";
     document.querySelectorAll(".tabbar a").forEach((a) => {
       if (a.dataset.tab === v) a.setAttribute("aria-current", "page");
       else a.removeAttribute("aria-current");
@@ -339,10 +328,10 @@
     $("updated-pill").textContent = `Mis à jour ${relative(new Date(latest.checked_at))}`;
 
     $("hero").classList.toggle("is-deal", !!deal);
-    const scope = groups.length === 1 ? GROUP[groups[0]].long : "toutes catégories";
-    $("hero-label").textContent = deal ? `Bonne affaire · ${kitLabel(deal)}` : `Meilleur prix · ${scope}`;
+    const scope = groups.length === 1 ? GROUP[groups[0]].long : "Box et Tray";
+    $("hero-label").textContent = deal ? `Bonne affaire · ${versionLabel(deal)}` : `Meilleur prix · ${scope}`;
     $("hero-price").textContent = offer ? eur(offer.price_eur) : "—";
-    $("hero-name").textContent = offer ? `${offer.name} · ${kitLabel(offer)}` : "Aucune offre disponible à ce passage";
+    $("hero-name").textContent = offer ? `${offer.name} · ${versionLabel(offer)}` : "Aucune offre disponible à ce relevé";
 
     const facts = $("hero-facts");
     facts.replaceChildren();
@@ -361,18 +350,18 @@
     $("hero-link").hidden = !url;
     if (url) $("hero-link").href = url;
 
-    const list = $("by-cl");
+    const list = $("by-cat");
     list.replaceChildren(...GROUPS.map((g) => {
       const best = bestListed(g);
       return el("button", {
         type: "button",
-        class: `row-cl${prefs.cl === g ? " is-selected" : ""}`,
-        onclick: () => { setPref("cl", g); location.hash = "#offres"; },
+        class: `row-cat${prefs.cat === g ? " is-selected" : ""}`,
+        onclick: () => { setPref("cat", g); location.hash = "#offres"; },
       },
-      el("span", { class: "cl-name" }, dot(GROUP[g].color), el("span", null, GROUP[g].label, el("span", { class: "cl-sub" }, `${GROUP[g].sub} · seuil ${eur(groupLimit(g))}`))),
-      el("span", { class: "cl-right" },
-        el("span", { class: "cl-price" }, best ? eur(best.price_eur) : "—",
-          el("small", null, best ? deltaChip(changeSincePrevious(g)) || el("span", { class: "cl-sub" }, best.shop) : el("span", { class: "cl-sub" }, "aucune offre"))),
+      el("span", { class: "cat-name" }, dot(GROUP[g].color), el("span", null, GROUP[g].label, el("span", { class: "cat-sub" }, `${GROUP[g].sub} · seuil ${eur(groupLimit(g))}`))),
+      el("span", { class: "cat-right" },
+        el("span", { class: "cat-price" }, best ? eur(best.price_eur) : "—",
+          el("small", null, best ? deltaChip(changeSincePrevious(g)) || el("span", { class: "cat-sub" }, best.shop) : el("span", { class: "cat-sub" }, "aucune offre"))),
         el("span", { class: "chev", "aria-hidden": "true" }, "›")));
     }));
 
@@ -413,7 +402,7 @@
     const sorters = {
       "price-asc": (a, b) => a.price_eur - b.price_eur,
       "price-desc": (a, b) => b.price_eur - a.price_eur,
-      cl: (a, b) => speedOf(b) - speedOf(a) || a.cl - b.cl || a.price_eur - b.price_eur,
+      version: (a, b) => GROUPS.indexOf(groupOf(a)) - GROUPS.indexOf(groupOf(b)) || a.price_eur - b.price_eur,
       shop: (a, b) => a.shop.localeCompare(b.shop, "fr") || a.price_eur - b.price_eur,
     };
     return state.latest.offers
@@ -432,7 +421,7 @@
     const list = $("offers");
     if (!offers.length) {
       list.replaceChildren(el("li", { class: "empty" },
-        el("p", null, total ? "Aucune offre ne correspond à tes filtres." : "Aucune offre relevée pour cette catégorie à ce passage."),
+        el("p", null, total ? "Aucune offre ne correspond à tes filtres." : "Aucune offre relevée pour cette version à ce relevé."),
         total ? el("button", { type: "button", class: "btn btn-ghost", onclick: () => { prefs.available = false; setPref("verifiedOnly", false); } }, "Retirer les filtres") : null));
       return;
     }
@@ -443,27 +432,27 @@
     const stock = STOCK[o.stock] || STOCK.unknown;
     const key = offerKey(o);
     const open = prefs.details || openOffers.has(key);
-    const gap = o.price_eur - limitFor(o);
     const url = safeUrl(o.url);
     const li = el("li", { class: ["offer", o.deal && "is-deal", o.stock === "out_of_stock" && "is-out", open && "is-open"].filter(Boolean).join(" ") });
     const head = el("button", { type: "button", class: "offer-head", "aria-expanded": String(open) },
       el("span", { class: "offer-top" },
-        el("span", { class: "badge" }, dot(GROUP[groupOf(o)].color), kitLabel(o)),
+        el("span", { class: "badge" }, dot(GROUP[groupOf(o)].color), versionLabel(o)),
         o.deal && el("span", { class: "badge deal" }, "Bonne affaire")),
       el("span", { class: "offer-price" }, eur(o.price_eur)),
       el("span", { class: "offer-name" }, o.name),
-      el("span", { class: "offer-per-go" }, perGo(o.price_eur)),
+      el("span", { class: "offer-gap" }, gapText(o)),
       el("span", { class: "offer-sub", style: "grid-column: 1 / -1" },
         el("span", null, o.shop),
         el("span", null, dot(stock.color), stock.label)));
     const more = el("div", { class: "offer-more" }, el("div", null,
       el("dl", { class: "facts" },
         fact("Référence", o.ref || "non précisée", true),
-        fact("Écart au seuil", gap > 0 ? `+${eurRound(gap)} (seuil ${eur(limitFor(o))})` : `${eurRound(-gap)} sous le seuil`),
+        fact("Version", groupOf(o) === "tray" ? "Tray (sans boîte)" : "Box (en boîte)"),
+        fact("Seuil", eur(limitFor(o))),
         fact("Prix", o.verified ? "Vérifié chez la boutique" : o.via ? `Relevé via ${o.via}, livraison incluse` : "Non vérifié (comparateur)"),
         fact("Vendeur", o.marketplace ? "Marketplace (vendeur tiers)" : "Boutique"),
         fact("Stock", stock.label),
-        fact("Prix au Go", perGo(o.price_eur))),
+        fact("Garantie", groupOf(o) === "tray" ? "Celle du vendeur" : "AMD, 3 ans")),
       url && el("div", { class: "offer-actions" },
         el("a", { class: "btn btn-primary", href: url, target: "_blank", rel: "noopener noreferrer" }, `Voir chez ${o.shop} ↗`))));
     head.addEventListener("click", () => {
@@ -490,7 +479,7 @@
 
   function renderHistorique() {
     const groups = selectedGroups();
-    $("chart-title").textContent = groups.length > 1 ? "Meilleur prix par catégorie" : `Meilleur prix · ${GROUP[groups[0]].long}`;
+    $("chart-title").textContent = groups.length > 1 ? "Meilleur prix par version" : `Meilleur prix · ${GROUP[groups[0]].long}`;
     $("legend").replaceChildren(...(groups.length > 1 ? groups.map((g) => {
       const key = el("span", { class: "key" });
       key.style.background = GROUP[g].color;
@@ -502,7 +491,7 @@
       const values = pts.map((p) => p[g]).filter((v) => v != null);
       const last = [...pts].reverse().find((p) => p[g] != null);
       return el("tr", null,
-        el("td", null, el("span", { class: "cl-cell" }, dot(GROUP[g].color), GROUP[g].label)),
+        el("td", null, el("span", { class: "cat-cell" }, dot(GROUP[g].color), GROUP[g].label)),
         el("td", null, last ? eur(last[g]) : "—"),
         el("td", null, values.length ? eur(Math.min(...values)) : "—"),
         el("td", null, values.length ? eur(Math.max(...values)) : "—"));
@@ -529,7 +518,7 @@
     const series = selectedGroups().map((g) => ({ key: g, name: GROUP[g].label, color: GROUP[g].color }));
     const points = periodPoints().filter((p) => series.some((s) => p[s.key] != null));
     $("chart-hint").textContent = !points.length
-      ? "Aucun relevé sur cette période pour cette catégorie."
+      ? "Aucun relevé sur cette période pour cette version."
       : points.length < 2
         ? "L'historique se remplit à chaque relevé (toutes les heures en journée)."
         : "Touche ou glisse sur le graphique pour lire les prix d'une date.";
@@ -541,16 +530,8 @@
     const iw = W - m.left - m.right;
     const ih = H - m.top - m.bottom;
 
-    const keys = series.map((s) => s.key);
-    const single = series.length === 1 ? series[0] : null;
-    let refs = [];
-    if (keys.includes("30")) refs.push({ v: groupLimit("30"), label: "seuil CL30", color: "var(--cl30)" });
-    if (keys.includes("32") || keys.includes("36")) {
-      refs.push({ v: groupLimit("36"), label: single ? `seuil ${single.name}` : "seuil CL32/36", color: single ? single.color : "var(--muted)" });
-    }
-    if (keys.includes("5600")) refs.push({ v: groupLimit("5600"), label: "seuil 5600", color: "var(--mhz5600)" });
-    if (keys.includes("6400")) refs.push({ v: groupLimit("6400"), label: "seuil 6400+", color: "var(--mhz6400)" });
-    // Catégories au même seuil : une seule ligne.
+    let refs = series.map((s) => ({ v: groupLimit(s.key), label: `seuil ${s.name}`, color: s.color }));
+    // Versions au même seuil : une seule ligne.
     refs = refs.reduce((acc, r) => {
       const same = acc.find((a) => a.v === r.v);
       if (same) Object.assign(same, { label: "seuil", color: "var(--muted)" });
@@ -712,11 +693,8 @@
   // ---------- Réglages ----------
 
   function renderReglages() {
-    const t = thresholds();
-    $("th-cl30").textContent = eur(t.cl30);
-    $("th-cl32-36").textContent = eur(t.cl32_36);
-    $("th-5600").textContent = eur(groupLimit("5600"));
-    $("th-6400").textContent = eur(groupLimit("6400"));
+    $("th-box").textContent = eur(groupLimit("box"));
+    $("th-tray").textContent = eur(groupLimit("tray"));
     const slots = relevesSlots();
     const fmt = (m) => `${Math.floor(m / 60)}h${String(m % 60).padStart(2, "0")}`;
     $("set-schedule").textContent = `toutes les heures, ${fmt(slots[0])}–${fmt(slots[slots.length - 1])}`;
@@ -739,12 +717,12 @@
   }
 
   function syncControls() {
-    setChecked($("cl-switch"), "data-cl", prefs.cl);
+    setChecked($("cat-switch"), "data-cat", prefs.cat);
     setChecked($("period"), "data-period", prefs.period);
     setChecked($("set-theme"), "data-theme-value", prefs.theme);
     $("sort").value = prefs.sort;
     $("set-sort").value = prefs.sort;
-    $("set-cl").value = prefs.cl;
+    $("set-cat").value = prefs.cat;
     $("f-stock").setAttribute("aria-pressed", String(prefs.available));
     $("f-verified").setAttribute("aria-pressed", String(prefs.verifiedOnly));
     $("f-details").setAttribute("aria-pressed", String(prefs.details));
@@ -772,8 +750,8 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           topic,
-          title: "Veille RAM : notifications activées",
-          message: "Test réussi. Tu recevras ici le relevé de chaque heure, de 6h13 à 23h13, et une alerte dès qu'un kit passe sous le seuil.",
+          title: "Veille 7800X3D : notifications activées",
+          message: "Test réussi. Tu recevras ici le relevé de chaque heure, de 6h13 à 23h13, et une alerte dès que le 7800X3D passe sous le seuil.",
           tags: ["white_check_mark"],
           click: location.href.split("#")[0],
         }),
@@ -787,12 +765,12 @@
 
   // ---------- Événements ----------
 
-  $("cl-switch").addEventListener("click", (e) => { const b = e.target.closest("[data-cl]"); if (b) setPref("cl", b.dataset.cl); });
+  $("cat-switch").addEventListener("click", (e) => { const b = e.target.closest("[data-cat]"); if (b) setPref("cat", b.dataset.cat); });
   $("period").addEventListener("click", (e) => { const b = e.target.closest("[data-period]"); if (b) setPref("period", b.dataset.period); });
   $("set-theme").addEventListener("click", (e) => { const b = e.target.closest("[data-theme-value]"); if (b) setPref("theme", b.dataset.themeValue); });
   $("sort").addEventListener("change", (e) => setPref("sort", e.target.value));
   $("set-sort").addEventListener("change", (e) => setPref("sort", e.target.value));
-  $("set-cl").addEventListener("change", (e) => setPref("cl", e.target.value));
+  $("set-cat").addEventListener("change", (e) => setPref("cat", e.target.value));
   $("f-stock").addEventListener("click", () => setPref("available", !prefs.available));
   $("f-verified").addEventListener("click", () => setPref("verifiedOnly", !prefs.verifiedOnly));
   $("f-details").addEventListener("click", () => { openOffers.clear(); setPref("details", !prefs.details); });

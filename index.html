@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Veille RAM</title>
-  <meta name="description" content="Suivi du prix des kits DDR5 2x16 Go 6000 MHz CL30, CL32 et CL36, mis à jour deux fois par jour.">
+  <title>Veille 7800X3D</title>
+  <meta name="description" content="Suivi du prix de l'AMD Ryzen 7 7800X3D neuf (Box et Tray), relevé toutes les heures.">
   <meta name="theme-color" content="#f4f4f1">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Veille RAM">
+  <meta name="apple-mobile-web-app-title" content="Veille 7800X3D">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -26,7 +26,7 @@
   <div class="shell">
     <header class="appbar">
       <div class="appbar-text">
-        <p class="eyebrow" id="product">DDR5 · 2×16 Go · 5600 MHz et plus</p>
+        <p class="eyebrow" id="product">AMD Ryzen 7 7800X3D · neuf</p>
         <h1 id="page-title">Marché</h1>
       </div>
       <button class="icon-btn" id="refresh" type="button" aria-label="Actualiser les données">
@@ -45,13 +45,10 @@
       <span id="sync-text">Recherche des prix en cours…</span>
     </div>
 
-    <div class="segmented cl-switch" id="cl-switch" role="radiogroup" aria-label="Latence">
-      <button type="button" role="radio" data-cl="all" aria-label="Toutes les catégories">Tout</button>
-      <button type="button" role="radio" data-cl="30" aria-label="6000 MHz CL30"><span class="swatch s-cl30"></span>CL30</button>
-      <button type="button" role="radio" data-cl="32" aria-label="6000 MHz CL32"><span class="swatch s-cl32"></span>CL32</button>
-      <button type="button" role="radio" data-cl="36" aria-label="6000 MHz CL36"><span class="swatch s-cl36"></span>CL36</button>
-      <button type="button" role="radio" data-cl="5600" aria-label="5600 MHz, CL28 à CL36"><span class="swatch s-mhz5600"></span>5600</button>
-      <button type="button" role="radio" data-cl="6400" aria-label="6400 MHz et plus"><span class="swatch s-mhz6400"></span>6400+</button>
+    <div class="segmented cat-switch" id="cat-switch" role="radiogroup" aria-label="Version">
+      <button type="button" role="radio" data-cat="all" aria-label="Box et Tray">Tout</button>
+      <button type="button" role="radio" data-cat="box" aria-label="Version Box, en boîte"><span class="swatch s-box"></span>Box</button>
+      <button type="button" role="radio" data-cat="tray" aria-label="Version Tray, sans boîte"><span class="swatch s-tray"></span>Tray</button>
     </div>
 
     <main>
@@ -73,8 +70,8 @@
           </div>
         </article>
 
-        <h2 class="section-title">Par catégorie</h2>
-        <div class="card list" id="by-cl"></div>
+        <h2 class="section-title">Par version</h2>
+        <div class="card list" id="by-cat"></div>
 
         <h2 class="section-title">Le marché</h2>
         <div class="card text-card" id="trend"></div>
@@ -99,7 +96,7 @@
             <select id="sort">
               <option value="price-asc">Prix croissant</option>
               <option value="price-desc">Prix décroissant</option>
-              <option value="cl">Latence (CL)</option>
+              <option value="version">Version (Box, Tray)</option>
               <option value="shop">Boutique (A → Z)</option>
             </select>
           </label>
@@ -131,7 +128,7 @@
         <h2 class="section-title">Sur la période</h2>
         <div class="card">
           <table class="stats">
-            <thead><tr><th scope="col">Catégorie</th><th scope="col">Actuel</th><th scope="col">Plus bas</th><th scope="col">Plus haut</th></tr></thead>
+            <thead><tr><th scope="col">Version</th><th scope="col">Actuel</th><th scope="col">Plus bas</th><th scope="col">Plus haut</th></tr></thead>
             <tbody id="stats-rows"></tbody>
           </table>
         </div>
@@ -139,7 +136,7 @@
         <details class="card disclosure">
           <summary>Tous les relevés</summary>
           <table class="stats">
-            <thead><tr><th scope="col">Date</th><th scope="col">CL30</th><th scope="col">CL32</th><th scope="col">CL36</th><th scope="col">5600</th><th scope="col">6400+</th></tr></thead>
+            <thead><tr><th scope="col">Date</th><th scope="col">Box</th><th scope="col">Tray</th></tr></thead>
             <tbody id="history-rows"></tbody>
           </table>
         </details>
@@ -159,19 +156,16 @@
             <span>Installer ntfy sur Android</span><span class="chev" aria-hidden="true">↗</span>
           </a>
         </div>
-        <p class="footnote">Dans l'appli ntfy (gratuite, sans compte) : touche +, colle le nom du canal, puis « S'abonner ». Tu reçois une notification à chaque relevé de l'heure, de 6h13 à 23h13 : discrète s'il n'y a pas d'affaire, avec une alerte dès qu'un kit passe sous le seuil. Le bouton ↻ lance un relevé immédiat (1 à 2 minutes), sans clé : sources LDLC, Materiel.net, Alternate, Grosbill, et Amazon, Cdiscount, Fnac… via Ledenicheur.</p>
+        <p class="footnote">Dans l'appli ntfy (gratuite, sans compte) : touche +, colle le nom du canal, puis « S'abonner ». Tu reçois une notification à chaque relevé de l'heure, de 6h13 à 23h13 : discrète s'il n'y a pas d'affaire, avec une alerte dès que le 7800X3D passe sous le seuil. Le bouton ↻ lance un relevé immédiat (1 à 2 minutes), sans clé.</p>
 
         <h2 class="section-title">Général</h2>
         <div class="card list settings">
           <label class="row">
-            <span>Catégorie suivie</span>
-            <select id="set-cl">
-              <option value="all">Toutes</option>
-              <option value="30">6000 MHz CL30</option>
-              <option value="32">6000 MHz CL32</option>
-              <option value="36">6000 MHz CL36</option>
-              <option value="5600">5600 MHz (CL28 à 36)</option>
-              <option value="6400">6400 MHz et plus</option>
+            <span>Version affichée</span>
+            <select id="set-cat">
+              <option value="all">Box et Tray</option>
+              <option value="box">Box (en boîte)</option>
+              <option value="tray">Tray (sans boîte)</option>
             </select>
           </label>
           <div class="row">
@@ -191,7 +185,7 @@
             <select id="set-sort">
               <option value="price-asc">Prix croissant</option>
               <option value="price-desc">Prix décroissant</option>
-              <option value="cl">Latence (CL)</option>
+              <option value="version">Version (Box, Tray)</option>
               <option value="shop">Boutique (A → Z)</option>
             </select>
           </label>
@@ -211,15 +205,13 @@
 
         <h2 class="section-title">Alertes</h2>
         <div class="card list settings">
-          <div class="row"><span>Seuil 6000 MHz CL30</span><span class="value" id="th-cl30">—</span></div>
-          <div class="row"><span>Seuil 6000 MHz CL32 / CL36</span><span class="value" id="th-cl32-36">—</span></div>
-          <div class="row"><span>Seuil 5600 MHz</span><span class="value" id="th-5600">—</span></div>
-          <div class="row"><span>Seuil 6400 MHz et plus</span><span class="value" id="th-6400">—</span></div>
+          <div class="row"><span>Seuil Box</span><span class="value" id="th-box">—</span></div>
+          <div class="row"><span>Seuil Tray</span><span class="value" id="th-tray">—</span></div>
           <a class="row link" href="https://github.com/Tom9603/veille-ram/edit/gh-pages/config.json" target="_blank" rel="noopener noreferrer">
             <span>Modifier les seuils sur GitHub</span><span class="chev" aria-hidden="true">↗</span>
           </a>
         </div>
-        <p class="footnote">Une bonne affaire est une offre en stock ou sur commande, sous le seuil, dont le prix est confirmé : vu chez la boutique, ou relevé pour elle par Ledenicheur (livraison incluse). En 6400 MHz et plus, seuls les kits au moins aussi réactifs qu'un 5600 CL36 sont suivis : 6400 jusqu'à CL40, 7200 jusqu'à CL46, etc.</p>
+        <p class="footnote">Une bonne affaire est une offre en stock ou sur commande, sous le seuil, dont le prix est confirmé : vu chez la boutique, ou relevé pour elle par Ledenicheur (livraison incluse). Seul le 7800X3D neuf est suivi : pas d'occasion, de reconditionné, de lot ni de PC complet. Le Tray est le même processeur, vendu sans boîte, avec la garantie du vendeur.</p>
 
         <h2 class="section-title">Analyses</h2>
         <div class="card list settings">
@@ -238,7 +230,7 @@
         <h2 class="section-title">À propos</h2>
         <div class="card list settings">
           <a class="row link" href="https://github.com/Tom9603/veille-ram" target="_blank" rel="noopener noreferrer"><span>Projet sur GitHub</span><span class="chev" aria-hidden="true">↗</span></a>
-          <div class="row"><span>Version</span><span class="value">2.3</span></div>
+          <div class="row"><span>Version</span><span class="value">3.0</span></div>
         </div>
       </section>
     </main>
