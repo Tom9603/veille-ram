@@ -42,6 +42,8 @@ SOURCES = [
     ("ldlc.com / materiel.net", "ldlc_materiel", {"ldlc", "materiel.net"}),
     ("alternate.fr", "alternate", {"alternate"}),
     ("topachat.com", "topachat", {"topachat"}),
+    ("grosbill.com", "grosbill", {"grosbill"}),
+    ("aliexpress.com", "aliexpress", {"aliexpress"}),
 ]
 
 
