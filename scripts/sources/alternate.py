@@ -14,6 +14,7 @@ import time
 
 from collect import price, stock_from, text
 
+SHIPPING_DEFAULT = 9.90   # « frais d'expédition en sus à partir de € 9,90 »
 URLS = ["https://www.alternate.fr/listing.xhtml?q=7800x3d"]   # + les fiches produit trouvées dans la liste
 
 REFS = {"box": "100-100000910WOF", "tray": "100-000000910"}
@@ -90,12 +91,12 @@ def collect(fetch):
             info = None   # fiche en panne : on garde le prix de la liste
         cards.append((card, info))
     # Le port est le même pour toute la boutique : une fiche en panne reprend celui lu sur l'autre fiche,
-    # pour ne pas afficher une fausse baisse de 9,90 €.
-    known = [i["shipping"] for _, i in cards if i and i["shipping"] is not None]
+    # et si aucune fiche ne l'indique, le minimum annoncé (9,90 €), pour ne pas afficher une fausse baisse.
+    known = [i["shipping"] for _, i in cards if i and i["shipping"] is not None] or [SHIPPING_DEFAULT]
     offers = []
     for (url, name, sub, p, avail), info in cards:
         version = "tray" if TRAY.search(sub) or TRAY.search(name) else "box"   # sans mention : boîte
-        ref, label, seller, ship = REFS[version], avail, "ALTERNATE", known[0] if known else 0
+        ref, label, seller, ship = REFS[version], avail, "ALTERNATE", known[0]
         if info:
             if not info["new"]:
                 continue

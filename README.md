@@ -7,7 +7,9 @@ vendeur), avec une appli mobile et une notification chaque heure.
 **Appli :** https://tom9603.github.io/veille-ram/
 
 (Le dépôt s'appelle encore `veille-ram` : il suivait avant le prix d'un kit de
-RAM DDR5. Les données de cette époque sont gardées dans `archive/ram/`.)
+RAM DDR5. Les données de cette époque restent figées dans `data/latest.json` et
+`data/history.json`, pour les téléphones qui auraient encore l'ancienne appli
+ouverte : elles leur demandent de la fermer et de la rouvrir.)
 
 ## Comment ça marche
 
@@ -19,8 +21,8 @@ GitHub Actions « Actualiser les prix » (un relevé par heure de 6h à 23h, et 
   │  sert que de secours si la chaîne s'arrête
   │  scripts/collect.py : boutiques lues en direct (scripts/sources/), puis les
   │                       fiches Box et Tray de Ledenicheur (Amazon, Cdiscount,
-  │                       Fnac, AliExpress…, livraison incluse)
-  │  scripts/record.py  → data/latest.json + data/history.json
+  │                       Fnac, AliExpress…, livraison incluse si connue)
+  │  scripts/record.py  → data/cpu/latest.json + data/cpu/history.json
   │  scripts/notify.py  → notification ntfy (chaque heure ; sinon seulement si affaire)
   ├──────────────► GitHub Pages republie l'appli (moins d'une minute)
   └──────────────► notification sur le téléphone (appli ntfy, canal de config.json)

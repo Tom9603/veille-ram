@@ -156,6 +156,7 @@ h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.025em; line-height: 1
 }
 .pill svg { width: 14px; height: 14px; }
 .pill.is-deal { background: var(--good-soft); color: var(--good-ink); border-color: transparent; box-shadow: none; }
+.pill.is-link { cursor: pointer; }
 .pill-quiet { font-weight: 500; }
 
 /* ---------- Carte principale ---------- */
@@ -238,6 +239,7 @@ h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.025em; line-height: 1
   font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2);
 }
 .badge.deal { background: var(--good-soft); color: var(--good-ink); }
+.row-cat .badge { margin-left: 8px; vertical-align: 1px; }
 .offer-name { font-weight: 600; overflow-wrap: anywhere; }
 .offer-price { font-weight: 700; font-size: 1.125rem; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
 .offer-sub { font-size: 0.8125rem; color: var(--ink-2); display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }

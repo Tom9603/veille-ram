@@ -19,8 +19,8 @@ en version **Box** (en boîte, réf. 100-100000910WOF, garantie AMD 3 ans) et
 
 ## Où chercher
 
-1. Ledenicheur : fiches Box https://ledenicheur.fr/product.php?p=8053700 et
-   Tray https://ledenicheur.fr/product.php?p=8053713 (offres les moins chères,
+1. Ledenicheur : fiches Box https://ledenicheur.fr/product.php?p=8053700&filters=price_inc_shipping et
+   Tray https://ledenicheur.fr/product.php?p=8053713&filters=price_inc_shipping (offres les moins chères,
    livraison incluse).
 2. Boutiques et marketplaces : LDLC, Materiel.net, Alternate, Grosbill,
    TopAchat, Amazon.fr, Cdiscount, Fnac, AliExpress.
