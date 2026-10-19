@@ -1,0 +1,25 @@
+[
+ {
+  "checked_at": "2026-10-19T23:18+02:00",
+  "box": {
+   "name": "AMD Ryzen 7 7800X3D",
+   "ref": "",
+   "version": "box",
+   "price_eur": 303.1,
+   "shop": "AliExpress",
+   "stock": "in_stock",
+   "url": "https://fr.aliexpress.com/item/1005013032018770.html"
+  },
+  "tray": {
+   "name": "AMD Ryzen 7 7800X3D",
+   "ref": "",
+   "version": "tray",
+   "price_eur": 259.52,
+   "shop": "AliExpress",
+   "stock": "in_stock",
+   "url": "https://fr.aliexpress.com/item/1005012541014380.html"
+  },
+  "deal": true,
+  "offers_count": 48
+ }
+]
