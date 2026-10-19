@@ -85,11 +85,12 @@ jobs:
           # repart de la version en ligne et on y réapplique celui-ci.
           releve() {
             local published=
-            python3 scripts/collect.py "$run_json" || return 1
+            # Plafond de 10 minutes : un site qui répondrait au compte-gouttes ne bloque pas la boucle.
+            timeout 600 python3 scripts/collect.py "$run_json" || return 1
             for attempt in 1 2 3; do
               git fetch -q origin gh-pages && git reset -q --hard origin/gh-pages || { sleep 5; continue; }
               python3 scripts/record.py "$run_json" > /dev/null || return 1
-              git add data/latest.json data/history.json
+              git add data/cpu/latest.json data/cpu/history.json
               git diff --cached --quiet && { published=1; break; }
               git commit -q -m "Relevé automatique du $(TZ=Europe/Paris date '+%d/%m à %Hh%M')"
               git push -q origin HEAD:gh-pages && { published=1; break; }
@@ -136,7 +137,7 @@ jobs:
             python3 -c '
           import json, sys
           from datetime import datetime, timezone
-          at = datetime.fromisoformat(json.load(open("data/latest.json"))["checked_at"])
+          at = datetime.fromisoformat(json.load(open("data/cpu/latest.json"))["checked_at"])
           sys.exit(0 if (datetime.now(timezone.utc) - at).total_seconds() < 40 * 60 else 1)'
           }
 

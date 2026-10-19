@@ -7,7 +7,7 @@ Sources :
 - en direct (prix vu chez la boutique) : les modules de scripts/sources/,
   un par boutique (voir SOURCES plus bas) ;
 - Ledenicheur : fiches du 7800X3D Box et Tray, avec le prix de chaque boutique
-  (Amazon, Cdiscount, Fnac, AliExpress…), livraison incluse.
+  (Amazon, Cdiscount, Fnac, AliExpress…), livraison incluse quand elle est connue.
 
 Garde le processeur seul, neuf, en version Box (en boîte) ou Tray (sans boîte,
 OEM), et écrit un relevé au format attendu par scripts/record.py.
@@ -29,10 +29,11 @@ UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chr
 NAME = "AMD Ryzen 7 7800X3D"
 REFS = {"box": "100-100000910WOF", "tray": "100-000000910"}
 
-# Fiches Ledenicheur : les offres affichées sont les moins chères, triées par prix.
+# Fiches Ledenicheur, prix livraison incluse : les offres affichées sont les moins chères,
+# celles dont les frais de port sont connus d'abord, puis les autres.
 LEDENICHEUR = {
-    "box": "https://ledenicheur.fr/product.php?p=8053700",
-    "tray": "https://ledenicheur.fr/product.php?p=8053713",
+    "box": "https://ledenicheur.fr/product.php?p=8053700&filters=price_inc_shipping",
+    "tray": "https://ledenicheur.fr/product.php?p=8053713&filters=price_inc_shipping",
 }
 
 # Boutiques lues en direct : (libellé, module de scripts/sources/, noms des boutiques
@@ -92,6 +93,8 @@ def price(raw):
 
 def stock_from(label):
     s = label.lower()
+    if "inconnu" in s or "stock ?" in s:
+        return "unknown"
     if "pas en stock" in s or "rupture" in s or "épuisé" in s or "indisponible" in s or "out_of_stock" in s:
         return "out_of_stock"
     if "en stock" in s or "dernière" in s or "in_stock" in s:
@@ -111,7 +114,8 @@ def other_product(title):
     t = title.lower()
     if "7800x3d" not in t.replace(" ", ""):
         return True
-    return bool(re.search(r"9800x3d|7900x3d|7950x3d|\bpc (?:gamer|gaming|fixe|complet|de bureau)|gaming pc|ordinateur|"
+    return bool(re.search(r"9800x3d|7900x3d|7950x3d|\bpc (?:gamer|gaming|fixe|complet|de bureau)|gaming pc|"
+                          r"(?<!processeur d')(?<!processeur pour )ordinateur|"
                           r"unit[ée] centrale|\bkit\b|\bpack\b|bundle|\+ ?carte|carte m[èe]re|\bb650|\bx670|\bx870|"
                           r"\bb850|\brtx\b|\brx ?\d{4}|\bssd\b|\d+ ?go (?:de )?ram", t))
 
@@ -119,18 +123,21 @@ def other_product(title):
 def version_of(title, default):
     """Box ou Tray d'après le titre de l'offre ; à défaut, la version de la fiche."""
     t = title.lower()
-    if re.search(r"\btray\b|\boem\b|\bmpk\b|sans bo[iî]te|(?<!socket de )plateau|100-000000910\b", t):
+    if re.search(r"\btray\b|\boem\b|\bmpk\b|\bbulk\b|en vrac|sans bo[iî]te|sans emballage|(?<!socket de )plateau|"
+                 r"100-000000910\b", t):
         return "tray"
     if re.search(r"\bbox\b|\bwof\b|en bo[iî]te|bo[iî]te|100-100000910", t):
         return "box"
     return default
 
 
-def offer(version, p, shop, stock, url, verified, marketplace=False, via=None, name=NAME, ref=None):
+def offer(version, p, shop, stock, url, verified, marketplace=False, via=None, name=NAME, ref=None, shipping=None):
     o = {"name": name, "ref": REFS[version] if ref is None else ref, "version": version, "price_eur": p, "shop": shop,
          "stock": stock, "marketplace": marketplace, "verified": verified, "url": url}
     if via:
         o["via"] = via
+    if shipping:
+        o["shipping"] = shipping   # included : livraison comprise dans le prix ; unknown : frais de port inconnus
     return o
 
 
@@ -138,6 +145,8 @@ def offer(version, p, shop, stock, url, verified, marketplace=False, via=None, n
 
 def ledenicheur(page, version, skip_shops=frozenset()):
     """Fiche produit : une offre par boutique (prix livraison incluse, stock, lien)."""
+    if 'data-test="OfferListItem"' not in page:   # page anti-robot ou nouvelle mise en page
+        raise RuntimeError("aucune offre dans la page")
     offers = []
     for block in page.split('data-test="OfferListItem"')[1:]:
         block = block[:9000]
@@ -158,11 +167,13 @@ def ledenicheur(page, version, skip_shops=frozenset()):
         if p is None:
             continue
         stock = re.search(r"(En stock|Pas en stock|Stock inconnu|Rupture[^|]*|Expédié[^|]{0,40}|Sous \d+[^|]{0,30}|Sur commande)", body, re.I)
+        shipping = re.search(r"Livraison gratuite|Livraison \d|Frais de livraison inconnus", body, re.I)
         url = html.unescape(link.group(1))
         offers.append(offer(version_of(title, version), p, shop_name, stock_from(stock.group(1)) if stock else "unknown",
                             url if url.startswith("http") else "https://ledenicheur.fr" + url, False,
                             marketplace="marketplace" in shop_name.lower() or shop_name in ("AliExpress", "eBay"),
-                            via="Ledenicheur"))
+                            via="Ledenicheur",
+                            shipping="included" if shipping and "inconnu" not in shipping.group(0).lower() else "unknown"))
     return offers
 
 
@@ -190,7 +201,8 @@ def collect():
             continue
         if not found:
             print(f"{label} : aucune offre reconnue", file=sys.stderr)
-        read_directly.update(shops)
+        # Seules les boutiques effectivement lues remplacent leurs offres vues via Ledenicheur.
+        read_directly.update(shop for shop in shops if any(o["shop"].lower() == shop for o in found))
         offers += found
 
     for version, url in LEDENICHEUR.items():
@@ -204,11 +216,23 @@ def collect():
     return dedupe(offers), blocked
 
 
+def valid(o):
+    """Offre acceptée par scripts/record.py ? Une offre bancale est écartée, pas tout le relevé."""
+    return (o.get("version") in REFS and isinstance(o.get("price_eur"), (int, float)) and 50 <= o["price_eur"] <= 2000
+            and all(isinstance(o.get(k), str) and o[k].strip() for k in ("name", "shop", "url"))
+            and o["url"].startswith("https://") and isinstance(o.get("ref", ""), str)
+            and o.get("stock") in ("in_stock", "on_order", "out_of_stock", "unknown")
+            and isinstance(o.get("marketplace"), bool) and isinstance(o.get("verified"), bool))
+
+
 def main(argv):
     if len(argv) != 1:
         print(__doc__, file=sys.stderr)
         sys.exit(1)
     offers, blocked = collect()
+    for o in [o for o in offers if not valid(o)]:
+        print(f"Offre écartée (format invalide) : {o}", file=sys.stderr)
+    offers = [o for o in offers if valid(o)]
     if not offers:
         print("ERREUR : aucune offre relevée, rien n'est écrit.", file=sys.stderr)
         sys.exit(3)

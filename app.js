@@ -138,8 +138,8 @@
     document.body.classList.add("loading");
     try {
       const [latest, history, config] = await Promise.all([
-        getJSON("data/latest.json"),
-        getJSON("data/history.json"),
+        getJSON("data/cpu/latest.json"),
+        getJSON("data/cpu/history.json"),
         getJSON("config.json").catch(() => ({ data: null })),
       ]);
       state = { latest: latest.data, history: history.data, config: config.data, loadedAt: Date.now(), fromCache: latest.cached || history.cached };
@@ -187,7 +187,7 @@
       while (Date.now() - started < REFRESH_TIMEOUT_MS) {
         await sleep(6000);
         let fresh = null;
-        try { fresh = (await getJSON("data/latest.json")).data; } catch (e) { /* réseau : on réessaie */ }
+        try { fresh = (await getJSON("data/cpu/latest.json")).data; } catch (e) { /* réseau : on réessaie */ }
         if (fresh && fresh.checked_at !== before) {
           await load();
           showSync(`Prix relevés à l'instant (${state.latest.offers.length} offres).`, "done");
@@ -243,14 +243,19 @@
   }
 
   const thresholds = () => state.latest.thresholds_eur || {};
-  const groupLimit = (g) => thresholds()[g] ?? thresholds().box;
+  const groupLimit = (g) => {
+    const v = thresholds()[g] ?? thresholds().box;
+    return typeof v === "number" ? v : null;
+  };
   const limitFor = (o) => groupLimit(groupOf(o));
   const selectedGroups = () => (GROUP[prefs.cat] ? [prefs.cat] : GROUPS);
   const offerKey = (o) => `${o.shop}|${o.ref || o.name}|${groupOf(o)}|${o.url}`;
   const gapText = (o) => {
+    if (limitFor(o) == null) return "";
     const gap = o.price_eur - limitFor(o);
     return gap > 0 ? `${eurRound(gap)} au-dessus du seuil` : `${eurRound(-gap)} sous le seuil`;
   };
+  const hasDeal = (g) => state.latest.offers.some((o) => o.deal && groupOf(o) === g);
 
   function bestListed(g) {
     return state.latest.offers
@@ -258,8 +263,9 @@
       .reduce((best, o) => (!best || o.price_eur < best.price_eur ? o : best), null);
   }
 
+  // Relevés incomplets (une source bloquée) : meilleurs prix peut-être faussés, non tracés.
   function historyPoints() {
-    return state.history.map((h) => {
+    return state.history.filter((h) => !h.partial).map((h) => {
       const p = { t: new Date(h.checked_at) };
       for (const g of GROUPS) p[g] = h[g] ? h[g].price_eur : null;
       return p;
@@ -321,10 +327,16 @@
     const deals = latest.offers.filter((o) => o.deal && groups.includes(groupOf(o))).sort((a, b) => a.price_eur - b.price_eur);
     const deal = deals[0] || null;
     const offer = deal || bestListed(groups.length === 1 ? groups[0] : null);
+    // Une affaire sur l'autre version que celle affichée : on le dit, et un toucher l'affiche.
+    const elsewhere = !deal && GROUPS.find((g) => !groups.includes(g) && hasDeal(g));
 
     const pill = $("status-pill");
-    pill.classList.toggle("is-deal", !!deal);
-    pill.replaceChildren(icon(deal ? "check" : "clock"), deal ? "Bonne affaire !" : "Pas d'affaire pour l'instant");
+    pill.classList.toggle("is-deal", !!(deal || elsewhere));
+    pill.classList.toggle("is-link", !!elsewhere);
+    pill.onclick = elsewhere ? () => setPref("cat", "all") : null;
+    pill.replaceChildren(icon(deal || elsewhere ? "check" : "clock"),
+      deal ? "Bonne affaire !" : elsewhere ? `Bonne affaire en ${GROUP[elsewhere].label} › voir`
+        : groups.length === 1 ? `Pas d'affaire en ${GROUP[groups[0]].label}` : "Pas d'affaire pour l'instant");
     $("updated-pill").textContent = `Mis à jour ${relative(new Date(latest.checked_at))}`;
 
     $("hero").classList.toggle("is-deal", !!deal);
@@ -337,11 +349,10 @@
     facts.replaceChildren();
     if (offer) {
       const stock = STOCK[offer.stock] || STOCK.unknown;
-      const gap = offer.price_eur - limitFor(offer);
       facts.append(
         el("span", null, offer.shop),
         el("span", null, dot(stock.color), stock.label),
-        el("span", null, gap > 0 ? `${eurRound(gap)} au-dessus du seuil (${eur(limitFor(offer))})` : `${eurRound(-gap)} sous le seuil`),
+        el("span", null, gapText(offer)),
       );
       const d = changeSincePrevious(groupOf(offer));
       if (d) facts.append(el("span", null, deltaChip(d), "depuis le passage précédent"));
@@ -353,15 +364,19 @@
     const list = $("by-cat");
     list.replaceChildren(...GROUPS.map((g) => {
       const best = bestListed(g);
+      const out = best ? 0 : latest.offers.filter((o) => groupOf(o) === g).length;   // toutes en rupture ?
       return el("button", {
         type: "button",
         class: `row-cat${prefs.cat === g ? " is-selected" : ""}`,
         onclick: () => { setPref("cat", g); location.hash = "#offres"; },
       },
-      el("span", { class: "cat-name" }, dot(GROUP[g].color), el("span", null, GROUP[g].label, el("span", { class: "cat-sub" }, `${GROUP[g].sub} · seuil ${eur(groupLimit(g))}`))),
+      el("span", { class: "cat-name" }, dot(GROUP[g].color), el("span", null, GROUP[g].label,
+        hasDeal(g) && el("span", { class: "badge deal" }, "Bonne affaire"),
+        el("span", { class: "cat-sub" }, `${GROUP[g].sub} · seuil ${eur(groupLimit(g))}`))),
       el("span", { class: "cat-right" },
         el("span", { class: "cat-price" }, best ? eur(best.price_eur) : "—",
-          el("small", null, best ? deltaChip(changeSincePrevious(g)) || el("span", { class: "cat-sub" }, best.shop) : el("span", { class: "cat-sub" }, "aucune offre"))),
+          el("small", null, best ? deltaChip(changeSincePrevious(g)) || el("span", { class: "cat-sub" }, best.shop)
+            : el("span", { class: "cat-sub" }, out ? `en rupture (${out} offre${out > 1 ? "s" : ""})` : "aucune offre"))),
         el("span", { class: "chev", "aria-hidden": "true" }, "›")));
     }));
 
@@ -449,7 +464,8 @@
         fact("Référence", o.ref || "non précisée", true),
         fact("Version", groupOf(o) === "tray" ? "Tray (sans boîte)" : "Box (en boîte)"),
         fact("Seuil", eur(limitFor(o))),
-        fact("Prix", o.verified ? "Vérifié chez la boutique" : o.via ? `Relevé via ${o.via}, livraison incluse` : "Non vérifié (comparateur)"),
+        fact("Prix", o.verified ? "Vérifié chez la boutique"
+          : o.via ? `Relevé via ${o.via}, ${o.shipping === "unknown" ? "frais de port inconnus" : "livraison incluse"}` : "Non vérifié (comparateur)"),
         fact("Vendeur", o.marketplace ? "Marketplace (vendeur tiers)" : "Boutique"),
         fact("Stock", stock.label),
         fact("Garantie", groupOf(o) === "tray" ? "Celle du vendeur" : "AMD, 3 ans")),
@@ -487,12 +503,12 @@
     }) : []));
 
     const pts = periodPoints();
+    const current = pts.length ? pts[pts.length - 1] : null;   // « Actuel » : le dernier relevé seulement
     $("stats-rows").replaceChildren(...groups.map((g) => {
       const values = pts.map((p) => p[g]).filter((v) => v != null);
-      const last = [...pts].reverse().find((p) => p[g] != null);
       return el("tr", null,
         el("td", null, el("span", { class: "cat-cell" }, dot(GROUP[g].color), GROUP[g].label)),
-        el("td", null, last ? eur(last[g]) : "—"),
+        el("td", null, current ? eur(current[g]) : "—"),
         el("td", null, values.length ? eur(Math.min(...values)) : "—"),
         el("td", null, values.length ? eur(Math.max(...values)) : "—"));
     }));
