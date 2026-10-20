@@ -322,5 +322,57 @@
   },
   "deal": true,
   "offers_count": 89
+ },
+ {
+  "checked_at": "2026-10-20T09:13+02:00",
+  "best": {
+   "7800x3d": {
+    "box": {
+     "product": "7800x3d",
+     "name": "AMD Ryzen 7 7800X3D",
+     "ref": "100-100000910WOF",
+     "version": "box",
+     "price_eur": 309.0,
+     "shop": "Fnac Marketplace",
+     "stock": "in_stock",
+     "url": "https://ledenicheur.fr/go-to-shop/28695/offer/1-21880746?client_id=1551"
+    },
+    "tray": {
+     "product": "7800x3d",
+     "name": "AMD Ryzen 7 7800X3D",
+     "ref": "100-000000910",
+     "version": "tray",
+     "price_eur": 264.42,
+     "shop": "AliExpress",
+     "stock": "in_stock",
+     "url": "https://ledenicheur.fr/go-to-shop/42074/offer/12000057392556724?client_id=1551"
+    }
+   },
+   "9800x3d": {
+    "box": {
+     "product": "9800x3d",
+     "name": "AMD Ryzen 7 9800X3D",
+     "ref": "100-100001084WOF",
+     "version": "box",
+     "price_eur": 364.2,
+     "shop": "AliExpress",
+     "stock": "in_stock",
+     "url": "https://ledenicheur.fr/go-to-shop/42074/offer/12000056106555552?client_id=1551"
+    },
+    "tray": {
+     "product": "9800x3d",
+     "name": "AMD Ryzen 7 9800X3D",
+     "ref": "100-000001084",
+     "version": "tray",
+     "price_eur": 392.0,
+     "shop": "Cdiscount Marketplace",
+     "stock": "in_stock",
+     "url": "https://ledenicheur.fr/go-to-shop/36493/offer/AMD1734629292675-4362338619?client_id=1551"
+    }
+   }
+  },
+  "deal": true,
+  "offers_count": 45,
+  "partial": true
  }
 ]
