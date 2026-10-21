@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-21T18:14+02:00",
+  "checked_at": "2026-10-21T19:14+02:00",
   "products": {
     "7800x3d": {
       "name": "AMD Ryzen 7 7800X3D",
@@ -96,7 +96,7 @@
       "name": "AMD Ryzen 7 7800X3D",
       "ref": "",
       "version": "tray",
-      "price_eur": 263.99,
+      "price_eur": 263.64,
       "shop": "AliExpress",
       "stock": "in_stock",
       "marketplace": true,
@@ -355,6 +355,19 @@
       "marketplace": true,
       "verified": true,
       "url": "https://fr.aliexpress.com/item/1005013099731797.html",
+      "product": "7800x3d",
+      "deal": false
+    },
+    {
+      "name": "AMD Ryzen 7 7800X3D",
+      "ref": "",
+      "version": "tray",
+      "price_eur": 308.82,
+      "shop": "AliExpress",
+      "stock": "in_stock",
+      "marketplace": true,
+      "verified": true,
+      "url": "https://fr.aliexpress.com/item/1005012282552786.html",
       "product": "7800x3d",
       "deal": false
     },
@@ -952,19 +965,6 @@
       "deal": false
     },
     {
-      "name": "AMD Ryzen 7 7800X3D",
-      "ref": "100-000000910",
-      "version": "tray",
-      "price_eur": 469.99,
-      "shop": "TopAchat",
-      "stock": "on_order",
-      "marketplace": false,
-      "verified": true,
-      "url": "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wpr_puis_ref_est_in20024450.html",
-      "product": "7800x3d",
-      "deal": false
-    },
-    {
       "name": "AMD Ryzen 7 9800X3D",
       "ref": "",
       "version": "tray",
@@ -1006,6 +1006,7 @@
       "deal": false
     },
     {
+      "product": "7800x3d",
       "name": "AMD Ryzen 7 7800X3D",
       "ref": "100-100000910WOF",
       "version": "box",
@@ -1013,9 +1014,10 @@
       "shop": "TopAchat",
       "stock": "in_stock",
       "marketplace": false,
-      "verified": true,
-      "url": "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wpr_puis_ref_est_in20016948.html",
-      "product": "7800x3d",
+      "verified": false,
+      "url": "https://ledenicheur.fr/go-to-shop/24264/offer/in20016948?client_id=1551",
+      "via": "Ledenicheur",
+      "shipping": "unknown",
       "deal": false
     },
     {
@@ -1036,7 +1038,7 @@
       "name": "AMD Ryzen 7 9800X3D",
       "ref": "100-100001084WOF",
       "version": "box",
-      "price_eur": 487.58,
+      "price_eur": 487.4,
       "shop": "Pixmania",
       "stock": "in_stock",
       "marketplace": false,
@@ -1060,6 +1062,7 @@
       "deal": false
     },
     {
+      "product": "9800x3d",
       "name": "AMD Ryzen 7 9800X3D",
       "ref": "100-000001084",
       "version": "tray",
@@ -1067,9 +1070,10 @@
       "shop": "TopAchat",
       "stock": "in_stock",
       "marketplace": false,
-      "verified": true,
-      "url": "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wpr_puis_ref_est_in20026731.html",
-      "product": "9800x3d",
+      "verified": false,
+      "url": "https://ledenicheur.fr/go-to-shop/24264/offer/in20026731?client_id=1551",
+      "via": "Ledenicheur",
+      "shipping": "unknown",
       "deal": false
     },
     {
@@ -1228,6 +1232,7 @@
       "deal": false
     },
     {
+      "product": "9800x3d",
       "name": "AMD Ryzen 7 9800X3D",
       "ref": "100-100001084WOF",
       "version": "box",
@@ -1235,9 +1240,10 @@
       "shop": "TopAchat",
       "stock": "in_stock",
       "marketplace": false,
-      "verified": true,
-      "url": "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wpr_puis_ref_est_in20025379.html",
-      "product": "9800x3d",
+      "verified": false,
+      "url": "https://ledenicheur.fr/go-to-shop/24264/offer/in20025379?client_id=1551",
+      "via": "Ledenicheur",
+      "shipping": "unknown",
       "deal": false
     },
     {
@@ -1271,19 +1277,20 @@
   ],
   "trend": "7800X3D : 45 offres (11 Box, 34 Tray) · 9800X3D : 42 offres (11 Box, 31 Tray). Boutiques : 1FODISCOUNT, AliExpress, Alternate, Amazon.fr Marketplace, Cdiscount, Cdiscount Marketplace, Darty, Fnac, Fnac Marketplace, Grosbill, Hello Edge, Kaufland Marketplace, Materiel.net, Pixmania, TopAchat, eBay.",
   "blocked_sources": [
-    "ldlc.com / materiel.net"
+    "ldlc.com / materiel.net",
+    "topachat.com"
   ],
   "notified": {
     "7800x3d|aliexpress|tray": {
       "price": 259.52,
-      "seen": "2026-10-21T18:14+02:00"
+      "seen": "2026-10-21T19:14+02:00"
     },
     "7800x3d|cdiscount|tray": {
       "price": 275.0,
-      "seen": "2026-10-21T18:14+02:00"
+      "seen": "2026-10-21T19:14+02:00"
     }
   },
-  "notification": "🚨 BONNE AFFAIRE : AMD Ryzen 7 7800X3D Tray à 259,52 € chez AliExpress\n\n| Processeur | Prix | Boutique | Stock | Lien |\n|---|---|---|---|---|\n| 7800X3D Tray | 259,52 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005012541014380.html |\n| 7800X3D Tray | 263,99 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005009737339401.html |\n| 7800X3D Tray | 266,27 € (marketplace) | AliExpress | stock ? | https://fr.aliexpress.com/item/1005012055514852.html |\n| 7800X3D Tray | 269,42 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005010764145839.html |\n| 9800X3D Tray | 354,92 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005011718154556.html |\n| 9800X3D Tray | 355,86 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005012948576896.html |\n| 9800X3D Tray | 364,85 € (marketplace) | AliExpress | stock ? | https://fr.aliexpress.com/item/1005012711726614.html |\n| 9800X3D Tray | 372,69 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005008664922125.html |\n\nRelevé : 7800X3D : 45 offres (11 Box, 34 Tray) · 9800X3D : 42 offres (11 Box, 31 Tray). Boutiques : 1FODISCOUNT, AliExpress, Alternate, Amazon.fr Marketplace, Cdiscount, Cdiscount Marketplace, Darty, Fnac, Fnac Marketplace, Grosbill, Hello Edge, Kaufland Marketplace, Materiel.net, Pixmania, TopAchat, eBay.\nSources bloquées : ldlc.com / materiel.net\nAppli : https://tom9603.github.io/veille-ram/",
+  "notification": "🚨 BONNE AFFAIRE : AMD Ryzen 7 7800X3D Tray à 259,52 € chez AliExpress\n\n| Processeur | Prix | Boutique | Stock | Lien |\n|---|---|---|---|---|\n| 7800X3D Tray | 259,52 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005012541014380.html |\n| 7800X3D Tray | 263,64 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005009737339401.html |\n| 7800X3D Tray | 266,27 € (marketplace) | AliExpress | stock ? | https://fr.aliexpress.com/item/1005012055514852.html |\n| 7800X3D Tray | 269,42 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005010764145839.html |\n| 9800X3D Tray | 354,92 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005011718154556.html |\n| 9800X3D Tray | 355,86 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005012948576896.html |\n| 9800X3D Tray | 364,85 € (marketplace) | AliExpress | stock ? | https://fr.aliexpress.com/item/1005012711726614.html |\n| 9800X3D Tray | 372,69 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005008664922125.html |\n\nRelevé : 7800X3D : 45 offres (11 Box, 34 Tray) · 9800X3D : 42 offres (11 Box, 31 Tray). Boutiques : 1FODISCOUNT, AliExpress, Alternate, Amazon.fr Marketplace, Cdiscount, Cdiscount Marketplace, Darty, Fnac, Fnac Marketplace, Grosbill, Hello Edge, Kaufland Marketplace, Materiel.net, Pixmania, TopAchat, eBay.\nSources bloquées : ldlc.com / materiel.net, topachat.com\nAppli : https://tom9603.github.io/veille-ram/",
   "push": {
     "title": "Toujours en cours : 7800X3D Tray à 259,52 €",
     "message": "AMD Ryzen 7 7800X3D Tray chez AliExpress (en stock), seuil 280 €.\n7 autres offres sous le seuil.\n9800X3D : 354,92 € au mieux (Tray, seuil 350 €)",
