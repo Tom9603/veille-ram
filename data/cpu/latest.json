@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-25T17:13+01:00",
+  "checked_at": "2026-10-25T18:13+01:00",
   "products": {
     "7800x3d": {
       "name": "AMD Ryzen 7 7800X3D",
@@ -906,7 +906,7 @@
       "name": "AMD Ryzen 7 7800X3D",
       "ref": "100-100000910WOF",
       "version": "box",
-      "price_eur": 393.08,
+      "price_eur": 392.03,
       "shop": "Pixmania",
       "stock": "in_stock",
       "marketplace": false,
@@ -1032,7 +1032,7 @@
       "version": "tray",
       "price_eur": 433.62,
       "shop": "AliExpress",
-      "stock": "in_stock",
+      "stock": "unknown",
       "marketplace": true,
       "verified": true,
       "url": "https://fr.aliexpress.com/item/1005013358514581.html",
@@ -1155,7 +1155,7 @@
       "name": "AMD Ryzen 7 9800X3D",
       "ref": "",
       "version": "tray",
-      "price_eur": 471.47,
+      "price_eur": 471.0,
       "shop": "AliExpress",
       "stock": "in_stock",
       "marketplace": true,
@@ -1234,7 +1234,7 @@
       "name": "AMD Ryzen 7 9800X3D",
       "ref": "100-100001084WOF",
       "version": "box",
-      "price_eur": 486.4,
+      "price_eur": 486.93,
       "shop": "Pixmania",
       "stock": "in_stock",
       "marketplace": false,
@@ -1490,7 +1490,7 @@
   "usual_eur": {
     "7800x3d": {
       "box": 291.44,
-      "tray": 259.52
+      "tray": 259.31
     },
     "9800x3d": {
       "box": 430.0,
@@ -1503,7 +1503,7 @@
   "drop_alert_eur": {
     "7800x3d": {
       "box": 276.87,
-      "tray": 246.54
+      "tray": 246.34
     },
     "9800x3d": {
       "box": 408.5,
@@ -1517,19 +1517,19 @@
   "notified": {
     "7800x3d|aliexpress|tray": {
       "price": 245.73,
-      "seen": "2026-10-25T17:13+01:00"
+      "seen": "2026-10-25T18:13+01:00"
     },
     "7800x3d|cdiscount|tray": {
       "price": 275.0,
-      "seen": "2026-10-25T17:13+01:00"
+      "seen": "2026-10-25T18:13+01:00"
     },
     "9800x3d|aliexpress|tray": {
       "price": 327.99,
-      "seen": "2026-10-25T17:13+01:00"
+      "seen": "2026-10-25T18:13+01:00"
     },
     "7800x3d|aliexpress|box": {
       "price": 247.72,
-      "seen": "2026-10-25T17:13+01:00"
+      "seen": "2026-10-25T18:13+01:00"
     }
   },
   "drops": {
