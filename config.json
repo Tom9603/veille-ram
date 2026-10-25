@@ -2,16 +2,35 @@
   "products": {
     "7800x3d": {
       "name": "AMD Ryzen 7 7800X3D",
-      "model": "7800X3D"
+      "model": "7800X3D",
+      "kind": "cpu",
+      "versions": [
+        "box",
+        "tray"
+      ]
     },
     "9800x3d": {
       "name": "AMD Ryzen 7 9800X3D",
-      "model": "9800X3D"
+      "model": "9800X3D",
+      "kind": "cpu",
+      "versions": [
+        "box",
+        "tray"
+      ]
+    },
+    "b850m": {
+      "name": "MSI B850M GAMING PLUS WIFI6E",
+      "model": "B850M",
+      "kind": "motherboard",
+      "versions": [
+        "std"
+      ]
     }
   },
   "versions": {
     "box": "Box (en boîte, garantie AMD 3 ans)",
-    "tray": "Tray (sans boîte, OEM, garantie vendeur)"
+    "tray": "Tray (sans boîte, OEM, garantie vendeur)",
+    "std": "Neuve (carte mère, garantie constructeur)"
   },
   "thresholds_eur": {
     "7800x3d": {
@@ -21,6 +40,9 @@
     "9800x3d": {
       "box": 350,
       "tray": 350
+    },
+    "b850m": {
+      "std": 140
     }
   },
   "schedule": {

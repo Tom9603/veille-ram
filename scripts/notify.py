@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""Envoie au téléphone (appli ntfy) la notification du dernier relevé.
+"""Envoie au téléphone (appli ntfy) l'alerte du dernier relevé, s'il y en a une.
 
 Usage :
-    python3 scripts/notify.py              # relevé de l'heure : toujours envoyée
-    python3 scripts/notify.py --deals-only # relevé demandé depuis l'appli : seulement pour une nouvelle affaire
+    python3 scripts/notify.py
 
 Lit le champ « push » de data/cpu/latest.json (écrit par scripts/record.py) et le
-canal ntfy de config.json. Sans affaire, ou pour une affaire déjà annoncée, la
-notification est discrète (priorité basse) ; une nouvelle affaire sonne (priorité maximale).
+canal ntfy de config.json. Seules les alertes (priorité 5) partent : nouvelle bonne
+affaire sous le seuil, ou baisse de prix significative. Le résumé d'un relevé sans
+alerte reste dans les données (et dans l'appli) sans notification.
+L'option --deals-only (ancien relevé « à la demande ») est acceptée et ne change rien.
 """
 
 import json
@@ -25,8 +26,8 @@ def main(argv):
     if not ntfy or not push:
         print("Pas de canal ntfy ou pas de notification : rien à envoyer.")
         return
-    if "--deals-only" in argv and push.get("priority", 0) < 5:
-        print("Pas de nouvelle affaire : pas de notification pour ce relevé demandé depuis l'appli.")
+    if push.get("priority", 0) < 5:
+        print(f"Pas d'alerte (ni nouvelle affaire, ni baisse significative) : pas de notification. ({push['title']})")
         return
     body = {
         "topic": ntfy["topic"],

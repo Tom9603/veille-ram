@@ -4,17 +4,25 @@
   const $ = (id) => document.getElementById(id);
   const SVG_NS = "http://www.w3.org/2000/svg";
   const PREFS_KEY = "veille-ram:prefs";
-  // Processeurs suivis (7800X3D, 9800X3D : voir config.json « products »), chacun neuf, en version
-  // Box (boîte, garantie AMD) et en version Tray (sans boîte, garantie du vendeur).
-  const PRODUCTS = { "7800x3d": { name: "AMD Ryzen 7 7800X3D", model: "7800X3D" }, "9800x3d": { name: "AMD Ryzen 7 9800X3D", model: "9800X3D" } };
-  const LEGACY = "7800x3d";   // premières données, d'avant le suivi de plusieurs processeurs
-  const productOf = (o) => o.product || LEGACY;
-  const GROUPS = ["box", "tray"];
-  const GROUP = {
-    box: { label: "Box", long: "Version Box", sub: "En boîte, garantie AMD 3 ans", color: "var(--box)" },
-    tray: { label: "Tray", long: "Version Tray", sub: "Sans boîte, garantie vendeur", color: "var(--tray)" },
+  // Produits suivis (voir config.json « products »), tous neufs : les processeurs 7800X3D et 9800X3D en
+  // version Box (boîte, garantie AMD) et Tray (sans boîte, garantie du vendeur), et une carte mère (une version).
+  const PRODUCTS = {
+    "7800x3d": { name: "AMD Ryzen 7 7800X3D", model: "7800X3D", kind: "cpu", versions: ["box", "tray"] },
+    "9800x3d": { name: "AMD Ryzen 7 9800X3D", model: "9800X3D", kind: "cpu", versions: ["box", "tray"] },
+    b850m: { name: "MSI B850M GAMING PLUS WIFI6E", model: "B850M", kind: "motherboard", versions: ["std"] },
   };
-  const groupOf = (o) => (o.version === "tray" ? "tray" : "box");
+  const LEGACY = "7800x3d";   // premières données, d'avant le suivi de plusieurs produits
+  const productOf = (o) => o.product || LEGACY;
+  const groupsOf = (product) => (PRODUCTS[product] || PRODUCTS[LEGACY]).versions;
+  const GROUP = {
+    box: { label: "Box", long: "Version Box", sub: "En boîte, garantie AMD 3 ans", color: "var(--box)",
+      version: "Box (en boîte)", warranty: "AMD, 3 ans" },
+    tray: { label: "Tray", long: "Version Tray", sub: "Sans boîte, garantie vendeur", color: "var(--tray)",
+      version: "Tray (sans boîte)", warranty: "Celle du vendeur" },
+    std: { label: "Neuve", long: "Carte mère neuve", sub: "Garantie constructeur", color: "var(--box)",
+      version: "Neuve", warranty: "Constructeur (MSI)" },
+  };
+  const groupOf = (o) => (GROUP[o.version] ? o.version : "box");
   const versionLabel = (o) => GROUP[groupOf(o)].label;
   const VIEWS = { marche: "Marché", offres: "Offres", historique: "Historique", reglages: "Réglages" };
   const STOCK = {
@@ -31,7 +39,7 @@
   let prefs = { ...DEFAULT_PREFS };
   try { prefs = { ...DEFAULT_PREFS, ...JSON.parse(localStorage.getItem(PREFS_KEY) || "{}") }; } catch (e) { /* stockage indisponible */ }
   // Préférences de l'ancienne veille RAM (latences, tri par CL) : remises par défaut.
-  if (!GROUP[prefs.cat]) prefs.cat = "all";
+  if (!["all", "box", "tray"].includes(prefs.cat)) prefs.cat = "all";
   if (!PRODUCTS[prefs.product]) prefs.product = LEGACY;
   if (!SORT_LABELS[prefs.sort]) prefs.sort = "price-asc";
   delete prefs.cl;
@@ -255,9 +263,14 @@
   const groupLimit = (g) => limitOf(prefs.product, g);
   const limitFor = (o) => limitOf(productOf(o), groupOf(o));
   const modelOf = (product) => (PRODUCTS[product] || { model: product }).model;
-  // Offres du processeur affiché.
+  // « sur le 7800X3D », « sur la B850M » (carte mère)
+  const onProduct = (product) => `sur ${(PRODUCTS[product] || {}).kind === "motherboard" ? "la" : "le"} ${modelOf(product)}`;
+  const multiVersion = () => groupsOf(prefs.product).length > 1;
+  // Offres du produit affiché.
   const currentOffers = () => state.latest.offers.filter((o) => productOf(o) === prefs.product);
-  const selectedGroups = () => (GROUP[prefs.cat] ? [prefs.cat] : GROUPS);
+  const selectedGroups = () => (groupsOf(prefs.product).includes(prefs.cat) ? [prefs.cat] : groupsOf(prefs.product));
+  // « 7800X3D Box », « B850M »
+  const pvLabel = (product, g) => (groupsOf(product).length > 1 ? `${modelOf(product)} ${GROUP[g].label}` : modelOf(product));
   const offerKey = (o) => `${o.shop}|${o.ref || o.name}|${groupOf(o)}|${o.url}`;
   const gapText = (o) => {
     if (limitFor(o) == null) return "";
@@ -282,7 +295,7 @@
   function historyPoints() {
     return state.history.filter((h) => !h.partial).map((h) => {
       const p = { t: new Date(h.checked_at) };
-      for (const g of GROUPS) {
+      for (const g of groupsOf(prefs.product)) {
         const b = rowBest(h, prefs.product, g);
         p[g] = b ? b.price_eur : null;
       }
@@ -308,14 +321,20 @@
     const v = currentView();
     for (const key of Object.keys(VIEWS)) $(`view-${key}`).hidden = key !== v;
     $("page-title").textContent = VIEWS[v];
-    $("cat-switch").hidden = v === "reglages";
-    $("product-switch").hidden = v === "reglages";
+    updateSwitches();
     document.querySelectorAll(".tabbar a").forEach((a) => {
       if (a.dataset.tab === v) a.setAttribute("aria-current", "page");
       else a.removeAttribute("aria-current");
     });
     if (v === "historique" && state.latest) renderChart();
     if (scroll) window.scrollTo({ top: 0 });
+  }
+
+  // Version (Box / Tray) : seulement pour un produit qui en a plusieurs.
+  function updateSwitches() {
+    const v = currentView();
+    $("cat-switch").hidden = v === "reglages" || !multiVersion();
+    $("product-switch").hidden = v === "reglages";
   }
 
   // ---------- Rendu ----------
@@ -333,7 +352,8 @@
     if (state.fromCache) showBanner("Hors ligne : affichage des dernières données enregistrées.");
     else if (age > (day ? 2 : 8)) showBanner(`Aucun relevé depuis ${Math.floor(age)} h : le robot a peut-être raté un passage. Touche ↻ pour en lancer un.`);
     else showBanner("");
-    $("product").textContent = `${(PRODUCTS[prefs.product] || {}).name || ""} · neuf`;
+    const p = PRODUCTS[prefs.product] || {};
+    $("product").textContent = `${p.name || ""} · ${p.kind === "motherboard" ? "neuve" : "neuf"}`;
     renderMarche();
     renderOffres();
     renderHistorique();
@@ -346,10 +366,10 @@
     const deals = currentOffers().filter((o) => o.deal && groups.includes(groupOf(o))).sort((a, b) => a.price_eur - b.price_eur);
     const deal = deals[0] || null;
     const offer = deal || bestListed(groups.length === 1 ? groups[0] : null);
-    // Une affaire hors de ce qui est affiché (autre version, autre processeur) : on le dit, et un toucher l'affiche.
+    // Une affaire hors de ce qui est affiché (autre version, autre produit) : on le dit, et un toucher l'affiche.
     const other = deal ? null : latest.offers.filter((o) => o.deal).sort((a, b) => a.price_eur - b.price_eur)[0] || null;
     const elsewhere = other && (productOf(other) !== prefs.product
-      ? `Bonne affaire sur le ${modelOf(productOf(other))} › voir` : `Bonne affaire en ${GROUP[groupOf(other)].label} › voir`);
+      ? `Bonne affaire ${onProduct(productOf(other))} › voir` : `Bonne affaire en ${GROUP[groupOf(other)].label} › voir`);
 
     const pill = $("status-pill");
     pill.classList.toggle("is-deal", !!(deal || elsewhere));
@@ -357,14 +377,14 @@
     pill.onclick = elsewhere ? () => { prefs.product = productOf(other); setPref("cat", "all"); } : null;
     pill.replaceChildren(icon(deal || elsewhere ? "check" : "clock"),
       deal ? "Bonne affaire !" : elsewhere
-        || (groups.length === 1 ? `Pas d'affaire en ${GROUP[groups[0]].label}` : "Pas d'affaire pour l'instant"));
+        || (groups.length === 1 && multiVersion() ? `Pas d'affaire en ${GROUP[groups[0]].label}` : "Pas d'affaire pour l'instant"));
     $("updated-pill").textContent = `Mis à jour ${relative(new Date(latest.checked_at))}`;
 
     $("hero").classList.toggle("is-deal", !!deal);
     const scope = groups.length === 1 ? GROUP[groups[0]].long : "Box et Tray";
-    $("hero-label").textContent = deal ? `Bonne affaire · ${versionLabel(deal)}` : `Meilleur prix · ${scope}`;
+    $("hero-label").textContent = deal ? (multiVersion() ? `Bonne affaire · ${versionLabel(deal)}` : "Bonne affaire") : `Meilleur prix · ${scope}`;
     $("hero-price").textContent = offer ? eur(offer.price_eur) : "—";
-    $("hero-name").textContent = offer ? `${offer.name} · ${versionLabel(offer)}` : "Aucune offre disponible à ce relevé";
+    $("hero-name").textContent = offer ? (multiVersion() ? `${offer.name} · ${versionLabel(offer)}` : offer.name) : "Aucune offre disponible à ce relevé";
 
     const facts = $("hero-facts");
     facts.replaceChildren();
@@ -382,14 +402,15 @@
     $("hero-link").hidden = !url;
     if (url) $("hero-link").href = url;
 
+    $("by-cat-title").textContent = multiVersion() ? "Par version" : "En bref";
     const list = $("by-cat");
-    list.replaceChildren(...GROUPS.map((g) => {
+    list.replaceChildren(...groupsOf(prefs.product).map((g) => {
       const best = bestListed(g);
       const out = best ? 0 : currentOffers().filter((o) => groupOf(o) === g).length;   // toutes en rupture ?
       return el("button", {
         type: "button",
-        class: `row-cat${prefs.cat === g ? " is-selected" : ""}`,
-        onclick: () => { setPref("cat", g); location.hash = "#offres"; },
+        class: `row-cat${prefs.cat === g && multiVersion() ? " is-selected" : ""}`,
+        onclick: () => { if (multiVersion()) setPref("cat", g); location.hash = "#offres"; },
       },
       el("span", { class: "cat-name" }, dot(GROUP[g].color), el("span", null, GROUP[g].label,
         hasDeal(g) && el("span", { class: "badge deal" }, "Bonne affaire"),
@@ -438,7 +459,7 @@
     const sorters = {
       "price-asc": (a, b) => a.price_eur - b.price_eur,
       "price-desc": (a, b) => b.price_eur - a.price_eur,
-      version: (a, b) => GROUPS.indexOf(groupOf(a)) - GROUPS.indexOf(groupOf(b)) || a.price_eur - b.price_eur,
+      version: (a, b) => groupsOf(prefs.product).indexOf(groupOf(a)) - groupsOf(prefs.product).indexOf(groupOf(b)) || a.price_eur - b.price_eur,
       shop: (a, b) => a.shop.localeCompare(b.shop, "fr") || a.price_eur - b.price_eur,
     };
     return currentOffers()
@@ -457,7 +478,7 @@
     const list = $("offers");
     if (!offers.length) {
       list.replaceChildren(el("li", { class: "empty" },
-        el("p", null, total ? "Aucune offre ne correspond à tes filtres." : "Aucune offre relevée pour cette version à ce relevé."),
+        el("p", null, total ? "Aucune offre ne correspond à tes filtres." : `Aucune offre relevée${multiVersion() ? " pour cette version" : ""} à ce relevé.`),
         total ? el("button", { type: "button", class: "btn btn-ghost", onclick: () => { prefs.available = false; setPref("verifiedOnly", false); } }, "Retirer les filtres") : null));
       return;
     }
@@ -472,7 +493,7 @@
     const li = el("li", { class: ["offer", o.deal && "is-deal", o.stock === "out_of_stock" && "is-out", open && "is-open"].filter(Boolean).join(" ") });
     const head = el("button", { type: "button", class: "offer-head", "aria-expanded": String(open) },
       el("span", { class: "offer-top" },
-        el("span", { class: "badge" }, dot(GROUP[groupOf(o)].color), versionLabel(o)),
+        multiVersion() && el("span", { class: "badge" }, dot(GROUP[groupOf(o)].color), versionLabel(o)),
         o.deal && el("span", { class: "badge deal" }, "Bonne affaire")),
       el("span", { class: "offer-price" }, eur(o.price_eur)),
       el("span", { class: "offer-name" }, o.name),
@@ -483,13 +504,13 @@
     const more = el("div", { class: "offer-more" }, el("div", null,
       el("dl", { class: "facts" },
         fact("Référence", o.ref || "non précisée", true),
-        fact("Version", groupOf(o) === "tray" ? "Tray (sans boîte)" : "Box (en boîte)"),
+        fact("Version", GROUP[groupOf(o)].version),
         fact("Seuil", eur(limitFor(o))),
         fact("Prix", o.verified ? "Vérifié chez la boutique"
           : o.via ? `Relevé via ${o.via}, ${o.shipping === "unknown" ? "frais de port inconnus" : "livraison incluse"}` : "Non vérifié (comparateur)"),
         fact("Vendeur", o.marketplace ? "Marketplace (vendeur tiers)" : "Boutique"),
         fact("Stock", stock.label),
-        fact("Garantie", groupOf(o) === "tray" ? "Celle du vendeur" : "AMD, 3 ans")),
+        fact("Garantie", GROUP[groupOf(o)].warranty)),
       url && el("div", { class: "offer-actions" },
         el("a", { class: "btn btn-primary", href: url, target: "_blank", rel: "noopener noreferrer" }, `Voir chez ${o.shop} ↗`))));
     head.addEventListener("click", () => {
@@ -516,7 +537,7 @@
 
   function renderHistorique() {
     const groups = selectedGroups();
-    $("chart-title").textContent = groups.length > 1 ? "Meilleur prix par version" : `Meilleur prix · ${GROUP[groups[0]].long}`;
+    $("chart-title").textContent = groups.length > 1 ? "Meilleur prix par version" : multiVersion() ? `Meilleur prix · ${GROUP[groups[0]].long}` : "Meilleur prix";
     $("legend").replaceChildren(...(groups.length > 1 ? groups.map((g) => {
       const key = el("span", { class: "key" });
       key.style.background = GROUP[g].color;
@@ -533,8 +554,11 @@
         el("td", null, values.length ? eur(Math.min(...values)) : "—"),
         el("td", null, values.length ? eur(Math.max(...values)) : "—"));
     }));
+    const cols = groupsOf(prefs.product);
+    $("history-head").replaceChildren(el("th", { scope: "col" }, "Date"),
+      ...cols.map((g) => el("th", { scope: "col" }, cols.length > 1 ? GROUP[g].label : "Meilleur prix")));
     $("history-rows").replaceChildren(...[...pts].reverse().map((p) =>
-      el("tr", null, el("td", null, shortFmt.format(p.t)), ...GROUPS.map((g) => el("td", null, eur(p[g]))))));
+      el("tr", null, el("td", null, shortFmt.format(p.t)), ...cols.map((g) => el("td", null, eur(p[g]))))));
 
     if (currentView() === "historique") renderChart();
   }
@@ -552,7 +576,7 @@
     box.querySelectorAll("svg").forEach((n) => n.remove());
     tooltip.hidden = true;
 
-    const series = selectedGroups().map((g) => ({ key: g, name: GROUP[g].label, color: GROUP[g].color }));
+    const series = selectedGroups().map((g) => ({ key: g, name: multiVersion() ? GROUP[g].label : "Meilleur prix", color: GROUP[g].color }));
     const points = periodPoints().filter((p) => series.some((s) => p[s.key] != null));
     $("chart-hint").textContent = !points.length
       ? "Aucun relevé sur cette période pour cette version."
@@ -567,7 +591,8 @@
     const iw = W - m.left - m.right;
     const ih = H - m.top - m.bottom;
 
-    let refs = series.map((s) => ({ v: groupLimit(s.key), label: `seuil ${s.name}`, color: s.color }));
+    let refs = series.map((s) => ({ v: groupLimit(s.key), label: multiVersion() ? `seuil ${s.name}` : "seuil", color: s.color }))
+      .filter((r) => r.v != null);
     // Versions au même seuil : une seule ligne.
     refs = refs.reduce((acc, r) => {
       const same = acc.find((a) => a.v === r.v);
@@ -732,9 +757,21 @@
   function renderReglages() {
     const card = $("thresholds");
     card.querySelectorAll(".th-row").forEach((r) => r.remove());
-    card.prepend(...Object.keys(PRODUCTS).flatMap((product) => GROUPS.map((g) =>
-      el("div", { class: "row th-row" }, el("span", null, `Seuil ${modelOf(product)} ${GROUP[g].label}`),
+    card.prepend(...Object.keys(PRODUCTS).flatMap((product) => groupsOf(product).map((g) =>
+      el("div", { class: "row th-row" }, el("span", null, `Seuil ${pvLabel(product, g)}`),
         el("span", { class: "value" }, eur(limitOf(product, g)))))));
+    // Alertes de baisse : prix habituel (médiane sur 7 jours) et prix qui déclenche l'alerte.
+    const usual = state.latest.usual_eur || {};
+    const alertAt = state.latest.drop_alert_eur || {};
+    $("drops").replaceChildren(...Object.keys(PRODUCTS).flatMap((product) => groupsOf(product).map((g) => {
+      const u = (usual[product] || {})[g];
+      const a = (alertAt[product] || {})[g];
+      const ready = u != null && a != null;
+      return el("div", { class: "row" },
+        el("span", null, pvLabel(product, g),
+          el("span", { class: "sub" }, ready ? `prix habituel ${eurRound(u)}` : "il faut environ 1 jour de relevés")),
+        el("span", { class: "value" }, ready ? `alerte ≤ ${eurRound(a)}` : "en calcul"));
+    })));
     const slots = relevesSlots();
     const fmt = (m) => `${Math.floor(m / 60)}h${String(m % 60).padStart(2, "0")}`;
     $("set-schedule").textContent = `toutes les heures, ${fmt(slots[0])}–${fmt(slots[slots.length - 1])}`;
@@ -758,6 +795,7 @@
 
   function syncControls() {
     setChecked($("product-switch"), "data-product", prefs.product);
+    updateSwitches();
     setChecked($("cat-switch"), "data-cat", prefs.cat);
     setChecked($("period"), "data-period", prefs.period);
     setChecked($("set-theme"), "data-theme-value", prefs.theme);
@@ -792,8 +830,8 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           topic,
-          title: "Veille X3D : notifications activées",
-          message: "Test réussi. Tu recevras ici le relevé de chaque heure, de 6h13 à 23h13, et une alerte dès qu'un processeur suivi passe sous son seuil.",
+          title: "Veille PC : notifications activées",
+          message: "Test réussi. Tu seras prévenu ici seulement s'il y a du nouveau : une bonne affaire sous ton seuil, ou une baisse de prix significative sur un processeur ou la carte mère.",
           tags: ["white_check_mark"],
           click: location.href.split("#")[0],
         }),

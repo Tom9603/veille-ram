@@ -8,7 +8,8 @@ name: Actualiser les prix
 # un autre qui prend le relais.
 #
 # - « Relevé horaire » : la boucle, entretenue par les relais. Après chaque
-#   relevé de l'heure, elle envoie la notification au téléphone (ntfy). Entre
+#   relevé, elle envoie une notification au téléphone (ntfy) seulement s'il y a
+#   une alerte : nouvelle bonne affaire ou baisse de prix significative. Entre
 #   deux relevés, elle surveille le canal ntfy des demandes de l'appli : le
 #   bouton ↻ y publie un message et un relevé est fait aussitôt. Les lancements
 #   programmés ne servent que de secours : ils redémarrent la boucle si elle
@@ -79,10 +80,10 @@ jobs:
             echo "$next"
           }
 
-          # Relevé, publication sur gh-pages, puis notification : à chaque relevé de
-          # l'heure (« horaire »), seulement en cas d'affaire pour un relevé demandé
-          # depuis l'appli (« manuel »). En cas de conflit avec un autre relevé, on
-          # repart de la version en ligne et on y réapplique celui-ci.
+          # Relevé, publication sur gh-pages, puis notification s'il y a une alerte
+          # (scripts/notify.py n'envoie rien sinon), que le relevé soit celui de
+          # l'heure ou demandé depuis l'appli. En cas de conflit avec un autre relevé,
+          # on repart de la version en ligne et on y réapplique celui-ci.
           releve() {
             local published=
             # Plafond de 10 minutes : un site qui répondrait au compte-gouttes ne bloque pas la boucle.
@@ -97,11 +98,7 @@ jobs:
               sleep $((attempt * 5))
             done
             [ -n "$published" ] || return 1
-            if [ "$1" = horaire ]; then
-              python3 scripts/notify.py || echo "::warning::Notification non envoyée."
-            else
-              python3 scripts/notify.py --deals-only || echo "::warning::Notification non envoyée."
-            fi
+            python3 scripts/notify.py || echo "::warning::Notification non envoyée."
           }
 
           # Attend l'heure $1 (secondes depuis 1970) en relevant le canal ntfy des

@@ -1,7 +1,7 @@
 {
-  "name": "Veille X3D",
-  "short_name": "Veille CPU",
-  "description": "Prix des AMD Ryzen 7 7800X3D et 9800X3D neufs (Box et Tray), relevés toutes les heures.",
+  "name": "Veille PC",
+  "short_name": "Veille PC",
+  "description": "Prix des AMD Ryzen 7 7800X3D et 9800X3D (Box et Tray) et de la carte mère MSI B850M GAMING PLUS WIFI6E neufs, relevés toutes les heures.",
   "lang": "fr",
   "start_url": "./",
   "scope": "./",

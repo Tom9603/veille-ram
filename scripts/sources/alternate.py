@@ -1,6 +1,6 @@
-"""Alternate France : processeur suivi (7800X3D, 9800X3D…) neuf, versions box et tray.
+"""Alternate France : produit suivi (processeur en Box ou Tray, carte mère) neuf.
 
-La recherche liste les fiches (une « Tray », une « processeur en boîte ») ; chaque fiche du processeur est
+La recherche liste les fiches (pour un processeur : une « Tray », une « processeur en boîte ») ; chaque fiche du produit est
 ensuite ouverte pour y lire, sur le site même de la boutique, la référence AMD (mpn du JSON-LD), le prix,
 le stock et les frais d'expédition affichés (« en sus à partir de € 9,90 »), ajoutés au prix.
 Si une fiche ne répond pas, on garde le prix de la liste, plus le port lu sur l'autre fiche s'il y en a un.
@@ -11,25 +11,23 @@ et renvoie au panier pour le montant exact, que ce module ne peut pas lire.
 import json
 import re
 import time
+from urllib.parse import quote_plus
 
-from collect import price, stock_from, text
+from collect import classify, excluded, price, stock_from, text
 
 SHIPPING_DEFAULT = 9.90   # « frais d'expédition en sus à partir de € 9,90 »
-SEARCH = "https://www.alternate.fr/listing.xhtml?q={key}"   # + les fiches produit trouvées dans la liste
+SEARCH = "https://www.alternate.fr/listing.xhtml?q={q}"   # + les fiches produit trouvées dans la liste
 
 
-def cpu(product):
-    """Écarte les PC (« ALTERNATE PC Gaming… ») et les autres CPU ; « Ryzen™ » toléré (vu sur le 9800X3D)."""
-    return re.compile(rf"^AMD Ryzen[™®]? 7 {product['model']}\b", re.I)
-
-EXCLUDE = re.compile(r"\+|bundle|\bkit\b|\bpack\b|\bPC\b|ventirad|watercooling|carte m[eè]re|d[ée]lid"
-                     r"|occasion|reconditionn|refurb|comme neuf|seconde main", re.I)
-TRAY = re.compile(r"\btray\b|\boem\b|\bmpk\b|sans bo[iî]te|plateau", re.I)
+# Le nom doit commencer par le produit (product["title_re"]) : écarte les PC (« ALTERNATE PC Gaming… »)
+# et les autres modèles (« Ryzen™ » toléré, vu sur le 9800X3D).
 
 
 def stock(label):
     if re.search(r"plus (?:en stock|disponible)|n'est plus", label, re.I):   # stock_from y verrait « en stock »
         return "out_of_stock"
+    if re.search(r"en clarification", label, re.I):   # « Date de livraison en clarification » : aucune date
+        return "unknown"
     # « En rupture de stock, prêt à être expédié dans 7-13 jours ouvrables » : commandable, donc sur commande
     return "on_order" if re.search(r"exp[ée]di[ée] dans", label, re.I) else stock_from(label)
 
@@ -41,8 +39,8 @@ def euros(raw):
 
 
 def listing(page, product):
-    """Cartes de la recherche : (lien, nom, sous-titre, prix, disponibilité) du seul processeur suivi, neuf."""
-    cards, cpu_re = [], cpu(product)
+    """Cartes de la recherche : (lien, nom, sous-titre, prix, disponibilité) du seul produit suivi, neuf."""
+    cards, title_re = [], product["title_re"]
     for block in re.split(r'<a href="(?=https://www\.alternate\.fr/[^"]+/html/product/)', page)[1:]:
         url = block.split('"', 1)[0]
         name = re.search(r'<div class="product-name[^"]*">(.*?)</div>', block, re.S)
@@ -53,13 +51,13 @@ def listing(page, product):
             continue
         name, sub = text(name.group(1)), text(sub.group(1)) if sub else ""
         p = price(text(cost.group(1)))
-        if not cpu_re.search(name) or EXCLUDE.search(f"{name} {sub}") or p is None:
+        if not title_re.search(name) or excluded(product, f"{name} {sub}") or p is None:
             continue
         cards.append((url, name, sub, p, text(avail.group(1)) if avail else ""))
     return cards
 
 
-def product(page):
+def details(page):
     """Fiche produit : offre du JSON-LD (prix, mpn, état, vendeur), stock et port affichés."""
     for m in re.finditer(r'<script type="application/ld\+json">(.*?)</script>', page, re.S):
         try:
@@ -80,15 +78,14 @@ def product(page):
 
 
 def collect(fetch, product):
-    refs = product["refs"]
-    page = fetch(SEARCH.format(key=product["key"]))   # première page : une erreur remonte (source bloquée)
+    page = fetch(SEARCH.format(q=quote_plus(product["search"])))   # première page : une erreur remonte (source bloquée)
     if "Résultats pour" not in page:   # page anti-robot ou d'erreur servie en 200 : bloquée, pas « vide »
         raise RuntimeError("Alternate : page de recherche méconnaissable (blocage ?)")
     cards = []
     for card in listing(page, product):
         try:
             time.sleep(0.4)
-            info = product(fetch(card[0]))
+            info = details(fetch(card[0]))
         except Exception:
             info = None   # fiche en panne : on garde le prix de la liste
         cards.append((card, info))
@@ -97,14 +94,12 @@ def collect(fetch, product):
     known = [i["shipping"] for _, i in cards if i and i["shipping"] is not None] or [SHIPPING_DEFAULT]
     offers = []
     for (url, name, sub, p, avail), info in cards:
-        version = "tray" if TRAY.search(sub) or TRAY.search(name) else "box"   # sans mention : boîte
-        ref, label, seller, ship = refs[version], avail, "ALTERNATE", known[0]
+        version, ref = classify(product, f"{name} {sub}")   # processeur sans mention : boîte
+        label, seller, ship = avail, "ALTERNATE", known[0]
         if info:
             if not info["new"]:
                 continue
-            if info["mpn"] in refs.values():
-                ref = info["mpn"]
-                version = "box" if ref == refs["box"] else "tray"
+            version, ref = classify(product, f"{name} {sub}", info["mpn"])
             p, ship = info["price"], ship if info["shipping"] is None else info["shipping"]
             label, seller = info["stock"] or avail, info["seller"] or seller
         p = round(p + ship, 2)

@@ -6,25 +6,29 @@ les seuils, modifie `config.json`.
 
 ## Mission
 
-Trouver le meilleur prix actuel **en France** des **AMD Ryzen 7 7800X3D** et
-**9800X3D** neufs, en version **Box** (en boîte, garantie AMD 3 ans ; réf.
-100-100000910WOF et 100-100001084WOF) et **Tray** (sans boîte, OEM/MPK, garantie
-du vendeur ; réf. 100-000000910 et 100-000001084). Champ `product` de chaque
-offre : `7800x3d` ou `9800x3d`.
+Trouver le meilleur prix actuel **en France** des produits suivis, neufs :
+
+- **AMD Ryzen 7 7800X3D** et **9800X3D**, en version **Box** (en boîte, garantie
+  AMD 3 ans ; réf. 100-100000910WOF et 100-100001084WOF) et **Tray** (sans boîte,
+  OEM/MPK, garantie du vendeur ; réf. 100-000000910 et 100-000001084). Champ
+  `product` : `7800x3d` ou `9800x3d` ; `version` : `box` ou `tray`.
+- Carte mère **MSI B850M GAMING PLUS WIFI6E** (réf. MSI 7E81-001R). Champ
+  `product` : `b850m` ; `version` : `std`. Pas la B850M GAMING PLUS WIFI (sans
+  6E), ni la B850 GAMING PLUS WIFI6E (ATX), ni les variantes PZ ou MAX.
 
 - Ignore l'occasion, le reconditionné, les lots (processeur + carte mère…), les
-  PC complets et les autres processeurs (7900X3D, 7800X…).
+  PC complets et les autres modèles.
 - Les marketplaces (Amazon, Cdiscount, Fnac, AliExpress…) comptent : marque-les
   `marketplace: true`.
-- Seuils d'alerte : `thresholds_eur` dans `config.json`, par processeur et version.
+- Seuils d'alerte : `thresholds_eur` dans `config.json`, par produit et version.
 
 ## Où chercher
 
-1. Ledenicheur : fiches Box et Tray de chaque processeur (liens dans
-   `PRODUCTS` de `scripts/collect.py`, avec `&filters=price_inc_shipping` :
-   offres les moins chères, livraison incluse).
+1. Ledenicheur : fiche(s) de chaque produit (liens dans `PRODUCTS` de
+   `scripts/collect.py`, avec `&filters=price_inc_shipping` : offres les moins
+   chères, livraison incluse).
 2. Boutiques et marketplaces : LDLC, Materiel.net, Alternate, Grosbill,
-   TopAchat, Amazon.fr, Cdiscount, Fnac, AliExpress.
+   TopAchat, Amazon.fr, Cdiscount, Fnac, Kaufland, AliExpress (processeurs).
 3. Bons plans récents (moins de 48 h) sur dealabs.com.
 
 ## Règles de fiabilité

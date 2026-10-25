@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Veille X3D</title>
-  <meta name="description" content="Suivi du prix des AMD Ryzen 7 7800X3D et 9800X3D neufs (Box et Tray), relevé toutes les heures.">
+  <title>Veille PC</title>
+  <meta name="description" content="Suivi du prix des AMD Ryzen 7 7800X3D et 9800X3D (Box et Tray) et de la carte mère MSI B850M GAMING PLUS WIFI6E neufs, relevé toutes les heures.">
   <meta name="theme-color" content="#f4f4f1">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Veille X3D">
+  <meta name="apple-mobile-web-app-title" content="Veille PC">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -45,9 +45,10 @@
       <span id="sync-text">Recherche des prix en cours…</span>
     </div>
 
-    <div class="segmented product-switch" id="product-switch" role="radiogroup" aria-label="Processeur">
-      <button type="button" role="radio" data-product="7800x3d" aria-label="Ryzen 7 7800X3D">7800X3D</button>
-      <button type="button" role="radio" data-product="9800x3d" aria-label="Ryzen 7 9800X3D">9800X3D</button>
+    <div class="segmented product-switch" id="product-switch" role="radiogroup" aria-label="Produit">
+      <button type="button" role="radio" data-product="7800x3d" aria-label="Processeur Ryzen 7 7800X3D">7800X3D</button>
+      <button type="button" role="radio" data-product="9800x3d" aria-label="Processeur Ryzen 7 9800X3D">9800X3D</button>
+      <button type="button" role="radio" data-product="b850m" aria-label="Carte mère MSI B850M GAMING PLUS WIFI6E">B850M</button>
     </div>
 
     <div class="segmented cat-switch" id="cat-switch" role="radiogroup" aria-label="Version">
@@ -75,7 +76,7 @@
           </div>
         </article>
 
-        <h2 class="section-title">Par version</h2>
+        <h2 class="section-title" id="by-cat-title">Par version</h2>
         <div class="card list" id="by-cat"></div>
 
         <h2 class="section-title">Le marché</h2>
@@ -141,7 +142,7 @@
         <details class="card disclosure">
           <summary>Tous les relevés</summary>
           <table class="stats">
-            <thead><tr><th scope="col">Date</th><th scope="col">Box</th><th scope="col">Tray</th></tr></thead>
+            <thead><tr id="history-head"><th scope="col">Date</th><th scope="col">Box</th><th scope="col">Tray</th></tr></thead>
             <tbody id="history-rows"></tbody>
           </table>
         </details>
@@ -161,19 +162,20 @@
             <span>Installer ntfy sur Android</span><span class="chev" aria-hidden="true">↗</span>
           </a>
         </div>
-        <p class="footnote">Dans l'appli ntfy (gratuite, sans compte) : touche +, colle le nom du canal, puis « S'abonner ». Tu reçois une notification à chaque relevé de l'heure, de 6h13 à 23h13 : discrète s'il n'y a pas d'affaire, avec une alerte dès qu'un processeur suivi passe sous son seuil. Le bouton ↻ lance un relevé immédiat (1 à 2 minutes), sans clé.</p>
+        <p class="footnote">Dans l'appli ntfy (gratuite, sans compte) : touche +, colle le nom du canal, puis « S'abonner ». Les prix sont relevés chaque heure, de 6h13 à 23h13, mais tu n'es notifié que s'il y a du nouveau : une bonne affaire sous ton seuil, ou une baisse de prix significative (voir « Alertes de baisse »). Le bouton ↻ lance un relevé immédiat (1 à 2 minutes), sans clé.</p>
 
         <h2 class="section-title">Général</h2>
         <div class="card list settings">
           <label class="row">
-            <span>Processeur affiché</span>
+            <span>Produit affiché</span>
             <select id="set-product">
               <option value="7800x3d">Ryzen 7 7800X3D</option>
               <option value="9800x3d">Ryzen 7 9800X3D</option>
+              <option value="b850m">Carte mère B850M</option>
             </select>
           </label>
           <label class="row">
-            <span>Version affichée</span>
+            <span>Version des processeurs</span>
             <select id="set-cat">
               <option value="all">Box et Tray</option>
               <option value="box">Box (en boîte)</option>
@@ -221,11 +223,15 @@
             <span>Modifier les seuils sur GitHub</span><span class="chev" aria-hidden="true">↗</span>
           </a>
         </div>
-        <p class="footnote">Une bonne affaire est une offre en stock ou sur commande, sous le seuil, dont le prix est confirmé : vu chez la boutique, ou relevé pour elle par Ledenicheur (livraison incluse quand elle est connue ; sinon la fiche l'indique). Seuls les 7800X3D et 9800X3D neufs sont suivis : pas d'occasion, de reconditionné, de lot ni de PC complet. Le Tray est le même processeur, vendu sans boîte, avec la garantie du vendeur.</p>
+        <p class="footnote">Une bonne affaire est une offre en stock ou sur commande, sous le seuil, dont le prix est confirmé : vu chez la boutique, ou relevé pour elle par Ledenicheur (livraison incluse quand elle est connue ; sinon la fiche l'indique). Seuls les produits neufs sont suivis : pas d'occasion, de reconditionné, de lot ni de PC complet. Le Tray est le même processeur, vendu sans boîte, avec la garantie du vendeur. Pour la carte mère, seule la B850M GAMING PLUS WIFI6E compte (pas la version WIFI sans 6E, ni la B850 au format ATX).</p>
+
+        <h2 class="section-title">Alertes de baisse</h2>
+        <div class="card list settings" id="drops"></div>
+        <p class="footnote">Une baisse est significative quand le meilleur prix sûr (disponible, port connu) passe au moins 5 % et 10 € sous le prix habituel, la médiane des relevés des 7 derniers jours. Une seule alerte par baisse : il en faut une nouvelle d'au moins 5 € pour être prévenu de nouveau.</p>
 
         <h2 class="section-title">Analyses</h2>
         <div class="card list settings">
-          <div class="row"><span>Relevés et notifications</span><span class="value" id="set-schedule">—</span></div>
+          <div class="row"><span>Relevés</span><span class="value" id="set-schedule">—</span></div>
           <div class="row"><span>Dernière analyse</span><span class="value" id="set-last">—</span></div>
           <div class="row"><span>Sources inaccessibles</span><span class="value" id="set-blocked">—</span></div>
           <button type="button" class="row link" id="set-refresh"><span>Actualiser maintenant</span><span class="chev" aria-hidden="true">↻</span></button>
@@ -240,7 +246,7 @@
         <h2 class="section-title">À propos</h2>
         <div class="card list settings">
           <a class="row link" href="https://github.com/Tom9603/veille-ram" target="_blank" rel="noopener noreferrer"><span>Projet sur GitHub</span><span class="chev" aria-hidden="true">↗</span></a>
-          <div class="row"><span>Version</span><span class="value">3.1</span></div>
+          <div class="row"><span>Version</span><span class="value">3.2</span></div>
         </div>
       </section>
     </main>

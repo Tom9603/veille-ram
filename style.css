@@ -298,6 +298,7 @@ h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.025em; line-height: 1
 /* ---------- Réglages ---------- */
 .settings .row { font-size: 0.9375rem; }
 .settings .value { color: var(--ink-2); text-align: right; }
+.settings .row .sub { display: block; font-size: 0.8125rem; color: var(--muted); }
 .settings select {
   appearance: none; -webkit-appearance: none; border: 0; background: transparent; color: var(--accent);
   font-weight: 600; text-align: right; text-align-last: right; padding: 4px 0; outline: none; max-width: 55%;

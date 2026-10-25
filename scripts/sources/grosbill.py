@@ -1,7 +1,7 @@
-"""Grosbill : processeur suivi (7800X3D, 9800X3D…) neuf, versions box (« WOF ») et tray.
+"""Grosbill : produit suivi (processeur en Box « WOF » ou Tray, carte mère) neuf.
 
-La recherche liste les fiches (cartes « product-row », prix dans data-price) ; chaque fiche du processeur est
-ensuite ouverte pour y lire, sur le site même de la boutique, le JSON-LD : référence AMD (mpn), prix, état,
+La recherche liste les fiches (cartes « product-row », prix dans data-price) ; chaque fiche du produit est
+ensuite ouverte pour y lire, sur le site même de la boutique, le JSON-LD : référence fabricant (mpn), prix, état,
 vendeur et frais de port (shippingRate, 6,99 €), ajoutés au prix sauf si le bandeau du site annonce la
 livraison offerte à partir d'un montant atteint (« Livraison offerte à partir de 299€* d'achat du 16 au 19
 octobre inclus ») et que l'opération n'est pas terminée. Si une fiche ne répond pas, on garde le prix de la
@@ -13,20 +13,16 @@ import json
 import re
 import time
 from datetime import date, datetime, timezone
+from urllib.parse import quote_plus
 
-from collect import price, stock_from, text
+from collect import classify, excluded, price, stock_from, text
 
 BASE = "https://www.grosbill.com"
-SEARCH = BASE + "/recherche?q={key}"   # + les fiches produit trouvées dans la liste
+SEARCH = BASE + "/recherche?q={q}"   # + les fiches produit trouvées dans la liste
 
 
-def cpu(product):
-    """Écarte les PC (« VENOM - R7-7800X3D/… », « Sapphire… ») et les autres CPU."""
-    return re.compile(rf"^AMD Ryzen 7 {product['model']}\b", re.I)
-
-EXCLUDE = re.compile(r"\+|bundle|\bkit\b|\bpack\b|\bPC\b|ventirad|watercooling|coreliquid|carte m[eè]re|d[ée]lid"
-                     r"|occasion|reconditionn|refurb|comme neuf|seconde main", re.I)
-TRAY = re.compile(r"\btray\b|\boem\b|\bmpk\b|sans bo[iî]te|plateau", re.I)
+# Le nom doit commencer par le produit (product["title_re"]) : écarte les PC (« VENOM - R7-7800X3D/… »)
+# et les autres modèles.
 AVAILABILITY = {"InStock": "in_stock", "LimitedAvailability": "in_stock", "OutOfStock": "out_of_stock",
                 "SoldOut": "out_of_stock", "Discontinued": "out_of_stock", "PreOrder": "on_order", "BackOrder": "on_order"}
 MOIS = {"janvier": 1, "février": 2, "fevrier": 2, "mars": 3, "avril": 4, "mai": 5, "juin": 6, "juillet": 7,
@@ -34,8 +30,8 @@ MOIS = {"janvier": 1, "février": 2, "fevrier": 2, "mars": 3, "avril": 4, "mai":
 
 
 def listing(page, product):
-    """Cartes de la recherche : (lien, nom, prix, disponibilité, vendu par Grosbill) du seul processeur suivi, neuf."""
-    cards, cpu_re = [], cpu(product)
+    """Cartes de la recherche : (lien, nom, prix, disponibilité, vendu par Grosbill) du seul produit suivi, neuf."""
+    cards, title_re = [], product["title_re"]
     for row in page.split('class="product-row')[1:]:
         if "product-row--bundle" in row[:80]:
             continue   # « Kit Upgrade AM5 Ryzen 7 7800X3D + … » : lot
@@ -45,7 +41,7 @@ def listing(page, product):
         if not (name and cost):
             continue
         title, p = text(name.group(2)), price(cost.group(1))
-        if not cpu_re.search(title) or EXCLUDE.search(title) or p is None:
+        if not title_re.search(title) or excluded(product, title) or p is None:
             continue
         url = html.unescape(name.group(1))
         cards.append((url if url.startswith("http") else BASE + url, title, p,
@@ -79,7 +75,7 @@ def free_shipping_from(page, today=None):
     return float(re.sub(r"\s", "", m.group(1)).replace(",", "."))
 
 
-def product(page):
+def details(page):
     """Fiche produit : offre du JSON-LD (prix, mpn, état, vendeur, port), stock affiché."""
     for m in re.finditer(r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>', page, re.S):
         try:
@@ -102,25 +98,22 @@ def product(page):
 
 
 def collect(fetch, product):
-    refs = product["refs"]
-    offers, first = [], fetch(SEARCH.format(key=product["key"]))   # première page : une erreur remonte (source bloquée)
+    offers, first = [], fetch(SEARCH.format(q=quote_plus(product["search"])))   # première page : une erreur remonte (source bloquée)
     if 'class="product-row' not in first:   # page anti-robot ou nouvelle mise en page : pas une simple absence d'offre
         raise RuntimeError("Grosbill : recherche sans liste de produits (blocage ou mise en page changée)")
     for url, title, p, label, own in listing(first, product):
-        version = "tray" if TRAY.search(title) else "box"   # « WOF » / « BOX » ou sans mention : boîte
-        ref, stock, marketplace = refs[version], stock_from(label) if label else "unknown", not own
+        version, ref = classify(product, title)   # processeur « WOF » / « BOX » ou sans mention : boîte
+        stock, marketplace = stock_from(label) if label else "unknown", not own
         try:
             time.sleep(0.4)
             page = fetch(url)
-            info = product(page)
+            info = details(page)
         except Exception:
             info = None   # fiche en panne : on garde le prix de la liste
         if info:
-            if not info["new"] or EXCLUDE.search(info["name"]):
+            if not info["new"] or excluded(product, info["name"]):
                 continue
-            if info["mpn"] in refs.values():
-                ref = info["mpn"]
-                version = "box" if ref == refs["box"] else "tray"
+            version, ref = classify(product, title, info["mpn"])
             shipping = info["shipping"] or 0
             threshold = free_shipping_from(page)
             if threshold is not None and info["price"] >= threshold:

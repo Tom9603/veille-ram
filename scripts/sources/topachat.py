@@ -1,8 +1,9 @@
-"""TopAchat : processeur suivi (7800X3D, 9800X3D…) neuf, versions box et tray.
+"""TopAchat : produit suivi (processeur en Box ou Tray, carte mère) neuf.
 
-Le site (SvelteKit, groupe LDLC) rend tout côté serveur. La page « Processeur » filtrée sur le modèle (« 7800x3d »)
+Le site (SvelteKit, groupe LDLC) rend tout côté serveur. La page de la rubrique (« Processeur », « Carte mère AM5 »)
+filtrée sur le modèle (« 7800x3d », « b850m gaming plus »)
 embarque, dans un objet JavaScript, chaque fiche : {ref:"in…",label:"…",offer:{availability:{…},price:{price_final:…}}}.
-On ouvre ensuite chaque fiche du processeur pour lire sur la page même de la boutique le JSON-LD (référence AMD
+On ouvre ensuite chaque fiche du produit pour lire sur la page même de la boutique le JSON-LD (référence fabricant
 en « mpn », prix, état neuf, vendeur) et l'étiquette de disponibilité (« EN STOCK », « DISPO FOURNISSEUR »…).
 TopAchat n'affiche pas de frais de port sur ses fiches (calculés au panier) : le prix est donc hors port.
 Si une fiche ne répond pas, on garde les données de la liste. Si la page catégorie arrive sans ses données
@@ -12,20 +13,17 @@ Si une fiche ne répond pas, on garde les données de la liste. Si la page caté
 import json
 import re
 import time
+from urllib.parse import quote
 
-from collect import price, stock_from
+from collect import classify, excluded, price, stock_from
 
 BASE = "https://www.topachat.com"
-CATEGORY = BASE + "/pages/produits_cat_est_micro_puis_rubrique_est_wpr_puis_mc_est_{key}.html"   # + les fiches trouvées
+# rubrique (« wpr » : processeurs, « w_cm_am5 » : cartes mères AM5) et filtre de modèle : product["topachat"]
+CATEGORY = BASE + "/pages/produits_cat_est_micro_puis_rubrique_est_{rubric}_puis_mc_est_{term}.html"   # + les fiches
 
 
-def cpu(product):
-    """Nom commençant par le CPU : écarte les autres CPU (9800X3D, 7800X…), les PC, les ventirads, les outils de délidage."""
-    return re.compile(rf"^AMD Ryzen 7 {product['model']}\b", re.I)
-
-EXCLUDE = re.compile(r"\+|bundle|\bkit\b|\bpack\b|\bduo\b|\btrio\b|\bPC\b|\bRTX\b|\bRX \d|\bSSD\b|\d+ ?Go\b|\bW1[01]\b"
-                     r"|watercooling|carte m[eè]re|d[ée]lid|occasion|reconditionn|refurb|comme neuf|seconde main", re.I)
-TRAY = re.compile(r"\btray\b|\boem\b|\bmpk\b|\bbulk\b|sans bo[iî]te|plateau", re.I)
+# Le nom doit commencer par le produit (product["title_re"]) : écarte les autres modèles (9800X3D, 7800X…,
+# B850M GAMING PLUS WIFI sans 6E), les PC, les ventirads, les outils de délidage.
 # Disponibilité schema.org (secours si l'étiquette affichée manque) → mots compris par collect.stock_from
 SCHEMA_STOCK = {"InStock": "en stock", "LimitedAvailability": "en stock", "OutOfStock": "rupture",
                 "SoldOut": "rupture", "Discontinued": "rupture"}
@@ -36,8 +34,8 @@ CARD = re.compile(r'\{ref:"(in\d+)",label:"((?:[^"\\]|\\.)*)",sublabel:(?:"((?:[
 
 
 def listing(page, product):
-    """Cartes de la catégorie : (lien, nom, sous-titre, prix, disponibilité) du seul processeur suivi, neuf."""
-    cards, cpu_re = {}, cpu(product)
+    """Cartes de la catégorie : (lien, nom, sous-titre, prix, disponibilité) du seul produit suivi, neuf."""
+    cards, title_re, rubric = {}, product["title_re"], product["topachat"][0]
     for m in CARD.finditer(page):
         ref, name, sub, avail = m.groups()
         sub = sub or ""
@@ -46,14 +44,14 @@ def listing(page, product):
         cost = re.search(r"price_final:([\d.]+)", window)
         link = re.search(r'url_product:"(/pages/[^"]+)"', window)
         p = price(cost.group(1)) if cost else None
-        if not cpu_re.search(name) or EXCLUDE.search(f"{name} {sub}") or p is None or ref in cards:
+        if not title_re.search(name) or excluded(product, f"{name} {sub}") or p is None or ref in cards:
             continue
-        url = BASE + (link.group(1) if link else f"/pages/detail2_cat_est_micro_puis_rubrique_est_wpr_puis_ref_est_{ref}.html")
+        url = BASE + (link.group(1) if link else f"/pages/detail2_cat_est_micro_puis_rubrique_est_{rubric}_puis_ref_est_{ref}.html")
         cards[ref] = (url, name, sub, p, avail)
     return list(cards.values())
 
 
-def product(page):
+def details(page):
     """Fiche produit : offre du JSON-LD (prix, mpn, état, vendeur) et étiquette de disponibilité affichée."""
     for m in re.finditer(r'<script type="application/ld\+json">(.*?)</script>', page, re.S):
         try:
@@ -74,25 +72,23 @@ def product(page):
 
 
 def collect(fetch, product):
-    offers, refs = [], product["refs"]
-    page = fetch(CATEGORY.format(key=product["key"]))   # première page : une erreur remonte (source bloquée)
+    offers, (rubric, term) = [], product["topachat"]
+    page = fetch(CATEGORY.format(rubric=rubric, term=quote(term)))   # première page : une erreur remonte (source bloquée)
     # Une vraie page de catégorie (même vide) porte le terme filtré ; sinon anti-bot ou refonte : on le signale.
-    if not re.search(rf'search_term:"{product["key"]}"', page, re.I):
+    if not re.search(rf'search_term:"{re.escape(term)}"', page, re.I):
         raise RuntimeError("TopAchat : page catégorie sans données produit (anti-bot ou refonte du site)")
     for url, name, sub, p, avail in listing(page, product):
-        version = "tray" if TRAY.search(name) else "box"   # sans mention : boîte
-        ref, label, seller = refs[version], avail, "TopAchat"
+        version, ref = classify(product, name)   # processeur sans mention : boîte
+        label, seller = avail, "TopAchat"
         try:
             time.sleep(0.4)
-            info = product(fetch(url))
+            info = details(fetch(url))
         except Exception:
             info = None   # fiche en panne : on garde les données de la liste
         if info:
-            if not info["new"] or EXCLUDE.search(info["name"]):
+            if not info["new"] or excluded(product, info["name"]):
                 continue
-            if info["mpn"] in refs.values():
-                ref = info["mpn"]
-                version = "box" if ref == refs["box"] else "tray"
+            version, ref = classify(product, name, info["mpn"])
             p, label, seller = info["price"], info["stock"] or avail, info["seller"] or seller
         # « EN STOCK » → en stock ; « DISPO FOURNISSEUR » (expédié depuis le fournisseur) → sur commande
         offers.append({"name": product["name"], "ref": ref, "version": version, "price_eur": round(p, 2),
