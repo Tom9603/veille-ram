@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-29T12:13+01:00",
+  "checked_at": "2026-10-29T13:13+01:00",
   "products": {
     "7800x3d": {
       "name": "AMD Ryzen 7 7800X3D",
@@ -103,7 +103,7 @@
   },
   "change_since_previous_eur": {
     "7800x3d": {
-      "box": -44.62,
+      "box": 0.0,
       "tray": 0.0
     },
     "9800x3d": {
@@ -111,7 +111,7 @@
       "tray": 0.0
     },
     "b850m": {
-      "std": 7.75
+      "std": 0.0
     }
   },
   "offers": [
@@ -1032,26 +1032,11 @@
       "version": "tray",
       "price_eur": 443.27,
       "shop": "AliExpress",
-      "stock": "unknown",
+      "stock": "in_stock",
       "marketplace": true,
       "verified": true,
       "url": "https://fr.aliexpress.com/item/1005013422903314.html",
       "product": "9800x3d",
-      "deal": false
-    },
-    {
-      "product": "9800x3d",
-      "name": "AMD Ryzen 7 9800X3D",
-      "ref": "100-100001084WOF",
-      "version": "box",
-      "price_eur": 449.0,
-      "shop": "Cdiscount",
-      "stock": "in_stock",
-      "marketplace": false,
-      "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/24166/offer/AMD0730143315289?client_id=1551",
-      "via": "Ledenicheur",
-      "shipping": "included",
       "deal": false
     },
     {
@@ -1065,6 +1050,21 @@
       "verified": true,
       "url": "https://fr.aliexpress.com/item/1005013213962766.html",
       "product": "9800x3d",
+      "deal": false
+    },
+    {
+      "product": "9800x3d",
+      "name": "AMD Ryzen 7 9800X3D",
+      "ref": "100-100001084WOF",
+      "version": "box",
+      "price_eur": 456.19,
+      "shop": "Cdiscount",
+      "stock": "in_stock",
+      "marketplace": false,
+      "verified": false,
+      "url": "https://ledenicheur.fr/go-to-shop/24166/offer/AMD0730143315289?client_id=1551",
+      "via": "Ledenicheur",
+      "shipping": "included",
       "deal": false
     },
     {
@@ -1088,7 +1088,7 @@
       "version": "tray",
       "price_eur": 461.24,
       "shop": "AliExpress",
-      "stock": "unknown",
+      "stock": "in_stock",
       "marketplace": true,
       "verified": true,
       "url": "https://fr.aliexpress.com/item/1005013499961304.html",
@@ -1147,6 +1147,19 @@
       "verified": true,
       "url": "https://www.grosbill.com/amd-ryzen-7-7800x3d-tray-147034",
       "product": "7800x3d",
+      "deal": false
+    },
+    {
+      "name": "AMD Ryzen 7 9800X3D",
+      "ref": "",
+      "version": "tray",
+      "price_eur": 473.62,
+      "shop": "AliExpress",
+      "stock": "in_stock",
+      "marketplace": true,
+      "verified": true,
+      "url": "https://fr.aliexpress.com/item/1005009976507383.html",
+      "product": "9800x3d",
       "deal": false
     },
     {
@@ -1284,19 +1297,6 @@
       "deal": false
     },
     {
-      "name": "AMD Ryzen 7 9800X3D",
-      "ref": "",
-      "version": "tray",
-      "price_eur": 498.55,
-      "shop": "AliExpress",
-      "stock": "in_stock",
-      "marketplace": true,
-      "verified": true,
-      "url": "https://fr.aliexpress.com/item/1005009976507383.html",
-      "product": "9800x3d",
-      "deal": false
-    },
-    {
       "name": "AMD Ryzen 7 7800X3D",
       "ref": "100-100000910WOF",
       "version": "box",
@@ -1423,7 +1423,7 @@
       "version": "tray",
       "price_eur": 554.39,
       "shop": "AliExpress",
-      "stock": "unknown",
+      "stock": "in_stock",
       "marketplace": true,
       "verified": true,
       "url": "https://fr.aliexpress.com/item/1005012677453024.html",
@@ -1502,15 +1502,15 @@
   "notified": {
     "7800x3d|aliexpress|tray": {
       "price": 233.29,
-      "seen": "2026-10-29T12:13+01:00"
+      "seen": "2026-10-29T13:13+01:00"
     },
     "9800x3d|aliexpress|tray": {
       "price": 304.87,
-      "seen": "2026-10-29T12:13+01:00"
+      "seen": "2026-10-29T13:13+01:00"
     },
     "7800x3d|aliexpress|box": {
       "price": 234.23,
-      "seen": "2026-10-29T12:13+01:00"
+      "seen": "2026-10-29T13:13+01:00"
     }
   },
   "drops": {
@@ -1523,7 +1523,7 @@
       "at": "2026-10-29T08:13+01:00"
     }
   },
-  "notification": "🚨 BONNE AFFAIRE : 7800X3D Tray à 233,29 € chez AliExpress\nDepuis le relevé précédent : 7800X3D Box −44,62 €, B850M +7,75 €\n\n| Produit | Prix | Boutique | Stock | Lien |\n|---|---|---|---|---|\n| 7800X3D Tray | 233,29 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005011718202289.html |\n| 7800X3D Box | 234,23 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005013032018770.html |\n| 7800X3D Tray | 245,73 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005010764145839.html |\n| 7800X3D Tray | 251,55 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005009737339401.html |\n| 9800X3D Tray | 341,92 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005012736897168.html |\n| 9800X3D Tray | 343,44 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005012948576896.html |\n| 9800X3D Tray | 358,39 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005008664922125.html |\n| 9800X3D Tray | 362,14 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005012304257514.html |\n| B850M | 154,99 € | TopAchat | en stock | https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_w_cm_am5_puis_ref_est_in20028865.html |\n| B850M | 164,95 € | LDLC | en stock | https://www.ldlc.com/fiche/PB00696453.html |\n| B850M | 164,95 € | Materiel.net | en stock | https://www.materiel.net/produit/202506200018.html |\n| B850M | 171,89 € | Grosbill | sur commande | https://www.grosbill.com/msi-b850m-gaming-plus-wifi6e-156494 |\n\nRelevé : 7800X3D : 44 offres (12 Box, 32 Tray) · 9800X3D : 47 offres (11 Box, 36 Tray) · B850M : 9 offres. Boutiques : AliExpress, Amazon.fr, Amazon.fr Marketplace, Cdiscount, Cdiscount Marketplace, Fnac, Fnac Marketplace, Grosbill, Hello Edge, Kaufland Marketplace, LDLC, Materiel.net, Pixmania, TopAchat, eBay.\nAppli : https://tom9603.github.io/veille-ram/",
+  "notification": "🚨 BONNE AFFAIRE : 7800X3D Tray à 233,29 € chez AliExpress\n\n| Produit | Prix | Boutique | Stock | Lien |\n|---|---|---|---|---|\n| 7800X3D Tray | 233,29 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005011718202289.html |\n| 7800X3D Box | 234,23 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005013032018770.html |\n| 7800X3D Tray | 245,73 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005010764145839.html |\n| 7800X3D Tray | 251,55 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005009737339401.html |\n| 9800X3D Tray | 341,92 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005012736897168.html |\n| 9800X3D Tray | 343,44 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005012948576896.html |\n| 9800X3D Tray | 358,39 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005008664922125.html |\n| 9800X3D Tray | 362,14 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005012304257514.html |\n| B850M | 154,99 € | TopAchat | en stock | https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_w_cm_am5_puis_ref_est_in20028865.html |\n| B850M | 164,95 € | LDLC | en stock | https://www.ldlc.com/fiche/PB00696453.html |\n| B850M | 164,95 € | Materiel.net | en stock | https://www.materiel.net/produit/202506200018.html |\n| B850M | 171,89 € | Grosbill | sur commande | https://www.grosbill.com/msi-b850m-gaming-plus-wifi6e-156494 |\n\nRelevé : 7800X3D : 44 offres (12 Box, 32 Tray) · 9800X3D : 47 offres (11 Box, 36 Tray) · B850M : 9 offres. Boutiques : AliExpress, Amazon.fr, Amazon.fr Marketplace, Cdiscount, Cdiscount Marketplace, Fnac, Fnac Marketplace, Grosbill, Hello Edge, Kaufland Marketplace, LDLC, Materiel.net, Pixmania, TopAchat, eBay.\nAppli : https://tom9603.github.io/veille-ram/",
   "push": {
     "title": "Toujours en cours : 7800X3D Tray à 233,29 €",
     "message": "7800X3D Tray chez AliExpress (en stock), seuil 280 €.\n9 autres offres sous le seuil.\nB850M : 154,99 € au mieux (seuil 140 €)",
