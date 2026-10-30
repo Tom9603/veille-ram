@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-30T12:13+01:00",
+  "checked_at": "2026-10-30T13:13+01:00",
   "products": {
     "7800x3d": {
       "name": "AMD Ryzen 7 7800X3D",
@@ -647,6 +647,21 @@
     {
       "product": "7800x3d",
       "name": "AMD Ryzen 7 7800X3D",
+      "ref": "100-100000910WOF",
+      "version": "box",
+      "price_eur": 356.27,
+      "shop": "Amazon.fr",
+      "stock": "in_stock",
+      "marketplace": false,
+      "verified": false,
+      "url": "https://ledenicheur.fr/go-to-shop/18708/offer/B0BTZB7F88?client_id=1551",
+      "via": "Ledenicheur",
+      "shipping": "included",
+      "deal": false
+    },
+    {
+      "product": "7800x3d",
+      "name": "AMD Ryzen 7 7800X3D",
       "ref": "100-000000910",
       "version": "tray",
       "price_eur": 358.99,
@@ -696,21 +711,6 @@
       "verified": true,
       "url": "https://fr.aliexpress.com/item/1005010763896625.html",
       "product": "9800x3d",
-      "deal": false
-    },
-    {
-      "product": "7800x3d",
-      "name": "AMD Ryzen 7 7800X3D",
-      "ref": "100-100000910WOF",
-      "version": "box",
-      "price_eur": 375.93,
-      "shop": "Amazon.fr",
-      "stock": "in_stock",
-      "marketplace": false,
-      "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/18708/offer/B0BTZB7F88?client_id=1551",
-      "via": "Ledenicheur",
-      "shipping": "included",
       "deal": false
     },
     {
@@ -1043,6 +1043,19 @@
       "name": "AMD Ryzen 7 9800X3D",
       "ref": "",
       "version": "tray",
+      "price_eur": 441.52,
+      "shop": "AliExpress",
+      "stock": "unknown",
+      "marketplace": true,
+      "verified": true,
+      "url": "https://fr.aliexpress.com/item/1005013358514581.html",
+      "product": "9800x3d",
+      "deal": false
+    },
+    {
+      "name": "AMD Ryzen 7 9800X3D",
+      "ref": "",
+      "version": "tray",
       "price_eur": 450.0,
       "shop": "AliExpress",
       "stock": "unknown",
@@ -1127,7 +1140,7 @@
       "name": "AMD Ryzen 7 9800X3D",
       "ref": "",
       "version": "tray",
-      "price_eur": 471.0,
+      "price_eur": 471.47,
       "shop": "AliExpress",
       "stock": "in_stock",
       "marketplace": true,
@@ -1147,19 +1160,6 @@
       "verified": true,
       "url": "https://www.grosbill.com/amd-ryzen-7-7800x3d-tray-147034",
       "product": "7800x3d",
-      "deal": false
-    },
-    {
-      "name": "AMD Ryzen 7 9800X3D",
-      "ref": "",
-      "version": "tray",
-      "price_eur": 478.41,
-      "shop": "AliExpress",
-      "stock": "unknown",
-      "marketplace": true,
-      "verified": true,
-      "url": "https://fr.aliexpress.com/item/1005013358514581.html",
-      "product": "9800x3d",
       "deal": false
     },
     {
@@ -1502,19 +1502,19 @@
   "notified": {
     "7800x3d|aliexpress|tray": {
       "price": 233.29,
-      "seen": "2026-10-30T12:13+01:00"
+      "seen": "2026-10-30T13:13+01:00"
     },
     "9800x3d|aliexpress|tray": {
       "price": 304.87,
-      "seen": "2026-10-30T12:13+01:00"
+      "seen": "2026-10-30T13:13+01:00"
     },
     "7800x3d|aliexpress|box": {
       "price": 234.23,
-      "seen": "2026-10-30T12:13+01:00"
+      "seen": "2026-10-30T13:13+01:00"
     },
     "7800x3d|cdiscount|tray": {
       "price": 275.0,
-      "seen": "2026-10-30T12:13+01:00"
+      "seen": "2026-10-30T13:13+01:00"
     }
   },
   "drops": {
