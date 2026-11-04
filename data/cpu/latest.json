@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-11-04T15:13+01:00",
+  "checked_at": "2026-11-04T16:13+01:00",
   "products": {
     "7800x3d": {
       "name": "AMD Ryzen 7 7800X3D",
@@ -518,7 +518,7 @@
       "version": "tray",
       "price_eur": 355.31,
       "shop": "AliExpress",
-      "stock": "in_stock",
+      "stock": "unknown",
       "marketplace": true,
       "verified": true,
       "url": "https://fr.aliexpress.com/item/1005013346591009.html",
@@ -647,6 +647,21 @@
       "deal": false
     },
     {
+      "product": "7800x3d",
+      "name": "AMD Ryzen 7 7800X3D",
+      "ref": "100-100000910WOF",
+      "version": "box",
+      "price_eur": 383.88,
+      "shop": "Pixmania",
+      "stock": "in_stock",
+      "marketplace": false,
+      "verified": false,
+      "url": "https://ledenicheur.fr/go-to-shop/30138/offer/243086?client_id=1551",
+      "via": "Ledenicheur",
+      "shipping": "unknown",
+      "deal": false
+    },
+    {
       "name": "AMD Ryzen 7 9800X3D",
       "ref": "",
       "version": "tray",
@@ -705,21 +720,6 @@
       "deal": false
     },
     {
-      "product": "7800x3d",
-      "name": "AMD Ryzen 7 7800X3D",
-      "ref": "100-100000910WOF",
-      "version": "box",
-      "price_eur": 405.32,
-      "shop": "Pixmania",
-      "stock": "in_stock",
-      "marketplace": false,
-      "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/30138/offer/243086?client_id=1551",
-      "via": "Ledenicheur",
-      "shipping": "unknown",
-      "deal": false
-    },
-    {
       "name": "AMD Ryzen 7 9800X3D",
       "ref": "",
       "version": "tray",
@@ -753,7 +753,7 @@
       "version": "tray",
       "price_eur": 419.35,
       "shop": "AliExpress",
-      "stock": "in_stock",
+      "stock": "unknown",
       "marketplace": true,
       "verified": true,
       "url": "https://fr.aliexpress.com/item/1005013555418706.html",
@@ -1228,7 +1228,7 @@
       "version": "tray",
       "price_eur": 515.49,
       "shop": "AliExpress",
-      "stock": "in_stock",
+      "stock": "unknown",
       "marketplace": true,
       "verified": true,
       "url": "https://fr.aliexpress.com/item/1005013511360833.html",
@@ -1345,7 +1345,7 @@
   "usual_eur": {
     "7800x3d": {
       "box": 278.85,
-      "tray": 240.24
+      "tray": 240.27
     },
     "9800x3d": {
       "box": 419.11,
@@ -1358,7 +1358,7 @@
   "drop_alert_eur": {
     "7800x3d": {
       "box": 264.91,
-      "tray": 228.23
+      "tray": 228.26
     },
     "9800x3d": {
       "box": 398.15,
@@ -1372,11 +1372,11 @@
   "notified": {
     "7800x3d|aliexpress|tray": {
       "price": 233.29,
-      "seen": "2026-11-04T15:13+01:00"
+      "seen": "2026-11-04T16:13+01:00"
     },
     "7800x3d|cdiscount|tray": {
       "price": 275.0,
-      "seen": "2026-11-04T15:13+01:00"
+      "seen": "2026-11-04T16:13+01:00"
     },
     "9800x3d|aliexpress|tray": {
       "price": 349.56,
