@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-11-05T19:13+01:00",
+  "checked_at": "2026-11-05T20:13+01:00",
   "products": {
     "7800x3d": {
       "name": "AMD Ryzen 7 7800X3D",
@@ -585,7 +585,7 @@
       "version": "tray",
       "price_eur": 355.31,
       "shop": "AliExpress",
-      "stock": "unknown",
+      "stock": "in_stock",
       "marketplace": true,
       "verified": true,
       "url": "https://fr.aliexpress.com/item/1005013346591009.html",
@@ -699,21 +699,6 @@
       "deal": false
     },
     {
-      "product": "7800x3d",
-      "name": "AMD Ryzen 7 7800X3D",
-      "ref": "100-100000910WOF",
-      "version": "box",
-      "price_eur": 383.88,
-      "shop": "Pixmania",
-      "stock": "in_stock",
-      "marketplace": false,
-      "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/30138/offer/243086?client_id=1551",
-      "via": "Ledenicheur",
-      "shipping": "unknown",
-      "deal": false
-    },
-    {
       "name": "AMD Ryzen 7 9800X3D",
       "ref": "",
       "version": "tray",
@@ -769,6 +754,21 @@
       "url": "https://ledenicheur.fr/go-to-shop/29810/offer/v1%7C336867100246%7C0?client_id=1551",
       "via": "Ledenicheur",
       "shipping": "included",
+      "deal": false
+    },
+    {
+      "product": "7800x3d",
+      "name": "AMD Ryzen 7 7800X3D",
+      "ref": "100-100000910WOF",
+      "version": "box",
+      "price_eur": 408.66,
+      "shop": "Pixmania",
+      "stock": "in_stock",
+      "marketplace": false,
+      "verified": false,
+      "url": "https://ledenicheur.fr/go-to-shop/30138/offer/243086?client_id=1551",
+      "via": "Ledenicheur",
+      "shipping": "unknown",
       "deal": false
     },
     {
@@ -1137,6 +1137,21 @@
       "deal": false
     },
     {
+      "product": "9800x3d",
+      "name": "AMD Ryzen 7 9800X3D",
+      "ref": "100-100001084WOF",
+      "version": "box",
+      "price_eur": 491.42,
+      "shop": "Pixmania",
+      "stock": "in_stock",
+      "marketplace": false,
+      "verified": false,
+      "url": "https://ledenicheur.fr/go-to-shop/30138/offer/331728?client_id=1551",
+      "via": "Ledenicheur",
+      "shipping": "unknown",
+      "deal": false
+    },
+    {
       "name": "AMD Ryzen 7 9800X3D",
       "ref": "",
       "version": "tray",
@@ -1270,21 +1285,6 @@
       "url": "https://ledenicheur.fr/go-to-shop/24721/offer/8069930?client_id=1551",
       "via": "Ledenicheur",
       "shipping": "included",
-      "deal": false
-    },
-    {
-      "product": "9800x3d",
-      "name": "AMD Ryzen 7 9800X3D",
-      "ref": "100-100001084WOF",
-      "version": "box",
-      "price_eur": 510.62,
-      "shop": "Pixmania",
-      "stock": "in_stock",
-      "marketplace": false,
-      "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/30138/offer/331728?client_id=1551",
-      "via": "Ledenicheur",
-      "shipping": "unknown",
       "deal": false
     },
     {
@@ -1437,7 +1437,7 @@
   "blocked_sources": [],
   "usual_eur": {
     "7800x3d": {
-      "box": 289.68,
+      "box": 298.21,
       "tray": 240.27
     },
     "9800x3d": {
@@ -1450,7 +1450,7 @@
   },
   "drop_alert_eur": {
     "7800x3d": {
-      "box": 275.2,
+      "box": 283.3,
       "tray": 228.26
     },
     "9800x3d": {
@@ -1465,15 +1465,15 @@
   "notified": {
     "7800x3d|aliexpress|tray": {
       "price": 233.29,
-      "seen": "2026-11-05T19:13+01:00"
+      "seen": "2026-11-05T20:13+01:00"
     },
     "7800x3d|cdiscount|tray": {
       "price": 275.0,
-      "seen": "2026-11-05T19:13+01:00"
+      "seen": "2026-11-05T20:13+01:00"
     },
     "9800x3d|aliexpress|tray": {
       "price": 349.56,
-      "seen": "2026-11-05T19:13+01:00"
+      "seen": "2026-11-05T20:13+01:00"
     }
   },
   "drops": {},
