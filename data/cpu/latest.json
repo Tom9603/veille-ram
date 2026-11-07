@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-11-07T06:13+01:00",
+  "checked_at": "2026-11-07T07:13+01:00",
   "products": {
     "7800x3d": {
       "name": "AMD Ryzen 7 7800X3D",
@@ -559,7 +559,7 @@
       "version": "tray",
       "price_eur": 348.2,
       "shop": "AliExpress",
-      "stock": "unknown",
+      "stock": "in_stock",
       "marketplace": true,
       "verified": true,
       "url": "https://fr.aliexpress.com/item/1005013346591009.html",
@@ -590,6 +590,21 @@
       "verified": true,
       "url": "https://fr.aliexpress.com/item/1005012591264618.html",
       "product": "7800x3d",
+      "deal": false
+    },
+    {
+      "product": "7800x3d",
+      "name": "AMD Ryzen 7 7800X3D",
+      "ref": "100-100000910WOF",
+      "version": "box",
+      "price_eur": 356.99,
+      "shop": "Hello Edge",
+      "stock": "in_stock",
+      "marketplace": false,
+      "verified": false,
+      "url": "https://ledenicheur.fr/go-to-shop/42811/offer/364?client_id=1551",
+      "via": "Ledenicheur",
+      "shipping": "included",
       "deal": false
     },
     {
@@ -933,21 +948,6 @@
       "verified": true,
       "url": "https://fr.aliexpress.com/item/1005013422903314.html",
       "product": "9800x3d",
-      "deal": false
-    },
-    {
-      "product": "7800x3d",
-      "name": "AMD Ryzen 7 7800X3D",
-      "ref": "100-100000910WOF",
-      "version": "box",
-      "price_eur": 439.99,
-      "shop": "Darty",
-      "stock": "in_stock",
-      "marketplace": false,
-      "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/24721/offer/8069948?client_id=1551",
-      "via": "Ledenicheur",
-      "shipping": "included",
       "deal": false
     },
     {
@@ -1491,15 +1491,15 @@
   "notified": {
     "7800x3d|aliexpress|tray": {
       "price": 233.29,
-      "seen": "2026-11-07T06:13+01:00"
+      "seen": "2026-11-07T07:13+01:00"
     },
     "7800x3d|cdiscount|tray": {
       "price": 275.0,
-      "seen": "2026-11-07T06:13+01:00"
+      "seen": "2026-11-07T07:13+01:00"
     },
     "9800x3d|aliexpress|tray": {
       "price": 337.49,
-      "seen": "2026-11-07T06:13+01:00"
+      "seen": "2026-11-07T07:13+01:00"
     }
   },
   "drops": {
