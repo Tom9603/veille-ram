@@ -26882,5 +26882,81 @@
   },
   "deal": true,
   "offers_count": 100
+ },
+ {
+  "checked_at": "2026-11-10T09:13+01:00",
+  "best": {
+   "7800x3d": {
+    "box": {
+     "product": "7800x3d",
+     "name": "AMD Ryzen 7 7800X3D",
+     "ref": "",
+     "version": "box",
+     "price_eur": 268.18,
+     "shop": "AliExpress",
+     "stock": "in_stock",
+     "url": "https://fr.aliexpress.com/item/1005013032018770.html"
+    },
+    "tray": {
+     "product": "7800x3d",
+     "name": "AMD Ryzen 7 7800X3D",
+     "ref": "",
+     "version": "tray",
+     "price_eur": 240.24,
+     "shop": "AliExpress",
+     "stock": "in_stock",
+     "url": "https://fr.aliexpress.com/item/1005011718202289.html"
+    }
+   },
+   "9800x3d": {
+    "box": {
+     "product": "9800x3d",
+     "name": "AMD Ryzen 7 9800X3D",
+     "ref": "100-100001084WOF",
+     "version": "box",
+     "price_eur": 411.98,
+     "shop": "Grosbill",
+     "stock": "in_stock",
+     "url": "https://www.grosbill.com/amd-ryzen-7-9800x3d-wof-148505"
+    },
+    "tray": {
+     "product": "9800x3d",
+     "name": "AMD Ryzen 7 9800X3D",
+     "ref": "",
+     "version": "tray",
+     "price_eur": 349.34,
+     "shop": "AliExpress",
+     "stock": "in_stock",
+     "url": "https://fr.aliexpress.com/item/1005012304257514.html"
+    }
+   },
+   "b850m": {
+    "std": {
+     "product": "b850m",
+     "name": "MSI B850M GAMING PLUS WIFI6E",
+     "ref": "7E81-001R",
+     "version": "std",
+     "price_eur": 154.99,
+     "shop": "TopAchat",
+     "stock": "in_stock",
+     "url": "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_w_cm_am5_puis_ref_est_in20028865.html"
+    }
+   }
+  },
+  "low": {
+   "7800x3d": {
+    "box": 268.18,
+    "tray": 240.24
+   },
+   "9800x3d": {
+    "box": 411.98,
+    "tray": 349.34
+   },
+   "b850m": {
+    "std": 154.99
+   }
+  },
+  "deal": true,
+  "offers_count": 104
  }
 ]
