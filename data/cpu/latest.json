@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-11-11T15:13+01:00",
+  "checked_at": "2026-11-11T16:13+01:00",
   "products": {
     "7800x3d": {
       "name": "AMD Ryzen 7 7800X3D",
@@ -1176,7 +1176,7 @@
       "name": "AMD Ryzen 7 9800X3D",
       "ref": "100-100001084WOF",
       "version": "box",
-      "price_eur": 447.91,
+      "price_eur": 447.81,
       "shop": "Rue du Commerce Marketplace",
       "stock": "in_stock",
       "marketplace": true,
@@ -1296,7 +1296,7 @@
       "version": "tray",
       "price_eur": 458.7,
       "shop": "AliExpress",
-      "stock": "in_stock",
+      "stock": "unknown",
       "marketplace": true,
       "verified": true,
       "url": "https://fr.aliexpress.com/item/1005013589809622.html",
@@ -1528,15 +1528,15 @@
   "notified": {
     "7800x3d|aliexpress|tray": {
       "price": 233.29,
-      "seen": "2026-11-11T15:13+01:00"
+      "seen": "2026-11-11T16:13+01:00"
     },
     "7800x3d|cdiscount|tray": {
       "price": 275.0,
-      "seen": "2026-11-11T15:13+01:00"
+      "seen": "2026-11-11T16:13+01:00"
     },
     "9800x3d|aliexpress|tray": {
       "price": 337.49,
-      "seen": "2026-11-11T15:13+01:00"
+      "seen": "2026-11-11T16:13+01:00"
     },
     "7800x3d|aliexpress|box": {
       "price": 257.94,
