@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-11-14T09:13+01:00",
+  "checked_at": "2026-11-14T10:13+01:00",
   "products": {
     "7800x3d": {
       "name": "AMD Ryzen 7 7800X3D",
@@ -617,7 +617,7 @@
       "version": "tray",
       "price_eur": 332.24,
       "shop": "AliExpress",
-      "stock": "in_stock",
+      "stock": "unknown",
       "marketplace": true,
       "verified": true,
       "url": "https://fr.aliexpress.com/item/1005013346591009.html",
@@ -1036,7 +1036,7 @@
       "version": "tray",
       "price_eur": 431.11,
       "shop": "AliExpress",
-      "stock": "unknown",
+      "stock": "in_stock",
       "marketplace": true,
       "verified": true,
       "url": "https://fr.aliexpress.com/item/1005013506285112.html",
@@ -1286,6 +1286,21 @@
       "deal": false
     },
     {
+      "product": "9800x3d",
+      "name": "AMD Ryzen 7 9800X3D",
+      "ref": "100-000001084",
+      "version": "tray",
+      "price_eur": 456.21,
+      "shop": "Pixmania",
+      "stock": "in_stock",
+      "marketplace": false,
+      "verified": false,
+      "url": "https://ledenicheur.fr/go-to-shop/30138/offer/481688?client_id=1551",
+      "via": "Ledenicheur",
+      "shipping": "unknown",
+      "deal": false
+    },
+    {
       "name": "AMD Ryzen 7 9800X3D",
       "ref": "",
       "version": "tray",
@@ -1296,21 +1311,6 @@
       "verified": true,
       "url": "https://fr.aliexpress.com/item/1005013358514581.html",
       "product": "9800x3d",
-      "deal": false
-    },
-    {
-      "product": "9800x3d",
-      "name": "AMD Ryzen 7 9800X3D",
-      "ref": "100-000001084",
-      "version": "tray",
-      "price_eur": 463.29,
-      "shop": "Pixmania",
-      "stock": "in_stock",
-      "marketplace": false,
-      "verified": false,
-      "url": "https://ledenicheur.fr/go-to-shop/30138/offer/558081?client_id=1551",
-      "via": "Ledenicheur",
-      "shipping": "unknown",
       "deal": false
     },
     {
@@ -1348,7 +1348,7 @@
       "name": "AMD Ryzen 7 9800X3D",
       "ref": "100-100001084WOF",
       "version": "box",
-      "price_eur": 465.29,
+      "price_eur": 465.42,
       "shop": "Pixmania",
       "stock": "in_stock",
       "marketplace": false,
@@ -1377,7 +1377,7 @@
       "version": "tray",
       "price_eur": 490.5,
       "shop": "AliExpress",
-      "stock": "unknown",
+      "stock": "in_stock",
       "marketplace": true,
       "verified": true,
       "url": "https://fr.aliexpress.com/item/1005013511360833.html",
@@ -1525,15 +1525,15 @@
   "notified": {
     "7800x3d|aliexpress|tray": {
       "price": 233.29,
-      "seen": "2026-11-14T09:13+01:00"
+      "seen": "2026-11-14T10:13+01:00"
     },
     "7800x3d|cdiscount|tray": {
       "price": 275.0,
-      "seen": "2026-11-14T09:13+01:00"
+      "seen": "2026-11-14T10:13+01:00"
     },
     "7800x3d|fnac|tray": {
       "price": 274.0,
-      "seen": "2026-11-14T09:13+01:00"
+      "seen": "2026-11-14T10:13+01:00"
     }
   },
   "drops": {},
