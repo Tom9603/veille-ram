@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-11-16T19:13+01:00",
+  "checked_at": "2026-11-16T20:13+01:00",
   "products": {
     "7800x3d": {
       "name": "AMD Ryzen 7 7800X3D",
@@ -1000,7 +1000,7 @@
       "stock": "unknown",
       "marketplace": true,
       "verified": true,
-      "url": "https://fr.aliexpress.com/item/1005013351231404.html",
+      "url": "https://fr.aliexpress.com/item/1005013183516361.html",
       "product": "9800x3d",
       "deal": false
     },
@@ -1013,7 +1013,7 @@
       "stock": "unknown",
       "marketplace": true,
       "verified": true,
-      "url": "https://fr.aliexpress.com/item/1005013183516361.html",
+      "url": "https://fr.aliexpress.com/item/1005013351231404.html",
       "product": "9800x3d",
       "deal": false
     },
@@ -1569,11 +1569,11 @@
   "usual_eur": {
     "7800x3d": {
       "box": 299.0,
-      "tray": 266.32
+      "tray": 274.0
     },
     "9800x3d": {
       "box": 411.98,
-      "tray": 369.96
+      "tray": 389.0
     },
     "b850m": {
       "std": 154.99
@@ -1582,11 +1582,11 @@
   "drop_alert_eur": {
     "7800x3d": {
       "box": 284.05,
-      "tray": 253.0
+      "tray": 260.3
     },
     "9800x3d": {
       "box": 391.38,
-      "tray": 351.46
+      "tray": 369.55
     },
     "b850m": {
       "std": 144.99
@@ -1596,11 +1596,11 @@
   "notified": {
     "7800x3d|aliexpress|tray": {
       "price": 233.29,
-      "seen": "2026-11-16T19:13+01:00"
+      "seen": "2026-11-16T20:13+01:00"
     },
     "7800x3d|cdiscount|tray": {
       "price": 275.0,
-      "seen": "2026-11-16T19:13+01:00"
+      "seen": "2026-11-16T20:13+01:00"
     }
   },
   "drops": {
