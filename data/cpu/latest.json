@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-11-18T13:13+01:00",
+  "checked_at": "2026-11-18T14:13+01:00",
   "products": {
     "7800x3d": {
       "name": "AMD Ryzen 7 7800X3D",
@@ -715,7 +715,7 @@
       "name": "AMD Ryzen 7 7800X3D",
       "ref": "100-100000910WOF",
       "version": "box",
-      "price_eur": 348.23,
+      "price_eur": 347.98,
       "shop": "Pixmania",
       "stock": "in_stock",
       "marketplace": false,
@@ -1546,15 +1546,15 @@
   "notified": {
     "7800x3d|aliexpress|tray": {
       "price": 233.29,
-      "seen": "2026-11-18T13:13+01:00"
+      "seen": "2026-11-18T14:13+01:00"
     },
     "7800x3d|cdiscount|tray": {
       "price": 275.0,
-      "seen": "2026-11-18T13:13+01:00"
+      "seen": "2026-11-18T14:13+01:00"
     },
     "7800x3d|fnac|tray": {
       "price": 274.0,
-      "seen": "2026-11-18T13:13+01:00"
+      "seen": "2026-11-18T14:13+01:00"
     }
   },
   "drops": {
