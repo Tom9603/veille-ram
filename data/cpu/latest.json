@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-11-18T07:17+01:00",
+  "checked_at": "2026-11-18T08:17+01:00",
   "products": {
     "7800x3d": {
       "name": "AMD Ryzen 7 7800X3D",
@@ -491,6 +491,19 @@
       "deal": false
     },
     {
+      "name": "AMD Ryzen 7 7800X3D",
+      "ref": "",
+      "version": "tray",
+      "price_eur": 308.82,
+      "shop": "AliExpress",
+      "stock": "in_stock",
+      "marketplace": true,
+      "verified": true,
+      "url": "https://fr.aliexpress.com/item/1005012282552786.html",
+      "product": "7800x3d",
+      "deal": false
+    },
+    {
       "product": "7800x3d",
       "name": "AMD Ryzen 7 7800X3D",
       "ref": "100-100000910WOF",
@@ -610,7 +623,7 @@
       "version": "tray",
       "price_eur": 332.32,
       "shop": "AliExpress",
-      "stock": "unknown",
+      "stock": "in_stock",
       "marketplace": true,
       "verified": true,
       "url": "https://fr.aliexpress.com/item/1005013346591009.html",
@@ -1454,7 +1467,7 @@
       "deal": false
     }
   ],
-  "trend": "7800X3D : 43 offres (10 Box, 33 Tray) · 9800X3D : 44 offres (11 Box, 33 Tray) · B850M : 9 offres. Boutiques : 1FODISCOUNT, AliExpress, Amazon.fr, Amazon.fr Marketplace, Cdiscount, Cdiscount Marketplace, Darty, Fnac, Fnac Marketplace, Galaxus, Grosbill, Hello Edge, Kaufland Marketplace, Materiel.net, Pixmania, Rue du Commerce, Rue du Commerce Marketplace, TopAchat, TopBiz, eBay.",
+  "trend": "7800X3D : 44 offres (10 Box, 34 Tray) · 9800X3D : 44 offres (11 Box, 33 Tray) · B850M : 9 offres. Boutiques : 1FODISCOUNT, AliExpress, Amazon.fr, Amazon.fr Marketplace, Cdiscount, Cdiscount Marketplace, Darty, Fnac, Fnac Marketplace, Galaxus, Grosbill, Hello Edge, Kaufland Marketplace, Materiel.net, Pixmania, Rue du Commerce, Rue du Commerce Marketplace, TopAchat, TopBiz, eBay.",
   "blocked_sources": [
     "ldlc.com / materiel.net",
     "topachat.com"
@@ -1489,11 +1502,11 @@
   "notified": {
     "7800x3d|aliexpress|tray": {
       "price": 233.29,
-      "seen": "2026-11-18T07:17+01:00"
+      "seen": "2026-11-18T08:17+01:00"
     },
     "7800x3d|cdiscount|tray": {
       "price": 275.0,
-      "seen": "2026-11-18T07:17+01:00"
+      "seen": "2026-11-18T08:17+01:00"
     },
     "7800x3d|fnac|tray": {
       "price": 274.0,
@@ -1506,7 +1519,7 @@
       "at": "2026-11-16T06:13+01:00"
     }
   },
-  "notification": "🚨 BONNE AFFAIRE : 7800X3D Tray à 274,99 € chez Cdiscount Marketplace\n\n| Produit | Prix | Boutique | Stock | Lien |\n|---|---|---|---|---|\n| 7800X3D Tray | 274,99 € (marketplace) (via Ledenicheur) | Cdiscount Marketplace | en stock | https://ledenicheur.fr/go-to-shop/36493/offer/AMD1728522909809-4351951313?client_id=1551 |\n| 7800X3D Tray | 277,13 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005013197290313.html |\n| 7800X3D Tray | 280,49 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005009737339401.html |\n| 7800X3D Tray | 280,63 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005012541014380.html |\n| 9800X3D Tray | 392 € (marketplace) (via Ledenicheur) | Cdiscount Marketplace | en stock | https://ledenicheur.fr/go-to-shop/36493/offer/AMD1734629292675-4362338619?client_id=1551 |\n| 9800X3D Tray | 393,85 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005012304257514.html |\n| 9800X3D Tray | 401,85 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005011718154556.html |\n| 9800X3D Tray | 402,73 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005013358460813.html |\n| B850M | 154,99 € (via Ledenicheur) | Rue du Commerce | en stock | https://ledenicheur.fr/go-to-shop/24904/offer/AR202506200018?client_id=1551 |\n| B850M | 154,99 € (via Ledenicheur) | TopAchat | en stock | https://ledenicheur.fr/go-to-shop/24264/offer/in20028865?client_id=1551 |\n| B850M | 158,37 € (via Ledenicheur) | Galaxus | en stock | https://ledenicheur.fr/go-to-shop/40743/offer/59384231?client_id=1551 |\n| B850M | 164,95 € (via Ledenicheur) | Materiel.net | en stock | https://ledenicheur.fr/go-to-shop/24167/offer/AR202506200018?client_id=1551 |\n\nRelevé : 7800X3D : 43 offres (10 Box, 33 Tray) · 9800X3D : 44 offres (11 Box, 33 Tray) · B850M : 9 offres. Boutiques : 1FODISCOUNT, AliExpress, Amazon.fr, Amazon.fr Marketplace, Cdiscount, Cdiscount Marketplace, Darty, Fnac, Fnac Marketplace, Galaxus, Grosbill, Hello Edge, Kaufland Marketplace, Materiel.net, Pixmania, Rue du Commerce, Rue du Commerce Marketplace, TopAchat, TopBiz, eBay.\nSources bloquées : ldlc.com / materiel.net, topachat.com\nAppli : https://tom9603.github.io/veille-ram/",
+  "notification": "🚨 BONNE AFFAIRE : 7800X3D Tray à 274,99 € chez Cdiscount Marketplace\n\n| Produit | Prix | Boutique | Stock | Lien |\n|---|---|---|---|---|\n| 7800X3D Tray | 274,99 € (marketplace) (via Ledenicheur) | Cdiscount Marketplace | en stock | https://ledenicheur.fr/go-to-shop/36493/offer/AMD1728522909809-4351951313?client_id=1551 |\n| 7800X3D Tray | 277,13 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005013197290313.html |\n| 7800X3D Tray | 280,49 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005009737339401.html |\n| 7800X3D Tray | 280,63 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005012541014380.html |\n| 9800X3D Tray | 392 € (marketplace) (via Ledenicheur) | Cdiscount Marketplace | en stock | https://ledenicheur.fr/go-to-shop/36493/offer/AMD1734629292675-4362338619?client_id=1551 |\n| 9800X3D Tray | 393,85 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005012304257514.html |\n| 9800X3D Tray | 401,85 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005011718154556.html |\n| 9800X3D Tray | 402,73 € (marketplace) | AliExpress | en stock | https://fr.aliexpress.com/item/1005013358460813.html |\n| B850M | 154,99 € (via Ledenicheur) | Rue du Commerce | en stock | https://ledenicheur.fr/go-to-shop/24904/offer/AR202506200018?client_id=1551 |\n| B850M | 154,99 € (via Ledenicheur) | TopAchat | en stock | https://ledenicheur.fr/go-to-shop/24264/offer/in20028865?client_id=1551 |\n| B850M | 158,37 € (via Ledenicheur) | Galaxus | en stock | https://ledenicheur.fr/go-to-shop/40743/offer/59384231?client_id=1551 |\n| B850M | 164,95 € (via Ledenicheur) | Materiel.net | en stock | https://ledenicheur.fr/go-to-shop/24167/offer/AR202506200018?client_id=1551 |\n\nRelevé : 7800X3D : 44 offres (10 Box, 34 Tray) · 9800X3D : 44 offres (11 Box, 33 Tray) · B850M : 9 offres. Boutiques : 1FODISCOUNT, AliExpress, Amazon.fr, Amazon.fr Marketplace, Cdiscount, Cdiscount Marketplace, Darty, Fnac, Fnac Marketplace, Galaxus, Grosbill, Hello Edge, Kaufland Marketplace, Materiel.net, Pixmania, Rue du Commerce, Rue du Commerce Marketplace, TopAchat, TopBiz, eBay.\nSources bloquées : ldlc.com / materiel.net, topachat.com\nAppli : https://tom9603.github.io/veille-ram/",
   "push": {
     "title": "Toujours en cours : 7800X3D Tray à 274,99 €",
     "message": "7800X3D Tray chez Cdiscount Marketplace (en stock), seuil 280 €.\n1 autre offre sous le seuil.\n9800X3D Tray : 392 € au mieux (seuil 350 €)\nB850M : 154,99 € au mieux (seuil 140 €)",
