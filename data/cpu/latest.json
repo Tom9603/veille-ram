@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-11-20T16:13+01:00",
+  "checked_at": "2026-11-20T17:13+01:00",
   "products": {
     "7800x3d": {
       "name": "AMD Ryzen 7 7800X3D",
@@ -491,19 +491,6 @@
       "url": "https://ledenicheur.fr/go-to-shop/36493/offer/100100000910WOF-4358034314?client_id=1551",
       "via": "Ledenicheur",
       "shipping": "included",
-      "deal": false
-    },
-    {
-      "name": "AMD Ryzen 7 7800X3D",
-      "ref": "",
-      "version": "tray",
-      "price_eur": 308.82,
-      "shop": "AliExpress",
-      "stock": "unknown",
-      "marketplace": true,
-      "verified": true,
-      "url": "https://fr.aliexpress.com/item/1005012282552786.html",
-      "product": "7800x3d",
       "deal": false
     },
     {
@@ -1483,6 +1470,19 @@
       "url": "https://fr.aliexpress.com/item/1005012098618762.html",
       "product": "9800x3d",
       "deal": false
+    },
+    {
+      "name": "AMD Ryzen 7 7800X3D",
+      "ref": "",
+      "version": "tray",
+      "price_eur": 531.58,
+      "shop": "AliExpress",
+      "stock": "in_stock",
+      "marketplace": true,
+      "verified": true,
+      "url": "https://fr.aliexpress.com/item/1005012566581302.html",
+      "product": "7800x3d",
+      "deal": false
     }
   ],
   "trend": "7800X3D : 45 offres (11 Box, 34 Tray) · 9800X3D : 49 offres (11 Box, 38 Tray) · B850M : 7 offres. Boutiques : 1FODISCOUNT, AliExpress, Amazon.fr, Amazon.fr Marketplace, Cdiscount, Cdiscount Marketplace, Darty, Fnac, Fnac Marketplace, Galaxus, Grosbill, Hello Edge, LDLC, Materiel.net, Pixmania, Rue du Commerce, Rue du Commerce Marketplace, TopAchat, eBay.",
@@ -1517,11 +1517,11 @@
   "notified": {
     "7800x3d|aliexpress|tray": {
       "price": 233.29,
-      "seen": "2026-11-20T16:13+01:00"
+      "seen": "2026-11-20T17:13+01:00"
     },
     "7800x3d|cdiscount|tray": {
       "price": 275.0,
-      "seen": "2026-11-20T16:13+01:00"
+      "seen": "2026-11-20T17:13+01:00"
     },
     "7800x3d|fnac|tray": {
       "price": 274.0,
