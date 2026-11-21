@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-11-21T21:13+01:00",
+  "checked_at": "2026-11-21T22:13+01:00",
   "products": {
     "7800x3d": {
       "name": "AMD Ryzen 7 7800X3D",
@@ -476,7 +476,7 @@
       "stock": "unknown",
       "marketplace": true,
       "verified": true,
-      "url": "https://fr.aliexpress.com/item/1005013157703098.html",
+      "url": "https://fr.aliexpress.com/item/1005013099731797.html",
       "product": "7800x3d",
       "deal": false
     },
@@ -489,7 +489,7 @@
       "stock": "unknown",
       "marketplace": true,
       "verified": true,
-      "url": "https://fr.aliexpress.com/item/1005013099731797.html",
+      "url": "https://fr.aliexpress.com/item/1005013157703098.html",
       "product": "7800x3d",
       "deal": false
     },
@@ -816,12 +816,12 @@
       "name": "AMD Ryzen 7 9800X3D",
       "ref": "",
       "version": "tray",
-      "price_eur": 401.74,
+      "price_eur": 401.39,
       "shop": "AliExpress",
       "stock": "unknown",
       "marketplace": true,
       "verified": true,
-      "url": "https://fr.aliexpress.com/item/1005012711726614.html",
+      "url": "https://fr.aliexpress.com/item/1005012736897168.html",
       "product": "9800x3d",
       "deal": false
     },
@@ -829,12 +829,12 @@
       "name": "AMD Ryzen 7 9800X3D",
       "ref": "",
       "version": "tray",
-      "price_eur": 401.85,
+      "price_eur": 401.74,
       "shop": "AliExpress",
       "stock": "unknown",
       "marketplace": true,
       "verified": true,
-      "url": "https://fr.aliexpress.com/item/1005012736897168.html",
+      "url": "https://fr.aliexpress.com/item/1005012711726614.html",
       "product": "9800x3d",
       "deal": false
     },
@@ -1487,11 +1487,11 @@
   "notified": {
     "7800x3d|aliexpress|tray": {
       "price": 233.29,
-      "seen": "2026-11-21T21:13+01:00"
+      "seen": "2026-11-21T22:13+01:00"
     },
     "7800x3d|cdiscount|tray": {
       "price": 275.0,
-      "seen": "2026-11-21T21:13+01:00"
+      "seen": "2026-11-21T22:13+01:00"
     }
   },
   "drops": {
