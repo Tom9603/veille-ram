@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-11-24T15:13+01:00",
+  "checked_at": "2026-11-24T16:13+01:00",
   "products": {
     "7800x3d": {
       "name": "AMD Ryzen 7 7800X3D",
@@ -1102,7 +1102,7 @@
       "stock": "unknown",
       "marketplace": true,
       "verified": true,
-      "url": "https://fr.aliexpress.com/item/1005013422903314.html",
+      "url": "https://fr.aliexpress.com/item/1005012484866547.html",
       "product": "9800x3d",
       "deal": false
     },
@@ -1115,7 +1115,7 @@
       "stock": "unknown",
       "marketplace": true,
       "verified": true,
-      "url": "https://fr.aliexpress.com/item/1005012484866547.html",
+      "url": "https://fr.aliexpress.com/item/1005013422903314.html",
       "product": "9800x3d",
       "deal": false
     },
@@ -1167,7 +1167,7 @@
       "stock": "unknown",
       "marketplace": true,
       "verified": true,
-      "url": "https://fr.aliexpress.com/item/1005013589809622.html",
+      "url": "https://fr.aliexpress.com/item/1005013183516361.html",
       "product": "9800x3d",
       "deal": false
     },
@@ -1180,7 +1180,7 @@
       "stock": "unknown",
       "marketplace": true,
       "verified": true,
-      "url": "https://fr.aliexpress.com/item/1005013183516361.html",
+      "url": "https://fr.aliexpress.com/item/1005013589809622.html",
       "product": "9800x3d",
       "deal": false
     },
@@ -1323,7 +1323,7 @@
       "name": "AMD Ryzen 7 9800X3D",
       "ref": "100-100001084WOF",
       "version": "box",
-      "price_eur": 455.24,
+      "price_eur": 454.82,
       "shop": "Pixmania",
       "stock": "in_stock",
       "marketplace": false,
@@ -1526,15 +1526,15 @@
   "notified": {
     "7800x3d|aliexpress|tray": {
       "price": 233.29,
-      "seen": "2026-11-24T15:13+01:00"
+      "seen": "2026-11-24T16:13+01:00"
     },
     "7800x3d|cdiscount|tray": {
       "price": 275.0,
-      "seen": "2026-11-24T15:13+01:00"
+      "seen": "2026-11-24T16:13+01:00"
     },
     "7800x3d|aliexpress|box": {
       "price": 256.65,
-      "seen": "2026-11-24T15:13+01:00"
+      "seen": "2026-11-24T16:13+01:00"
     }
   },
   "drops": {
